@@ -1,0 +1,73 @@
+@import "../../../styles/variables.scss";
+
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: $gray-bg;
+}
+
+/* Estilização da Sidebar */
+.sidebar {
+  width: 250px;
+  background-color:$primary-color; /* Azul principal */
+  color: $gray-secondary-bg;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  text-align: center;
+  padding-bottom: 30px;
+  img { width: 150px; }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color:$text-color;
+  text-decoration: none;
+  transition: background-color 0.3s;
+
+  i { margin-right: 15px; }
+
+  &:hover { background-color:$secondary-color; }
+
+  &.active {
+    background-color: $secondary-color; 
+    color: white;
+    border-left: 5px solid #ffab00; 
+    padding-left: 15px; 
+  }
+}
+
+/* Estilização do Conteúdo Principal */
+.main-content-area {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background-color: white;
+  padding: 15px 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  i { color: #1e88e5; }
+}
+
+.content-wrapper {
+  padding: 30px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
