@@ -1,0 +1,35 @@
+<div class="dashboard-layout">
+  
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="../../../assets/svg/Logo.oficial.svg" alt="Logo MS Systems">
+    </div>
+
+    <nav class="menu-nav">
+      <a 
+        *ngFor="let item of funcionalidades" 
+        [routerLink]="item.rota" 
+        routerLinkActive="active" 
+        class="nav-item"
+      >
+        
+        <span>{{ item.nome }}</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main-content-area">
+    <header class="topbar">
+      <h2>Bem-vindo(a) ao Sistema de Gestão Financeira Pessoal</h2>
+      <div class="user-info">
+        
+        <span>Matheus Souza</span>
+        <button class="logout-btn"><i class="material-icons">Sair</i></button>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
