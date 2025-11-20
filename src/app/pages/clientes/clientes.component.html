@@ -1,1 +1,69 @@
-<p>cliente works!</p>
+
+<div class="clientes-page">
+    <h2>Gerenciamento de Clientes</h2>
+
+    <div class="top-actions">
+        <div class="search-bar">
+            <input 
+                type="text" 
+                placeholder="Pesquisar cliente por nome ou email..."
+                [(ngModel)]="termoPesquisa" 
+            >
+            <i class="material-icons search-icon"></i>
+        </div>
+
+        <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
+            <i class="material-icons"></i> Adicionar Novo Cliente
+        </button>
+    </div>
+
+    <div class="clientes-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let cliente of clientesFiltrados">
+                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.email }}</td>
+                    <td>{{ cliente.telefone }}</td>
+                    <td>{{ cliente.cpf_cnpj }}</td>
+                    <td [class.status-ativo]="cliente.status === 'Ativo'" [class.status-inativo]="cliente.status === 'Inativo'">
+                        {{ cliente.status }}
+                    </td>
+                    <td>
+                        <button class="btn btn-icon edit-btn" (click)="editarCliente(cliente)">
+                            <i class="material-icons">Editar</i>
+                        </button>
+                        
+                        <button class="btn btn-icon" (click)="alternarStatus(cliente)">
+                            <i class="material-icons" [title]="cliente.status === 'Ativo' ? 'Inativar' : 'Ativar'">
+                                {{ cliente.status === 'Ativo' ? 'Inativar' : 'Ativar' }}
+                            </i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p *ngIf="clientesFiltrados.length === 0" class="no-results">Nenhum cliente encontrado.</p>
+    </div>
+
+    <div *ngIf="isFormularioAberto" class="form-modal-overlay">
+        <div class="form-card">
+        
+        <app-clientes-form
+            [clienteEdicao]="clienteEmEdicao"
+            (clienteSalvo)="salvarCliente($event)"
+            (fechar)="fecharFormulario()"
+        ></app-clientes-form>
+        </div>
+    </div>
+</div>
