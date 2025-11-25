@@ -28,4 +28,9 @@ export class LoginService {
       })
     )
   }
+
+  logout(): void {
+    localStorage.removeItem('token_de_autenticacao');
+    localStorage.removeItem('usuario_logado');
+}
 }

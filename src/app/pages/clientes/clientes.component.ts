@@ -44,11 +44,11 @@ export class ClientesComponent implements OnInit {
     if (!this.termoPesquisa) {
       return this.clientes;
     }
-    const termo = this.termoPesquisa.toLowerCase();
+    const termo = this.termoPesquisa.toLowerCase(); 
     return this.clientes.filter(cliente =>
       cliente.nome.toLowerCase().includes(termo) ||
       cliente.email.toLowerCase().includes(termo) ||
-      cliente.cpf_cnpj.includes(termo)
+      cliente.cpf_Cnpj.includes(termo)
     );
   }
 

@@ -36,14 +36,13 @@
   &:hover { background-color:$secondary-color; }
 
   &.active {
-    background-color: $secondary-color; 
+    background-color: $secondary-color;
     color: white;
-    border-left: 5px solid #ffab00; 
-    padding-left: 15px; 
+    border-left: 5px solid #ffab00;
+    padding-left: 15px;
   }
 }
 
-/* Estilização do Conteúdo Principal */
 .main-content-area {
   flex-grow: 1;
   display: flex;
@@ -63,7 +62,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  i { color: #1e88e5; }
+  i { color: $text-color; }
 }
 
 .content-wrapper {

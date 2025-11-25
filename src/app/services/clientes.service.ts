@@ -8,7 +8,7 @@ export interface Cliente {
   nome: string;
   email: string;
   telefone: string;
-  cpf_cnpj: string;
+  cpf_Cnpj: string;
   endereco: string;
   descricao: string;
   status: 'Ativo' | 'Inativo';

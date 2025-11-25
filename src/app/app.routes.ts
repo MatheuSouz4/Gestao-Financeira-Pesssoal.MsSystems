@@ -12,7 +12,7 @@ import { TransacoesComponent } from './pages/transacoes/transacoes.component';
 import { AuthGuard } from './services/auth-guard.service';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'login', pathMatch: 'full' }, 
+    { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },
 
         {
@@ -22,13 +22,13 @@ export const routes: Routes = [
 
     {
     path: 'home',
-    component: HomeComponent,// O componente com o menu e <router-outlet>
+    component: HomeComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }, 
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       
       // Funcionalidades
-      { path: 'dashboard', component: DashboardComponent }, 
+      { path: 'dashboard', component: DashboardComponent },
       { path: 'clientes', component: ClientesComponent },
       { path: 'fornecedores', component: FornecedoresComponent },
       { path: 'contas', component: ContasComponent },
@@ -37,10 +37,6 @@ export const routes: Routes = [
     ],
   },
 
-  // 3. Rota de Wildcard (página 404/redirecionamento)
   { path: '**', redirectTo: 'login' },
-
-
-
 
 ];
