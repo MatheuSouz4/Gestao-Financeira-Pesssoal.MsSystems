@@ -49,7 +49,7 @@ export class ClientesFormComponent implements OnInit {
         [Validators.required,Validators.minLength(11)]
       ],
 
-      cpf_cnpj: [
+      cpf_Cnpj: [
         this.clienteEdicao ? this.clienteEdicao.cpf_Cnpj : '',
 
         [Validators.required, Validators.minLength(11)]

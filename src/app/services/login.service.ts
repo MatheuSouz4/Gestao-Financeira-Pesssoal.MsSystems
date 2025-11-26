@@ -16,6 +16,7 @@ export class LoginService {
       tap((value) => {
         localStorage.setItem("auth-token", value.token)
         localStorage.setItem("username", value.name)
+        console.log(value.token)
       })
     )
   }

@@ -39,7 +39,7 @@ export class ClientesService {
   // PUT: Atualizar existente
   atualizar(cliente: Cliente): Observable<Cliente> {
     // Assume rota: /clientes/{id}
-    const url = `${this.API_URL}/${cliente.id}`;
+    const url = `${this.API_URL}/${cliente.id}`;  
     return this.http.put<Cliente>(url, cliente);
   }
 
