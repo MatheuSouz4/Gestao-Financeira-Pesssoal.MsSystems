@@ -33,11 +33,14 @@
 
         <div class="form-group">
             <label for="telefone">Telefone (Ex: (99) 99999-9999)</label>
-            <input 
-                id="telefone" 
-                type="text" 
+            <input
+                id="telefone"
+                type="text"
                 formControlName="telefone"
                 placeholder="(99) 99999-9999"
+                mask="(00) 00000-0000"
+                [dropSpecialCharacters]="true"
+                
             >
             <div *ngIf="clienteForm.get('telefone')?.touched && clienteForm.get('telefone')?.errors" class="error-message">
                 <span *ngIf="clienteForm.get('telefone')?.errors?.['required']">O telefone é obrigatório.</span>
@@ -47,10 +50,22 @@
 
         <div class="form-group">
             <label for="cpf_Cnpj">CPF / CNPJ</label>
-            <input id="cpf_Cnpj" type="text" formControlName="cpf_Cnpj" placeholder="Ex: 999.999.999-99 ou 99.999.999/9999-99">
+            <input
+                id="cpf_Cnpj"
+                type="text"
+                formControlName="cpf_Cnpj"
+                placeholder="Ex: 999.999.999-99 ou 99.999.999/9999-99"
+        
+                [mask] = cpfCnpjMask
+                [dropSpecialCharacters]="true"
+            
+                
+                maxlength="18"
+            >
             <div *ngIf="clienteForm.get('cpf_Cnpj')?.touched && clienteForm.get('cpf_Cnpj')?.errors" class="error-message">
                 <span *ngIf="clienteForm.get('cpf_Cnpj')?.errors?.['required']">O CPF/CNPJ é obrigatório.</span>
                 <span *ngIf="clienteForm.get('cpf_Cnpj')?.errors?.['minlength']">CPF/CNPJ inválido (mínimo 11 caracteres).</span>
+                <span *ngIf="clienteForm.get('cpf_Cnpj')?.errors?.['cpfCnpjInvalido']">O CPF deve ter 11 dígitos ou o CNPJ deve ter 14 dígitos.</span>
             </div>
         </div>
         
@@ -73,6 +88,7 @@
                 <i class="material-icons"></i> 
                 {{ isEditMode ? 'Salvar Alterações' : 'Cadastrar' }}
             </button>
+            
         </div>
 
     </form>

@@ -1,1 +1,68 @@
-<p>fornecedores works!</p>
+<div class="fornecedores-page">
+    <h2>Gerenciamento de Fornecedores</h2>
+
+    <div class="top-actions">
+        <div class="search-bar">
+            <input 
+                type="text" 
+                placeholder="Pesquisar fornecedor por nome ou email..."
+                [(ngModel)]="termoPesquisa" 
+            >
+            <i class="material-icons search-icon"></i>
+        </div>
+
+        <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
+            <i class="material-icons"></i> Adicionar Novo Fornecedor
+        </button>
+    </div>
+
+    <div class="fornecedores-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome Fantasia</th>
+                    <th>Razão Social</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Telefone</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let fornecedor of fornecedoresFiltrados">
+                    <td>{{ fornecedor.nomeFantasia }}</td>
+                    <td>{{ fornecedor.razaoSocial }}</td>
+                    <td>{{ fornecedor.cpf_Cnpj }}</td>
+                    <td>{{ fornecedor.telefone }}</td>
+                    <td [class.status-ativo]="fornecedor.status === 'Ativo'" [class.status-inativo]="fornecedor.status === 'Inativo'">
+                        {{ fornecedor.status }}
+                    </td>
+                    <td>
+                        <button class="btn btn-icon edit-btn" (click)="editarFornecedor(fornecedor)">
+                            <i class="material-icons">Editar</i>
+                        </button>
+                        
+                        <button class="btn btn-icon" (click)="alternarStatus(fornecedor)">
+                            <i class="material-icons" [title]="fornecedor.status === 'Ativo' ? 'Inativar' : 'Ativar'">
+                                {{ fornecedor.status === 'Ativo' ? 'Inativar' : 'Ativar' }}
+                            </i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p *ngIf="fornecedoresFiltrados.length === 0" class="no-results">Nenhum fornecedor encontrado.</p>
+    </div>
+
+    <div *ngIf="isFormularioAberto" class="form-modal-overlay">
+        <div class="form-card">
+        
+        <app-fornecedores-form
+            [fornecedorEdicao]="fornecedorEmEdicao"
+            (fornecedorSalvo)="salvarFornecedor($event)"
+            (fechar)="fecharFormulario()"
+        ></app-fornecedores-form>
+        </div>
+    </div>
+</div>
