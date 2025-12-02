@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
+import { ToastrService } from 'ngx-toastr';
 import { Cliente } from '../../../services/clientes.service';
 
 
@@ -29,7 +30,10 @@ export class ClientesFormComponent implements OnInit {
 
   public cpfCnpjMask: string ="000.000.000-00||00.000.000/0000-00";
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private toastService: ToastrService
+  ) {}
 
   ngOnInit(): void {
 
@@ -61,7 +65,7 @@ export class ClientesFormComponent implements OnInit {
       
       endereco: [
         this.clienteEdicao ? this.clienteEdicao.endereco : '',
-        [Validators.required, Validators.maxLength(255)]
+        [ Validators.maxLength(255)]
       ],
 
       descricao: [
@@ -77,6 +81,7 @@ export class ClientesFormComponent implements OnInit {
   onSubmit(): void {
     if (this.clienteForm.invalid) {
       this.clienteForm.markAllAsTouched();
+      this.toastService.error('Por favor, preencha todos os campos obrigatórios!', 'Formulário Inválido');
       return;
     }
 

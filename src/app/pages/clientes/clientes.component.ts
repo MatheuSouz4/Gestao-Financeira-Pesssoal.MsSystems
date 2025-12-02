@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 import { Cliente, ClientesService } from '../../services/clientes.service';
 import { ClientesFormComponent } from './clientes-form/clientes-form.component';
 
@@ -21,7 +23,10 @@ export class ClientesComponent implements OnInit {
   // Lista de dados
   clientes: Cliente[] = [];
 
-  constructor(private clienteService: ClientesService) {}
+  constructor(
+    private clienteService: ClientesService,
+    private toastService: ToastrService) {}
+
 
   // Ao iniciar, carrega os dados do banco
   ngOnInit(): void {
@@ -34,7 +39,7 @@ export class ClientesComponent implements OnInit {
         this.clientes = dados;
       },
       error: (erro) => {
-        console.error('Erro ao buscar clientes:', erro);
+        this.toastService.error('Erro ao buscar clientes:', erro);
       }
     });
   }
@@ -75,12 +80,11 @@ export class ClientesComponent implements OnInit {
           if (index !== -1) {
             this.clientes[index] = clienteAtualizado;
           }
-          alert('Cliente atualizado com sucesso!');
+          this.toastService.success('Cliente atualizado com sucesso!');
           this.fecharFormulario();
         },
         error: (err) => {
-          console.error(err);
-          alert('Erro ao atualizar no servidor.');
+          this.toastService.error('Erro ao atualizar no servidor.');
         }
       });
 
@@ -89,12 +93,11 @@ export class ClientesComponent implements OnInit {
       this.clienteService.adicionar(clienteRecebido).subscribe({
         next: (novoCliente) => {
           this.clientes.push(novoCliente);
-          alert('Cliente cadastrado com sucesso!');
+          this.toastService.success('Cliente cadastrado com sucesso!');
           this.fecharFormulario();
         },
         error: (err) => {
-          console.error(err);
-          alert('Erro ao cadastrar no servidor.');
+          this.toastService.error('Cliente já existe no sistema.');
         }
       });
     }
@@ -109,17 +112,41 @@ alternarStatus(cliente: Cliente): void {
 
   const novoStatus: 'Ativo' | 'Inativo' = cliente.status === 'Ativo' ? 'Inativo' : 'Ativo';
   
-  
-  const clienteAtualizado: Cliente = { ...cliente, status: novoStatus };
+  Swal.fire({
+    title: 'Confirmação de Status',
+    html: `Você tem certeza que deseja alterar o status do cliente ${cliente.nome} para ${novoStatus}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6', // Cor azul padrão
+    cancelButtonColor: '#d33',   // Cor vermelha padrão
+    confirmButtonText: `Sim`,
+    cancelButtonText: 'Não',
+  }).then((result) => { // 2. Trata a resposta do usuário
+    
+    if (result.isConfirmed) {
+      // O usuário clicou em SIM (Confirmar)
+      
+      const clienteAtualizado: Cliente = { ...cliente, status: novoStatus };
 
-  this.clienteService.atualizar(clienteAtualizado).subscribe({
-    next: () => {
-      cliente.status = novoStatus;
-    },
-    error: (err) => {
-      console.error(err);
-      alert('Erro ao alterar status.');
-    }
-  });
-}
-  }
+      // 3. Chamada à API
+      this.clienteService.atualizar(clienteAtualizado).subscribe({
+        next: () => {
+          // 4. Atualiza a lista local e mostra o Toastr de sucesso
+          cliente.status = novoStatus;
+          
+          // Opcional: Mostra um toastr elegante antes do ToastrService, se desejar
+          // Swal.fire('Sucesso!', `Status alterado para ${novoStatus}!`, 'success');
+          
+          this.toastService.success(`Status de ${cliente.nome} alterado para ${novoStatus}!`);
+        },
+        error: (err) => {
+          this.toastService.error('Erro ao alterar status. Verifique o console.');
+          console.error(err);
+        }
+      });
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+      // O usuário clicou em CANCELAR
+      this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
+    }
+  });
+}}

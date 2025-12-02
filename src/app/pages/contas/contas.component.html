@@ -1,1 +1,69 @@
-<p>contas works!</p>
+<div class="contas-page">
+    <h2>Gerenciamento de Contas</h2>
+
+    <div class="top-actions">
+        <div class="search-bar">
+            <input 
+                type="text" 
+                placeholder="Pesquisar conta por nome ou tipo de conta..."
+                [(ngModel)]="termoPesquisa" 
+                (ngModelChange)="onPesquisaChange()" 
+                >
+            <i class="material-icons search-icon"></i>
+            </div>
+
+        <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
+            <i class="material-icons"></i> Adicionar Nova Conta
+        </button>
+    </div>
+
+    <div class="contas-list">
+        <p *ngIf="contas.length === 0 && !termoPesquisa">Nenhuma conta cadastrada!</p>
+        
+        <table *ngIf="contasFiltrados.length > 0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo de Conta</th>
+                    <th>Recorrência</th>
+                    <th>Referência (Cliente/Fornecedor)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let conta of contasFiltrados">
+                    <td>{{ conta.nome }}</td>
+                    <td>{{ conta.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}</td> 
+                    <td>{{ conta.recorrencia }}</td>
+                    <td>
+                        {{ conta.tipo === 'RECEITA' ? (conta.cliente?.nome || 'Cliente não definido') : (conta.fornecedor?.nome || 'Fornecedor não definido') }}
+                    </td>
+                    
+                    <td>
+                        <button class="btn btn-icon edit-btn" (click)="editarContas(conta)">
+                            <i class="material-icons">edit</i>
+                        </button>
+                        
+                        <button class="btn btn-icon delete-btn" (click)="excluirConta(conta.id)">
+                            <i class="material-icons">delete</i>
+                        </button>
+                        
+                        </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p *ngIf="termoPesquisa && contasFiltrados.length === 0" class="no-results">Nenhuma conta encontrada com o termo "{{ termoPesquisa }}".</p>
+    </div>
+
+    <div *ngIf="isFormularioAberto" class="form-modal-overlay">
+        <div class="form-card">
+        
+        <app-contas-form
+            [contaEdicao]="contaEmEdicao"
+            (contaSalva)="salvarConta($event)"
+            (fechar)="fecharFormulario()"
+        ></app-contas-form>
+        </div>
+    </div>
+</div>
