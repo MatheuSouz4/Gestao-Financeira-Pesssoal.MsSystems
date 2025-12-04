@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common'; // Adicionar CommonModule
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Adicionar FormsModule para ngModel
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 import { Conta, ContasService } from '../../services/contas.service'; // Usar Conta da Service
 import { ContasFormComponent } from './contas-form/contas-form.component'; // Importar o Formulário
 
@@ -25,7 +27,8 @@ export class ContasComponent implements OnInit {
   
   constructor(
     private contasService: ContasService,
-    private router: Router // Para navegação
+    private router: Router,
+    private toastService: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -33,7 +36,7 @@ export class ContasComponent implements OnInit {
   }
 
 carregarContas(): void {
-    this.contasService.getAll().subscribe({ // 🚨 CORREÇÃO: Usar getAll() em vez de listar()
+    this.contasService.listar().subscribe({ // 🚨 CORREÇÃO: Usar getAll() em vez de listar()
       next: (data: Conta[]) => {
         this.contas = data;
         this.aplicarFiltro();
@@ -83,23 +86,45 @@ carregarContas(): void {
   }
   
   alternarStatus(conta: Conta): void {
-    // 🚨 Nota: Como o status não faz parte do modelo do backend, 
-    // esta lógica deve ser implementada no frontend ou adicionada ao modelo Conta.
-    alert('Funcionalidade de Alternar Status (Ativo/Inativo) a ser implementada, pois o modelo de Conta não possui campo Status.');
-  }
-
-  excluirConta(id: number | undefined): void {
-      if (!id || !confirm('Tem certeza que deseja excluir esta conta?')) return;
+    const novoStatus: 'Ativo' | 'Inativo' = conta.status === 'Ativo' ? 'Inativo' : 'Ativo';
       
-      this.contasService.excluir(id).subscribe({
-          next: () => {
-              alert('Conta excluída com sucesso!');
-              this.carregarContas();
-          },
-          error: (err) => {
-              console.error('Erro ao excluir:', err);
-              alert('Erro ao excluir conta.');
-          }
-      });
-  }
-}
+      
+      Swal.fire({
+          title: 'Confirmação de Status',
+          html: `Você tem certeza que deseja alterar o status da conta ${conta.nome} para ${novoStatus}?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6', // Cor azul padrão
+          cancelButtonColor: '#d33',   // Cor vermelha padrão
+          confirmButtonText: `Sim`,
+          cancelButtonText: 'Não',
+        }).then((result) => { // 2. Trata a resposta do usuário
+          
+          if (result.isConfirmed) {
+            // O usuário clicou em SIM (Confirmar)
+            
+            const contaAtualizado: Conta = { ...conta, status: novoStatus };
+      
+            // 3. Chamada à API
+            this.contasService.atualizar(contaAtualizado).subscribe({
+              next: () => {
+                // 4. Atualiza a lista local e mostra o Toastr de sucesso
+                conta.status = novoStatus;
+                
+                // Opcional: Mostra um toastr elegante antes do ToastrService, se desejar
+                // Swal.fire('Sucesso!', `Status alterado para ${novoStatus}!`, 'success');
+                
+                this.toastService.success(`Status de ${conta.nome} alterado para ${novoStatus}!`);
+              },
+              error: (err) => {
+                this.toastService.error('Erro ao alterar status. Verifique o console.');
+                console.error(err);
+              }
+            });
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // O usuário clicou em CANCELAR
+            this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
+          }
+        });
+      }}
+    

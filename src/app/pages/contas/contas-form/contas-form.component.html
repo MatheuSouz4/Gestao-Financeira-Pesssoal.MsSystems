@@ -1,7 +1,7 @@
 <form [formGroup] = "contaForm" (ngSubmit)="onSubmit()">
     
     <div class="form-group">
-        <label for="nome">Nome da Conta Base</label>
+        <label for="nome">Nome da Conta</label>
         <input id="nome" type="text" formControlName="nome">
     </div>
 
@@ -47,5 +47,9 @@
         <textarea id="descricao" formControlName="descricao"></textarea>
     </div>
 
-    <button type="submit" [disabled]="contaForm.invalid">Cadastrar Conta Base</button>
+     <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="contaForm.invalid">Salvar</button>
+            
+        </div>
 </form>

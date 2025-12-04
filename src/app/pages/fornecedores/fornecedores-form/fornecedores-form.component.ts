@@ -28,7 +28,9 @@ export class FornecedoresFormComponent implements OnInit {
 
   public cpfCnpjMask: string ="000.000.000-00||00.000.000/0000-00";
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+      private fb: FormBuilder,
+      ) {}
 
   ngOnInit(): void {
 

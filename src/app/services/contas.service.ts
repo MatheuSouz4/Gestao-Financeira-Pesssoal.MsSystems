@@ -22,6 +22,7 @@ export interface Conta {
   descricao?: string;
   tipo: TipoConta; // 🚨 Campo tipo, não tipoConta
   recorrencia: Recorrencia;
+  status: 'Ativo' | 'Inativo';
   
   // Relacionamentos:
   cliente?: ClienteBase;
@@ -38,32 +39,20 @@ export class ContasService {
   constructor(private http: HttpClient) { }
 
   // 🚨 Renomeado de listar para getAll (padrão Angular Service)
-  getAll(): Observable<Conta[]> {
+  listar(): Observable<Conta[]> {
     return this.http.get<Conta[]>(this.API_URL);
   }
 
-  // Se você precisa do adicionar(), corrija a implementação também, se necessário:
-  // getById(id: number): Observable<Conta> {
-  //   return this.http.get<Conta>(`${this.API_URL}/${id}`);
-  // }
-  
-  // O seu método adicionar estava implementado como getById:
   adicionar(conta: Conta): Observable<Conta> {
-      // 🚨 Este método deve ser para CRIAR, mas a implementação estava errada (usando GET)
-      // Se você quer um método de criação separado (POST):
       return this.http.post<Conta>(this.API_URL, conta);
   }
 
   // O método salvar já trata POST/PUT:
-  save(conta: Conta): Observable<Conta> {
-    if (conta.id) {
-      // PUT para atualizar
+  atualizar(conta: Conta): Observable<Conta> {
+    const url = `${this.API_URL}/${conta.id}`;
       return this.http.put<Conta>(`${this.API_URL}/${conta.id}`, conta);
-    } else {
-      // POST para criar
-      return this.http.post<Conta>(this.API_URL, conta);
-    }
-  }
+  
+}
 
   // 🚨 Renomeado de excluir (DELETE)
   excluir(id: number): Observable<void> {

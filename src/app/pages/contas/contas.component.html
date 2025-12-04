@@ -26,7 +26,8 @@
                     <th>Nome</th>
                     <th>Tipo de Conta</th>
                     <th>Recorrência</th>
-                    <th>Referência (Cliente/Fornecedor)</th>
+                    <th>(Cliente/Fornecedor)</th>
+                    <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -38,14 +39,18 @@
                     <td>
                         {{ conta.tipo === 'RECEITA' ? (conta.cliente?.nome || 'Cliente não definido') : (conta.fornecedor?.nome || 'Fornecedor não definido') }}
                     </td>
-                    
+                    <td [class.status-ativo]="conta.status === 'Ativo'" [class.status-inativo]="conta.status === 'Inativo'">
+                        {{ conta.status }}
+                    </td>
                     <td>
                         <button class="btn btn-icon edit-btn" (click)="editarContas(conta)">
-                            <i class="material-icons">edit</i>
+                            <i class="material-icons">Editar</i>
                         </button>
                         
-                        <button class="btn btn-icon delete-btn" (click)="excluirConta(conta.id)">
-                            <i class="material-icons">delete</i>
+                        <button class="btn btn-icon" (click)="alternarStatus(conta)">
+                            <i class="material-icons" [title]="conta.status === 'Ativo' ? 'Inativar' : 'Ativar'">
+                                {{ conta.status === 'Ativo' ? 'Inativar' : 'Ativar' }}
+                            </i>
                         </button>
                         
                         </td>

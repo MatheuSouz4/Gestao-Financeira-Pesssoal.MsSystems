@@ -108,6 +108,7 @@ loadDependentData(): void {
         tipo: formValue.tipo,
         recorrencia: formValue.recorrencia,
         descricao: formValue.descricao,
+        status: this.contaEdicao?.status || 'Ativo',
         // Constrói o DTO de relacionamento com apenas o ID
         cliente: formValue.tipo === 'RECEITA' && formValue.clienteId 
             ? { id: formValue.clienteId } as ClienteBase : undefined,
@@ -115,7 +116,7 @@ loadDependentData(): void {
             ? { id: formValue.fornecedorId } as FornecedorBase : undefined,
     };
 
-    this.contasService.save(contaPayload).subscribe({
+    this.contasService.atualizar(contaPayload).subscribe({
       next: (response) => {
         alert(`Conta ${response.id ? 'atualizada' : 'cadastrada'} com sucesso!`);
         this.contaSalva.emit(response); // Emite para o componente pai recarregar
@@ -125,5 +126,14 @@ loadDependentData(): void {
         alert('Erro ao salvar conta. Verifique o console.');
       }
     });
+
+
+    this.contaSalva.emit(contaPayload);
+    
+    this.fechar.emit();
+  }
+
+  onCancel(): void {
+    this.fechar.emit();
   }
 }

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 import { Fornecedor, FornecedoresService } from '../../services/fornecedores.service';
 import { FornecedoresFormComponent } from './fornecedores-form/fornecedores-form.component';
 
@@ -113,15 +114,41 @@ alternarStatus(fornecedor: Fornecedor): void {
   const novoStatus: 'Ativo' | 'Inativo' = fornecedor.status === 'Ativo' ? 'Inativo' : 'Ativo';
   
   
-  const fornecedorAtualizado: Fornecedor = { ...fornecedor, status: novoStatus };
-
-  this.fornecedorService.atualizar(fornecedorAtualizado).subscribe({
-    next: () => {
-      fornecedor.status = novoStatus;
-    },
-    error: (err) => {
-      this.toastService.error('Erro ao alterar status.');
-    }
-  });
-}
-  }
+  Swal.fire({
+      title: 'Confirmação de Status',
+      html: `Você tem certeza que deseja alterar o status do fornecedor ${fornecedor.nomeFantasia} para ${novoStatus}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6', // Cor azul padrão
+      cancelButtonColor: '#d33',   // Cor vermelha padrão
+      confirmButtonText: `Sim`,
+      cancelButtonText: 'Não',
+    }).then((result) => { // 2. Trata a resposta do usuário
+      
+      if (result.isConfirmed) {
+        // O usuário clicou em SIM (Confirmar)
+        
+        const fornecedorAtualizado: Fornecedor = { ...fornecedor, status: novoStatus };
+  
+        // 3. Chamada à API
+        this.fornecedorService.atualizar(fornecedorAtualizado).subscribe({
+          next: () => {
+            // 4. Atualiza a lista local e mostra o Toastr de sucesso
+            fornecedor.status = novoStatus;
+            
+            // Opcional: Mostra um toastr elegante antes do ToastrService, se desejar
+            // Swal.fire('Sucesso!', `Status alterado para ${novoStatus}!`, 'success');
+            
+            this.toastService.success(`Status de ${fornecedor.nomeFantasia} alterado para ${novoStatus}!`);
+          },
+          error: (err) => {
+            this.toastService.error('Erro ao alterar status. Verifique o console.');
+            console.error(err);
+          }
+        });
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // O usuário clicou em CANCELAR
+        this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
+      }
+    });
+  }}
