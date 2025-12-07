@@ -20,14 +20,12 @@ export class FornecedoresComponent implements OnInit {
   termoPesquisa: string = '';
   fornecedorEmEdicao: Fornecedor | null = null;
 
-  // Lista de dados
   fornecedores: Fornecedor[] = [];
 
   constructor(
     private fornecedorService: FornecedoresService,
     private toastService: ToastrService) {}
 
-  // Ao iniciar, carrega os dados do banco
   ngOnInit(): void {
     this.carregarFornecedores();
   }
@@ -57,7 +55,7 @@ export class FornecedoresComponent implements OnInit {
     );
   }
 
-
+                      
   abrirFormularioCadastro(): void {
     this.fornecedorEmEdicao = null;
     this.isFormularioAberto = true;
@@ -85,7 +83,7 @@ export class FornecedoresComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.toastService.error('Erro ao atualizar no servidor.');
+          this.toastService.error('Erro ao atualizar Fornecedor.');
         }
       });
 
@@ -98,7 +96,7 @@ export class FornecedoresComponent implements OnInit {
           this.fecharFormulario();
         },
         error: (err) => {
-          this.toastService.error('Erro ao cadastrar no servidor.');
+          this.toastService.error('Fornecedor já existe no sistema.');
         }
       });
     }
@@ -119,26 +117,19 @@ alternarStatus(fornecedor: Fornecedor): void {
       html: `Você tem certeza que deseja alterar o status do fornecedor ${fornecedor.nomeFantasia} para ${novoStatus}?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6', // Cor azul padrão
-      cancelButtonColor: '#d33',   // Cor vermelha padrão
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
       confirmButtonText: `Sim`,
       cancelButtonText: 'Não',
-    }).then((result) => { // 2. Trata a resposta do usuário
+    }).then((result) => {
       
       if (result.isConfirmed) {
-        // O usuário clicou em SIM (Confirmar)
         
         const fornecedorAtualizado: Fornecedor = { ...fornecedor, status: novoStatus };
   
-        // 3. Chamada à API
         this.fornecedorService.atualizar(fornecedorAtualizado).subscribe({
           next: () => {
-            // 4. Atualiza a lista local e mostra o Toastr de sucesso
             fornecedor.status = novoStatus;
-            
-            // Opcional: Mostra um toastr elegante antes do ToastrService, se desejar
-            // Swal.fire('Sucesso!', `Status alterado para ${novoStatus}!`, 'success');
-            
             this.toastService.success(`Status de ${fornecedor.nomeFantasia} alterado para ${novoStatus}!`);
           },
           error: (err) => {
@@ -147,7 +138,6 @@ alternarStatus(fornecedor: Fornecedor): void {
           }
         });
       } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // O usuário clicou em CANCELAR
         this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
       }
     });

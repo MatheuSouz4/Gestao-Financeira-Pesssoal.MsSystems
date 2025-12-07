@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 // 1. Definimos a interface AQUI mesmo (sem arquivo de model separado)
 export interface Fornecedor {
-  id?: number; // Opcional pois na criação não temos ID
+  id: string; // Opcional pois na criação não temos ID
   nomeFantasia: string;
   razaoSocial: string;
   email: string;

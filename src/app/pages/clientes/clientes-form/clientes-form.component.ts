@@ -82,7 +82,6 @@ export class ClientesFormComponent implements OnInit {
       return;
     }
 
-    // Não precisa mais de this.limparFormatacao! O valor já é puro.
     const clientePayload: Cliente = this.clienteForm.value;
     
     console.log(this.isEditMode ? 'Atualizando cliente...' : 'Cadastrando novo cliente...', clientePayload);

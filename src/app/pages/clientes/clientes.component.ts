@@ -20,7 +20,7 @@ export class ClientesComponent implements OnInit {
   termoPesquisa: string = '';
   clienteEmEdicao: Cliente | null = null;
 
-  // Lista de dados
+
   clientes: Cliente[] = [];
 
   constructor(
@@ -28,7 +28,6 @@ export class ClientesComponent implements OnInit {
     private toastService: ToastrService) {}
 
 
-  // Ao iniciar, carrega os dados do banco
   ngOnInit(): void {
     this.carregarClientes();
   }
@@ -117,26 +116,19 @@ alternarStatus(cliente: Cliente): void {
     html: `Você tem certeza que deseja alterar o status do cliente ${cliente.nome} para ${novoStatus}?`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#3085d6', // Cor azul padrão
-    cancelButtonColor: '#d33',   // Cor vermelha padrão
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
     confirmButtonText: `Sim`,
     cancelButtonText: 'Não',
-  }).then((result) => { // 2. Trata a resposta do usuário
+  }).then((result) => {
     
     if (result.isConfirmed) {
-      // O usuário clicou em SIM (Confirmar)
       
       const clienteAtualizado: Cliente = { ...cliente, status: novoStatus };
 
-      // 3. Chamada à API
       this.clienteService.atualizar(clienteAtualizado).subscribe({
         next: () => {
-          // 4. Atualiza a lista local e mostra o Toastr de sucesso
-          cliente.status = novoStatus;
-          
-          // Opcional: Mostra um toastr elegante antes do ToastrService, se desejar
-          // Swal.fire('Sucesso!', `Status alterado para ${novoStatus}!`, 'success');
-          
+          cliente.status = novoStatus
           this.toastService.success(`Status de ${cliente.nome} alterado para ${novoStatus}!`);
         },
         error: (err) => {
@@ -145,8 +137,7 @@ alternarStatus(cliente: Cliente): void {
         }
       });
     } else if (result.dismiss === Swal.DismissReason.cancel) {
-      // O usuário clicou em CANCELAR
-      this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
+          this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
     }
   });
 }}

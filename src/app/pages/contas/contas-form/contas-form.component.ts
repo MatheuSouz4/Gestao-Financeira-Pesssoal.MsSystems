@@ -1,41 +1,63 @@
-import { CommonModule } from '@angular/common'; // Adicionado CommonModule
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'; // Adicionado Input/Output/EventEmitter
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'; // Adicionado ReactiveFormsModule
-import { Cliente, ClientesService } from '../../../services/clientes.service'; // 🚨 Serviço para Clientes
-import { ClienteBase, Conta, ContasService, FornecedorBase, Recorrencia, TipoConta } from '../../../services/contas.service'; // 🚨 Importa o modelo e enums CIENTRAIS
-import { Fornecedor, FornecedoresService } from '../../../services/fornecedores.service'; // 🚨 Serviço para Fornecedores
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
+import { Observable } from 'rxjs';
+import { Cliente, ClientesService } from '../../../services/clientes.service';
+import { Conta, ContasService, Recorrencia, TipoConta } from '../../../services/contas.service';
+import { Fornecedor, FornecedoresService } from '../../../services/fornecedores.service';
+
+export interface ContaRequestPayload {
+  id?: string;
+  nome: string;
+  tipo: TipoConta;
+  recorrencia: Recorrencia;
+  descricao?: string;
+  status: 'Ativo' | 'Inativo' | string;
+  
+  clienteId?: string | null; 
+  fornecedorId?: string | null;
+}
+
 
 @Component({
   selector: 'app-contas-form',
   standalone:true,
-  // 🚨 Adicionado Imports
+  
   imports: [ReactiveFormsModule, CommonModule], 
   templateUrl: './contas-form.component.html',
   styleUrls: ['./contas-form.component.scss'],
 })
+
 export class ContasFormComponent implements OnInit {
   
-  @Input() contaEdicao: Conta | null = null; // Para receber a conta a ser editada
+  @Input() contaEdicao: Conta | null = null;
   @Output() contaSalva = new EventEmitter<Conta>();
   @Output() fechar = new EventEmitter<void>();
   
   contaForm!: FormGroup;
+
+  isEditMode: boolean = false;
   
   tiposConta: TipoConta[] = ['RECEITA', 'DESPESA'];
   recorrencias: Recorrencia[] = ['UNICA', 'SEMANAL', 'MENSAL', 'TRIMESTRAL', 'ANUAL'];
   
-  // 🚨 Tipagem correta para as listas
   clientes: Cliente[] = []; 
   fornecedores: Fornecedor[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private contasService: ContasService, // 🚨 Injetar serviço de Contas
-    private clienteService: ClientesService, // 🚨 Injetar serviço de Clientes
-    private fornecedorService: FornecedoresService, // 🚨 Injetar serviço de Fornecedores
+    private contasService: ContasService,
+    private clienteService: ClientesService,
+    private fornecedorService: FornecedoresService,
+    private toastService: ToastrService
   ) {}
 
   ngOnInit(): void {
+
+    this.isEditMode = !!this.contaEdicao;
+
+
     this.initForm();
     this.loadDependentData();
 
@@ -43,30 +65,36 @@ export class ContasFormComponent implements OnInit {
       this.updateValidations(tipo);
     });
     
-    // 🚨 Lógica para Edição
     if (this.contaEdicao) {
         this.popularFormulario(this.contaEdicao);
     }
   }
   
   popularFormulario(conta: Conta): void {
-      this.contaForm.patchValue({
-          nome: conta.nome,
-          tipo: conta.tipo,
-          recorrencia: conta.recorrencia,
-          descricao: conta.descricao,
-          // Preenche o ID correto no campo do formulário
-          clienteId: conta.cliente?.id || null, 
-          fornecedorId: conta.fornecedor?.id || null, 
-      });
-      this.updateValidations(conta.tipo);
-  }
+    
+    const clienteRelacionamento = (conta as any).clienteId || conta.cliente;
+    const fornecedorRelacionamento = (conta as any).fornecedorId || conta.fornecedor;
+    
+    const clienteIdValor = typeof clienteRelacionamento === 'object' ? clienteRelacionamento?.id : clienteRelacionamento;
+    const fornecedorIdValor = typeof fornecedorRelacionamento === 'object' ? fornecedorRelacionamento?.id : fornecedorRelacionamento;
+    
+    this.contaForm.patchValue({
+        nome: conta.nome,
+        tipo: conta.tipo,
+        recorrencia: conta.recorrencia,
+        descricao: conta.descricao,
+      
+        clienteId: clienteIdValor || null, 
+        fornecedorId: fornecedorIdValor || null, 
+    });
+    this.updateValidations(conta.tipo);
+}
 
   initForm(): void {
     this.contaForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
       tipo: ['DESPESA', [Validators.required]], 
-      // Campos de ID de relacionamento
+     
       clienteId: [null], 
       fornecedorId: [null], 
       
@@ -77,20 +105,18 @@ export class ContasFormComponent implements OnInit {
   }
   
 loadDependentData(): void {
-    // 🚨 CORREÇÃO: Usar o método getAll() e forçar a tipagem do 'data'
+    
     this.clienteService.listar().subscribe((data: Cliente[]) => {
         this.clientes = data;
     });
 
-    // 🚨 CORREÇÃO: Usar o método getAll() e forçar a tipagem do 'data'
     this.fornecedorService.listar().subscribe((data: Fornecedor[]) => {
         this.fornecedores = data;
     });
   }
   
   updateValidations(tipo: TipoConta): void {
-    // ... (Lógica de validação do clienteId/fornecedorId conforme implementado)
-    // ...
+
   }
 
   onSubmit(): void {
@@ -100,37 +126,41 @@ loadDependentData(): void {
     }
     
     const formValue = this.contaForm.value;
-    
-    const contaPayload: Conta = {
-        // 🚨 Adiciona o ID para PUT, se for edição
+    const payload: ContaRequestPayload = {
         id: this.contaEdicao?.id, 
         nome: formValue.nome,
         tipo: formValue.tipo,
         recorrencia: formValue.recorrencia,
         descricao: formValue.descricao,
         status: this.contaEdicao?.status || 'Ativo',
-        // Constrói o DTO de relacionamento com apenas o ID
-        cliente: formValue.tipo === 'RECEITA' && formValue.clienteId 
-            ? { id: formValue.clienteId } as ClienteBase : undefined,
-        fornecedor: formValue.tipo === 'DESPESA' && formValue.fornecedorId
-            ? { id: formValue.fornecedorId } as FornecedorBase : undefined,
-    };
+        
+        clienteId: formValue.tipo === 'RECEITA' ? formValue.clienteId : null,
+        fornecedorId: formValue.tipo === 'DESPESA' ? formValue.fornecedorId : null,
+    }; 
+    
+    console.log(this.isEditMode ? 'Atualizando conta...' : 'Cadastrando um nova conta...', payload);
 
-    this.contasService.atualizar(contaPayload).subscribe({
-      next: (response) => {
-        alert(`Conta ${response.id ? 'atualizada' : 'cadastrada'} com sucesso!`);
-        this.contaSalva.emit(response); // Emite para o componente pai recarregar
-      },
-      error: (err) => {
-        console.error('Erro ao salvar conta:', err);
-        alert('Erro ao salvar conta. Verifique o console.');
-      }
+    let operacao$: Observable<Conta>;
+
+
+    if (this.isEditMode) {
+        operacao$ = this.contasService.atualizar(payload as unknown as Conta); 
+
+    } else {
+        operacao$ = this.contasService.adicionar(payload as unknown as Conta); 
+    }
+
+    operacao$.subscribe({
+        next: (response) => {
+            this.toastService.success(`Conta ${this.isEditMode ? 'atualizada' : 'cadastrada'} com sucesso!`);
+            this.contaSalva.emit(response);
+            this.fechar.emit();
+        },
+        error: (err) => {
+            this.toastService.error('Erro ao salvar conta.');
+        }
     });
 
-
-    this.contaSalva.emit(contaPayload);
-    
-    this.fechar.emit();
   }
 
   onCancel(): void {

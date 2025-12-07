@@ -37,7 +37,7 @@
                     <td>{{ conta.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}</td> 
                     <td>{{ conta.recorrencia }}</td>
                     <td>
-                        {{ conta.tipo === 'RECEITA' ? (conta.cliente?.nome || 'Cliente não definido') : (conta.fornecedor?.nome || 'Fornecedor não definido') }}
+                        {{ conta.tipo === 'RECEITA' ? (conta.cliente?.nome) : (conta.fornecedor?.nomeFantasia) }}
                     </td>
                     <td [class.status-ativo]="conta.status === 'Ativo'" [class.status-inativo]="conta.status === 'Inativo'">
                         {{ conta.status }}
