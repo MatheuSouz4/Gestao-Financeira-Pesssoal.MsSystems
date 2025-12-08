@@ -1,1 +1,141 @@
+<div class="transacoes-container">
+    <h2>Gestão de Transações</h2>
 
+    <div class="transacoes-menu">
+        <button class="menu-btn active" data-tab="lancamentos">Lançamentos de Contas</button>
+        <button class="menu-btn" data-tab="pagamentos">Pagamentos</button>
+    </div>
+
+    <div id="lancamentos" class="transacao-section active">
+        
+        <h3>Novo Lançamento de Conta</h3>
+        <form class="lancamento-form">
+            
+            <div class="form-group">
+                <label for="conta-selecao">Conta Cadastrada:</label>
+                <select id="conta-selecao" name="conta-selecao" required>
+                    <option value="" disabled selected>Selecione uma conta (Ex: Aluguel)</option>
+                    <option value="conta1">Conta de Luz - CEMIG</option>
+                    <option value="conta2">Aluguel - Imobiliária X</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="data-emissao">Data de Emissão:</label>
+                <input type="date" id="data-emissao" name="data-emissao" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="data-vencimento">Data de Vencimento:</label>
+                <input type="date" id="data-vencimento" name="data-vencimento" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="valor-lancamento">Valor (R$):</label>
+                <input type="number" id="valor-lancamento" name="valor-lancamento" step="0.01" placeholder="Ex: 1500.00" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Salvar Lançamento</button>
+        </form>
+
+        <hr>
+
+        <h3>Listagem de Lançamentos Registrados</h3>
+        <table class="data-list-table">
+            <thead>
+                <tr>
+                    <th>Conta</th>
+                    <th>Emissão</th>
+                    <th>Vencimento</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Aluguel - Imobiliária X</td>
+                    <td>01/12/2025</td>
+                    <td>10/12/2025</td>
+                    <td>R$ 1.500,00</td>
+                    <td><button class="btn btn-sm btn-edit">Editar</button></td>
+                </tr>
+                <tr>
+                    <td>Conta de Luz - CEMIG</td>
+                    <td>25/11/2025</td>
+                    <td>05/12/2025</td>
+                    <td>R$ 180,50</td>
+                    <td><button class="btn btn-sm btn-edit">Editar</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="pagamentos" class="transacao-section hidden">
+        
+        <h3>Contas a Pagar / Pagas</h3>
+
+        <table class="data-list-table">
+            <thead>
+                <tr>
+                    <th>Conta</th>
+                    <th>Vencimento</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="status-pendente">
+                    <td>Mensalidade Academia</td>
+                    <td>20/12/2025</td>
+                    <td>R$ 120,00</td>
+                    <td><span class="badge badge-pendente">Pendente</span></td>
+                    <td><button class="btn btn-sm btn-pagar" onclick="openPaymentModal(1)">Pagar</button></td>
+                </tr>
+                <tr class="status-vencida">
+                    <td>Conta de Água - COPASA</td>
+                    <td>05/12/2025</td>
+                    <td>R$ 95,80</td>
+                    <td><span class="badge badge-vencida">Vencida</span></td>
+                    <td><button class="btn btn-sm btn-pagar" onclick="openPaymentModal(2)">Pagar</button></td>
+                </tr>
+                 <tr class="status-paga">
+                    <td>Aluguel - Imobiliária X</td>
+                    <td>10/12/2025</td>
+                    <td>R$ 1.500,00</td>
+                    <td><span class="badge badge-paga">Paga</span></td>
+                    <td><button class="btn btn-sm btn-view">Ver</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="modal-pagamento" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h4>Confirmar Pagamento: <span id="conta-a-pagar"></span></h4>
+                
+                <form class="pagamento-form">
+                    
+                    <div class="form-group">
+                        <label for="data-pagamento">Data de Pagamento:</label>
+                        <input type="date" id="data-pagamento" name="data-pagamento" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="valor-pago">Valor Pago (R$):</label>
+                        <input type="number" id="valor-pago" name="valor-pago" step="0.01" placeholder="Digite o valor efetivamente pago" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comprovante">Anexar Comprovante (PDF/JPG):</label>
+                        <input type="file" id="comprovante" name="comprovante" accept=".pdf, .jpg, .jpeg" required>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary close-modal" onclick="closePaymentModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Registrar Pagamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
