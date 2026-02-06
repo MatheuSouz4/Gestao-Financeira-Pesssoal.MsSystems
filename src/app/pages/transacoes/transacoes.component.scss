@@ -1,275 +1,217 @@
-/* Variáveis de Cores */
-$primary-color: #5a7F78; // Azul padrão
-$success-color: #28a745; // Verde para Pago/Sucesso
-$danger-color: #dc3545; // Vermelho para Vencida/Atraso
-$warning-color: #ffc107; // Amarelo para Pendente/Atenção
-$light-gray: #f8f9fa;
-$border-color: #dee2e6;
-$text-color: #000000;
+/* Variáveis de Cores (Padrão das Imagens) */
+$primary-color: #5a7F78;    // Verde acinzentado
+$success-color: #2D8A4E;    // Verde Ativo/Pago
+$warning-color: #F39C12;    // Laranja Inativo/Pendente
+$danger-color: #dc3545;     // Vermelho Vencido
+$bg-light: #f4f7f6;         // Fundo cinza claro
+$border-color: #e0e0e0;
+$white: #ffffff;
 
-.transacoes-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
-    color: $text-color;
+// Correção do seletor (removido o espaço entre classes)
+.container.mt-4 {
+    padding: 30px;
+    background-color: $bg-light;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     h2 {
-        border-bottom: 2px solid $primary-color;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
         color: $primary-color;
-    }
-
-    h3 {
-        color: $primary-color;
-        margin-top: 25px;
-        margin-bottom: 15px;
+        margin-bottom: 25px;
     }
 }
 
-// ------------------------------------
-// Estilo do Menu/Abas
-// ------------------------------------
-.transacoes-menu {
+/* ------------------------------------
+   Abas (Nav Tabs)
+   ------------------------------------ */
+.nav-tabs {
     display: flex;
-    margin-bottom: 20px;
+    border-bottom: 2px solid $border-color;
 
-    .menu-btn {
-        background: $light-gray;
-        border: 1px solid $border-color;
-        padding: 10px 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-right: -1px; 
-        
-        &:hover {
-            background: darken($light-gray, 5%);
-        }
+    
+
+    .nav-link {
+        border: none;
+        color: #666;
+        font-weight: 500;
+        padding: 10px 15px;
+        transition: 0.3s;
+
+        &:hover { border: none; color: $primary-color; }
 
         &.active {
-            background: white;
-            border-bottom: 2px solid $primary-color;
             color: $primary-color;
+            background: none;
+            border-bottom: 3px solid $primary-color; // Linha de destaque
             font-weight: bold;
-            z-index: 1;
+        }
+    }
+}
+
+/* ------------------------------------
+   Card e Formulários (Lançamentos)
+   ------------------------------------ */
+.card {
+    padding: 25px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+    background-color: $white;
+
+    // Container que envolve os campos
+    form .row {
+        display: flex;
+        align-items: flex-end; // Alinha o botão pela base dos inputs
+        gap: 50px;;             // Espaçamento entre as colunas
+        flex-wrap: nowrap;     // Mantém tudo na mesma linha
+    }
+
+    .form-group {
+        flex-direction: column;
+        flex: 1;               // Faz os campos crescerem proporcionalmente
+        text-align:justify;
+
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px; // Reduzido de 50px para 8px para evitar sobreposição
+            font-size: 14px;
+        }
+    }
+
+    .form-control {
+        width: 100%;
+        border: 1px solid $border-color;
+        padding: 10px;
+        border-radius: 4px;
+        height: 42px; // Altura fixa para alinhar com o botão
+
+        &:focus {
+            border-color: $primary-color;
+            box-shadow: none;
+        }
+    }
+
+    .btn-primary {
+        height: 42px;         // Mesma altura dos inputs
+        padding: 0 25px;
+        background-color: $primary-color;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        white-space: nowrap; // Impede o texto do botão de quebrar
+
+        &:hover { 
+            background-color: darken($primary-color, 10%); 
         }
 
-        &:first-child { border-top-left-radius: 5px; }
-        &:last-child { border-top-right-radius: 5px; }
+        &:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
     }
 }
 
-.transacao-section {
-    background: white;
-    padding: 20px;
-    border: 1px solid $border-color;
-    border-radius: 5px;
-    margin-top: -1px; 
-
-    &.hidden {
-        display: none;
-    }
-}
-
-// ------------------------------------
-// Estilo de Formulários
-// ------------------------------------
-.lancamento-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); // 4 campos na mesma linha em telas maiores
-    gap: 20px;
-    padding-bottom: 10px;
-}
-
-.pagamento-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-
-    label {
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    input, select {
-        padding: 10px;
-        border: 1px solid $border-color;
-        border-radius: 4px;
-        font-size: 1em;
-        width: 100%;
-        box-sizing: border-box;
-    }
-}
-
-// ------------------------------------
-// Estilo de Botões
-// ------------------------------------
-.btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-
-    &-primary {
-        background-color: $primary-color;
-        color: white;
-        grid-column: 1 / -1; // O botão principal do form ocupa a largura total
-        
-        &:hover { background-color: darken($primary-color, 10%); }
-    }
-
-    &-success {
-        background-color: $success-color;
-        color: white;
-
-        &:hover { background-color: darken($success-color, 10%); }
-    }
-
-    &-secondary {
-        background-color: #6c757d;
-        color: white;
-
-        &:hover { background-color: darken(#6c757d, 10%); }
-    }
-
-    &-sm {
-        padding: 5px 10px;
-        font-size: 0.85em;
-    }
-    
-    &-edit {
-        background-color: $warning-color;
-        color: $text-color;
-    }
-    &-pagar {
-        background-color: $success-color;
-        color: white;
-    }
-    &-view {
-        background-color: $primary-color;
-        color: white;
-    }
-}
-
-// ------------------------------------
-// Estilo de Listagem (Tabelas)
-// ------------------------------------
-.data-list-table {
+/* ------------------------------------
+   Tabela (Pagamentos) - Estilo Imagem 640666
+   ------------------------------------ */
+.table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
-
-    th, td {
-        padding: 12px 15px;
-        text-align: left;
-        border-bottom: 1px solid $border-color;
-    }
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
 
     thead th {
-        background-color: $primary-color;
-        color: white;
-        text-transform: uppercase;
-        font-size: 0.9em;
+        background-color: $white !important; // Cabeçalho branco conforme imagem
+        color: #666;
+        font-weight: 600;
+        border-bottom: 2px solid #f4f4f4;
+        padding: 10px 20px;
+        text-transform:none;
+        text-align:justify;
     }
 
-    tbody tr:not(.status-paga) {
+    tbody td {
+        padding: 15px 20px;
+        vertical-align:middle;
+        color: #444;
+        border-bottom: 1px solid #f4f4f4;
+    }
+
+    // Customização dos Badges para os status das imagens
+    .badge {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        text-transform: capitalize;
+
+        &.bg-success { background-color: transparent !important; color: $success-color; }
+        &.bg-warning { background-color: transparent !important; color: $warning-color; }
+        &.bg-danger { background-color: transparent !important; color: $danger-color; }
+    }
+
+    // Estilo do botão "Pagar" para parecer link de ação (itálico)
+    .btn-outline-primary {
+        border: none;
+        font-style: italic;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9em;
+        
         &:hover {
-            background-color: $light-gray;
-            cursor: pointer;
+            background: none;
+            color: $primary-color;
+            text-decoration: underline;
         }
     }
 }
 
-// ------------------------------------
-// Categorização de Status (Pagamentos)
-// ------------------------------------
-.badge {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.8em;
-    font-weight: bold;
-    text-transform: uppercase;
-    text-align: center;
-}
-
-// Cores dos badges
-.badge-pendente {
-    background-color: $warning-color;
-    color: #856404; 
-}
-
-.badge-vencida {
-    background-color: $danger-color;
-    color: white;
-}
-
-.badge-paga {
-    background-color: $success-color;
-    color: white;
-}
-
-// Estilo das linhas da tabela conforme o status
-.status-vencida {
-    background-color: lighten($danger-color, 35%); // Fundo vermelho claro
-    color: darken($danger-color, 10%);
-}
-.status-paga {
-    background-color: lighten($success-color, 40%); // Fundo verde claro
-    color: #666;
-}
-
-// ------------------------------------
-// Modal de Pagamento
-// ------------------------------------
-.modal-overlay {
+/* ------------------------------------
+   Modal (Overlay e Content) - Estilo Imagem 64066a
+   ------------------------------------ */
+.modal-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 1000;
-
-    &.hidden {
-        display: none;
-    }
+    justify-content: center;
+    z-index: 1050;
 }
 
 .modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    background: $white;
+    width: 100%;
     max-width: 450px;
-    width: 90%;
+    border-radius: 10px;
+    border: none;
     
     h4 {
-        margin-top: 0;
+        color: $primary-color;
         border-bottom: 1px solid $border-color;
-        padding-bottom: 10px;
+        padding-bottom: 15px;
         margin-bottom: 20px;
-        #conta-a-pagar {
-            font-weight: normal;
-            color: $primary-color;
-        }
     }
-}
 
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+    .btn-secondary {
+        background: $white;
+        border: 1px solid #333;
+        color: #333;
+        padding: 8px 20px;
+        
+        &:hover { background: #f8f9fa; }
+    }
+
+    .btn-success {
+        background: #999; // Cinza conforme imagem do botão Salvar/Confirmar
+        border: none;
+        padding: 8px 25px;
+        
+        &:hover { background: #777; }
+    }
 }

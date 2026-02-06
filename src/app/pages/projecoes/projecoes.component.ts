@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-relatorio',
+  selector: 'app-projecoes',
   standalone: true,
   template: `
     <div class="page-card">
-      <h1>Relatórios</h1>
-      <p>Área de gerenciamento de relatórios.</p>
+      <h1>Projeções</h1>
+      <p>Área de gerenciamento de Projeções Financeiras.</p>
       </div>
   `,
   styles:`
@@ -14,6 +14,6 @@ import { Component } from '@angular/core';
     h1 { color: #5a7F78; }
   `
 })
-export class RelatoriosComponent {
+export class ProjecoesComponent{
 
 }

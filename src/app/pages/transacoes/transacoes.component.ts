@@ -1,174 +1,94 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-// Importa os serviços e interfaces necessárias
-import { Conta, ContasService, TipoConta } from '../../services/contas.service';
+import { Conta, ContasService } from '../../services/contas.service';
 import { Lancamento, TransacoesService } from '../../services/transacoes.service';
-// Assumindo que você criou o módulo para o componente
-// import { TransacoesFormComponent } from './transacoes-form/transacoes-form.component'; 
 
-// Define uma interface combinada para exibir na listagem
-interface LancamentoExibicao extends Lancamento {
-  nomeContaBase: string;
-  tipoContaBase: TipoConta;
-  statusCalculado: 'Pendente' | 'Vencida' | 'Paga';
+interface LancamentoVM extends Lancamento {
+  nomeConta: string;
+  statusReal: string;
 }
-
 
 @Component({
   selector: 'app-transacoes',
   standalone: true,
-  // Imports devem incluir o formulário e módulos de formulário
-  // imports: [CommonModule, FormsModule, TransacoesFormComponent], 
+  imports: [CommonModule, FormsModule],
   templateUrl: './transacoes.component.html',
   styleUrls: ['./transacoes.component.scss']
 })
 export class TransacoesComponent implements OnInit {
-
-  // --- Estado do Componente ---
   activeTab: 'lancamentos' | 'pagamentos' = 'lancamentos';
-  isModalPagamentoAberto: boolean = false;
+  
+  // Observables para os dados
+  contas$!: Observable<Conta[]>;
+  transacoesExibicao$!: Observable<LancamentoVM[]>;
 
-  // Dados observáveis (para o pipe async no HTML)
-  contasBase$!: Observable<Conta[]>;
-  lancamentosExibicao$!: Observable<LancamentoExibicao[]>;
-
-  // Dados do formulário de Lançamento
-  novoLancamento: { contaId: string, dataEmissao: string, dataVencimento: string, valor: number } = {
-    contaId: '',
-    dataEmissao: new Date().toISOString().substring(0, 10),
-    dataVencimento: new Date().toISOString().substring(0, 10),
-    valor: 0
-  };
-
-  // Dados do Modal de Pagamento
-  lancamentoSelecionado: LancamentoExibicao | null = null;
-  pagamentoPayload = {
-    dataPagamento: new Date().toISOString().substring(0, 10),
-    valorPago: 0,
-    comprovanteFile: null as File | null,
-    comprovanteUrl: undefined as string | undefined // URL após upload
-  };
+  // Estado do Modal de Pagamento
+  isModalAberto = false;
+  itemParaPagar: LancamentoVM | null = null;
+  formPagamento = { data: '', valor: 0, arquivo: null as File | null };
 
   constructor(
     private contasService: ContasService,
     private transacoesService: TransacoesService,
-    private toastService: ToastrService
+    private toast: ToastrService
   ) {}
 
   ngOnInit(): void {
-    this.carregarDados();
-  }
+    this.contas$ = this.contasService.listar();
 
-  carregarDados(): void {
-    this.contasBase$ = this.contasService.listar(); // Lista as Contas Base
-
-    // Combina os Lançamentos específicos com as Contas Base
-    this.lancamentosExibicao$ = combineLatest([
-      this.transacoesService.lancamentos$, 
-      this.contasBase$
+    // Combina Contas e Lançamentos para criar a ViewModel (VM)
+    this.transacoesExibicao$ = combineLatest([
+      this.transacoesService.lancamentos$,
+      this.contas$
     ]).pipe(
       map(([lancamentos, contas]) => {
-        const contasMap = new Map(contas.map(c => [c.id, c]));
-        
-        return lancamentos.map(lancamento => {
-          const contaBase = contasMap.get(lancamento.contaId);
-          
+        return lancamentos.map(l => {
+          const contaBase = contas.find(c => c.id === l.contaId);
           return {
-            ...lancamento,
-            nomeContaBase: contaBase?.nome || 'Conta Não Encontrada',
-            tipoContaBase: contaBase?.tipo || 'DESPESA',
-            statusCalculado: this.transacoesService.checkLancamentoStatus(lancamento)
-          } as LancamentoExibicao;
+            ...l,
+            nomeConta: contaBase ? contaBase.nome : 'Conta desconhecida',
+            statusReal: this.transacoesService.calcularStatus(l)
+          };
         });
       })
     );
   }
 
-  // --- Lógica de Lançamentos de Contas ---
-
+  // --- Ações de Lançamento ---
   salvarLancamento(form: NgForm): void {
     if (form.invalid) return;
 
-    const novoLancamentoPayload: Lancamento = {
-      id: '', // Será definido pelo Service/Backend
-      contaId: this.novoLancamento.contaId,
-      dataEmissao: this.novoLancamento.dataEmissao,
-      dataVencimento: this.novoLancamento.dataVencimento,
-      valor: this.novoLancamento.valor,
-      status: 'Pendente'
-    };
-
-    this.transacoesService.adicionarLancamento(novoLancamentoPayload).subscribe({
+    this.transacoesService.adicionar(form.value).subscribe({
       next: () => {
-        this.toastService.success('Lançamento registrado com sucesso!');
-        form.resetForm({ 
-            dataEmissao: new Date().toISOString().substring(0, 10),
-            dataVencimento: new Date().toISOString().substring(0, 10),
-            valor: 0
-        }); // Limpa o formulário, mantendo datas atuais
-      },
-      error: (err) => {
-        console.error('Erro ao adicionar lançamento:', err);
-        this.toastService.error('Falha ao registrar lançamento.');
+        this.toast.success('Lançamento realizado! Verifique a aba de pagamentos.');
+        form.resetForm({ status: 'Pendente' });
       }
     });
   }
 
-  // --- Lógica de Pagamentos (Modal e Submissão) ---
-
-  abrirModalPagamento(lancamento: LancamentoExibicao): void {
-    this.lancamentoSelecionado = lancamento;
-    this.pagamentoPayload.valorPago = lancamento.valor; // Sugere o valor total
-    this.pagamentoPayload.dataPagamento = new Date().toISOString().substring(0, 10);
-    this.pagamentoPayload.comprovanteFile = null;
-    this.isModalPagamentoAberto = true;
+  // --- Ações de Pagamento ---
+  abrirModal(item: LancamentoVM): void {
+    this.itemParaPagar = item;
+    this.formPagamento.valor = item.valor;
+    this.formPagamento.data = new Date().toISOString().split('T')[0];
+    this.isModalAberto = true;
   }
 
-  fecharModalPagamento(): void {
-    this.isModalPagamentoAberto = false;
-    this.lancamentoSelecionado = null;
-  }
+  confirmarPagamento(): void {
+    if (!this.itemParaPagar) return;
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.pagamentoPayload.comprovanteFile = input.files ? input.files[0] : null;
-  }
-
-  registrarPagamento(): void {
-    if (!this.lancamentoSelecionado || !this.pagamentoPayload.comprovanteFile) {
-      this.toastService.warning('Selecione um lançamento e anexe o comprovante.');
-      return;
-    }
-    
-    // * SIMULAÇÃO DE UPLOAD: Em uma aplicação real, você faria o upload do arquivo
-    // * aqui e obteria a URL antes de chamar o `registrarPagamento`.
-    // * Por simplicidade, faremos a chamada diretamente com uma URL simulada.
-    
-    const uploadSimuladoUrl = `comprovantes/${this.lancamentoSelecionado.id}-${Date.now()}.pdf`;
-    
-    this.transacoesService.registrarPagamento(this.lancamentoSelecionado.id, {
-      dataPagamento: this.pagamentoPayload.dataPagamento,
-      valorPago: this.pagamentoPayload.valorPago,
-      comprovanteUrl: uploadSimuladoUrl
+    this.transacoesService.registrarPagamento(this.itemParaPagar.id!, {
+      dataPagamento: this.formPagamento.data,
+      valorPago: this.formPagamento.valor
     }).subscribe({
       next: () => {
-        this.toastService.success(`Pagamento de ${this.lancamentoSelecionado!.nomeContaBase} registrado com sucesso!`);
-        this.fecharModalPagamento();
-      },
-      error: (err) => {
-        console.error('Erro ao registrar pagamento:', err);
-        this.toastService.error('Falha ao registrar pagamento.');
+        this.toast.success('Pagamento registrado com sucesso!');
+        this.isModalAberto = false;
       }
     });
-  }
-
-  // --- Helpers de Exibição ---
-  
-  setActiveTab(tab: 'lancamentos' | 'pagamentos'): void {
-    this.activeTab = tab;
   }
 }
