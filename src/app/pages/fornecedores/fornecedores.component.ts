@@ -3,13 +3,15 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { CpfCnpjPipe } from '../../components/pipes/cpf-cnpj.pipe';
+import { TelefonePipe } from '../../components/pipes/telefone.pipe';
 import { Fornecedor, FornecedoresService } from '../../services/fornecedores.service';
 import { FornecedoresFormComponent } from './fornecedores-form/fornecedores-form.component';
 
 @Component({
   selector: 'app-fornecedores',
   standalone: true,
-  imports: [CommonModule, FormsModule, FornecedoresFormComponent],
+  imports: [CommonModule, FormsModule, FornecedoresFormComponent,CpfCnpjPipe,TelefonePipe],
   templateUrl: './fornecedores.component.html',
   styleUrl: './fornecedores.component.scss',
 })

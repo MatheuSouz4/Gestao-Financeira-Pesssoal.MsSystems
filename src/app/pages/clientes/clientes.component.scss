@@ -25,7 +25,7 @@ h2 {
     width: 400px;
     input {
         width: 100%;
-        padding: 10px 10px 10px 40px;
+        padding: 10px 10px 10px 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 16px;
@@ -35,7 +35,7 @@ h2 {
         left: 10px;
         top: 50%;
         transform: translateY(-50%);
-        color: #888;
+        color: #ccc;
     }
 }
 
@@ -102,12 +102,14 @@ tr:hover {
 
 
 .status-ativo {
-    color: green;
+    color: #2e7d32;
+    border-radius: 4px;
     font-weight: bold;
 }
 
 .status-inativo {
-    color: orange;
+    color: #f57c00;
+    border-radius: 4px;
     font-weight: bold;
 }
 

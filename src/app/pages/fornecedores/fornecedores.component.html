@@ -32,8 +32,8 @@
                 <tr *ngFor="let fornecedor of fornecedoresFiltrados">
                     <td>{{ fornecedor.nomeFantasia }}</td>
                     <td>{{ fornecedor.razaoSocial }}</td>
-                    <td>{{ fornecedor.cpf_Cnpj }}</td>
-                    <td>{{ fornecedor.telefone }}</td>
+                    <td>{{ fornecedor.cpf_Cnpj | cpfCnpj }}</td>
+                    <td>{{ fornecedor.telefone | telefone }}</td>
                     <td [class.status-ativo]="fornecedor.status === 'Ativo'" [class.status-inativo]="fornecedor.status === 'Inativo'">
                         {{ fornecedor.status }}
                     </td>

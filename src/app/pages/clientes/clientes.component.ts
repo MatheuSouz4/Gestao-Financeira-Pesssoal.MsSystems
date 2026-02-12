@@ -3,13 +3,15 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { CpfCnpjPipe } from '../../components/pipes/cpf-cnpj.pipe';
+import { TelefonePipe } from '../../components/pipes/telefone.pipe';
 import { Cliente, ClientesService } from '../../services/clientes.service';
 import { ClientesFormComponent } from './clientes-form/clientes-form.component';
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ClientesFormComponent],
+  imports: [CommonModule, FormsModule, ClientesFormComponent,CpfCnpjPipe,TelefonePipe],
   templateUrl: './clientes.component.html',
   styleUrl: './clientes.component.scss',
 })
@@ -43,18 +45,19 @@ export class ClientesComponent implements OnInit {
     });
   }
 
+    get clientesFiltrados(): Cliente[] {
+  const termo = this.termoPesquisa?.trim().toLowerCase();
   
-  get clientesFiltrados(): Cliente[] {
-    if (!this.termoPesquisa) {
-      return this.clientes;
-    }
-    const termo = this.termoPesquisa.toLowerCase(); 
-    return this.clientes.filter(cliente =>
-      cliente.nome.toLowerCase().includes(termo) ||
-      cliente.email.toLowerCase().includes(termo) ||
-      cliente.cpf_Cnpj.includes(termo)
-    );
+  if (!termo) {
+    return this.clientes;
   }
+
+  return this.clientes.filter(cliente =>
+    cliente.nome.toLowerCase().includes(termo) ||
+    cliente.email.toLowerCase().includes(termo) ||
+    (cliente.cpf_Cnpj && cliente.cpf_Cnpj.includes(termo)) // Proteção contra CPF nulo
+  );
+}
 
 
   abrirFormularioCadastro(): void {
