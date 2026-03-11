@@ -1,50 +1,61 @@
-<div class="container mt-4">
-         <h2>Gerenciamento de Lançamentos</h2>
- 
-    <div class="card p-4 shadow-sm">
-      <form #f="ngForm" (ngSubmit)="salvarLancamento(f)">
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label>Conta Base</label>
-            <select name="contaId" ngModel required class="form-control">
-              <option *ngFor="let c of contas$ | async" [value]="c.id">{{ c.nome }}</option>
-            </select>
-          </div>
-          <div class="col-md-3 mb-3">
-            <label>Vencimento</label>
-            <input type="date" name="dataVencimento" ngModel required class="form-control">
-          </div>
-          <div class="col-md-3 mb-3">
-            <label>Valor</label>
-            <input type="number" name="valor" ngModel required class="form-control">
-          </div>
-          <input type="hidden" name="status" ngModel="Pendente">
-          <div class="col-md-2 d-flex align-items-end mb-3">
-            <button class="btn btn-primary w-100" [disabled]="f.invalid">Lançar</button>
-          </div>
+<div class="lancamento-page"> <h2>Gerenciamento de Lançamentos</h2>
+
+    <div class="top-actions">
+        <div class="search-bar">
+            <input 
+                type="text" 
+                placeholder="Pesquisar por conta ou status..."
+                [(ngModel)]="termoPesquisa" 
+                (ngModelChange)="aplicarFiltro()">
+            <i class="material-icons search-icon"></i>
         </div>
-      </form>
+
+        <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
+            <i class="material-icons"></i> Adicionar Novo Lançamento
+        </button>
     </div>
+
+    <div class="contas-list">
+        <table *ngIf="lancamentosFiltrados.length > 0">
+            <thead>
+                <tr>
+                    <th>Conta Base</th>
+                    <th>Vencimento</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let l of lancamentosFiltrados">
+                    <td>{{ l.nomeConta }}</td>
+                    <td>{{ l.dataVencimento | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ l.valor | currency:'BRL' }}</td>
+                    <td>
+                        <span [ngClass]="{
+                            'status-ativo': l.statusReal === 'Pago' || l.statusReal === 'Recebido',
+                            'status-inativo': l.statusReal === 'Pendente'
+                        }">{{ l.statusReal }}</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-icon" (click)="editarLancamento(l)">
+                            <i class="material-icons">edit</i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p *ngIf="lancamentosFiltrados.length === 0" class="no-results">Nenhum lançamento encontrado.</p>
     </div>
-    <table class="table table-hover border">
-      <thead class="bg-light">
-        <tr>
-          <th>Conta</th>
-          <th>Vencimento</th>
-          <th>Valor</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let t of transacoesExibicao$ | async">
-          <td>{{ t.nomeConta }}</td>
-          <td>{{ t.dataVencimento | date:'dd/MM/yyyy' }}</td>
-          <td>{{ t.valor | currency:'BRL' }}</td>
-          <td>
-            <span class="badge" [ngClass]="{
-              'bg-danger': t.statusReal === 'Vencida',
-              'bg-warning text-dark': t.statusReal === 'Pendente',
-              'bg-success': t.statusReal === 'Paga'
-            }">{{ t.statusReal }}</span>
-          </td>
+
+    <div *ngIf="isFormularioAberto" class="form-modal-overlay">
+        <div class="form-card">
+            <app-lancamentos-form
+                [lancamentoEdicao]="lancamentoEmEdicao"
+                (salvar)="salvarLancamento($event)"
+                (fechar)="fecharFormulario()">
+            </app-lancamentos-form>
+        </div>
+    </div>
+</div>

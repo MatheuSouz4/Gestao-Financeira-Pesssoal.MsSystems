@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface Lancamento {
   id?: string;
@@ -18,53 +18,91 @@ export interface Lancamento {
   providedIn: 'root'
 })
 export class LancamentosService {
-private API_URL = 'http://localhost:8080/lancamentos';
+  private readonly API_URL = 'http://localhost:8080/lancamentos';
 
-  // O BehaviorSubject é o "coração" da reatividade entre as abas
+  // BehaviorSubject que mantém o estado da lista em tempo real
   private _lancamentos = new BehaviorSubject<Lancamento[]>([]);
   public lancamentos$ = this._lancamentos.asObservable();
 
   constructor(private http: HttpClient) {
-    this.carregarDadosIniciais();
+    this.carregarDados();
   }
 
-  // Simula busca do banco de dados e alimenta o Subject
-  private carregarDadosIniciais(): void {
-    // Aqui você faria um this.http.get<Lancamento[]>(this.API_URL).subscribe(...)
-    this._lancamentos.next([]); 
+  /**
+   * Busca a lista do backend e atualiza o BehaviorSubject
+   */
+  carregarDados(): void {
+    this.http.get<Lancamento[]>(this.API_URL).subscribe({
+      next: (dados) => this._lancamentos.next(dados),
+      error: (err) => console.error('Erro ao carregar lançamentos:', err)
+    });
   }
 
+  /**
+   * Adiciona um novo lançamento e atualiza a lista local
+   */
   adicionar(lancamento: Lancamento): Observable<Lancamento> {
-    // Em produção: return this.http.post<Lancamento>(this.API_URL, lancamento).pipe(...)
+    return this.http.post<Lancamento>(this.API_URL, lancamento).pipe(
+      tap((novoLancamento) => {
+        const listaAtual = [...this._lancamentos.value, novoLancamento];
+        this._lancamentos.next(listaAtual);
+      })
+    );
+  }
+
+  /**
+   * Atualiza um lançamento existente
+   */
+  atualizar(lancamento: Lancamento): Observable<Lancamento> {
+    return this.http.put<Lancamento>(`${this.API_URL}/${lancamento.id}`, lancamento).pipe(
+      tap((atualizado) => {
+        const listaAtual = this._lancamentos.value.map(l => 
+          l.id === atualizado.id ? atualizado : l
+        );
+        this._lancamentos.next(listaAtual);
+      })
+    );
+  }
+
+  /**
+   * Lógica específica para registro de pagamento
+   */
+  registrarPagamento(id: string, dados: Partial<Lancamento>): Observable<Lancamento> {
+    // Aqui enviamos apenas o que mudou (Patch) ou o objeto completo conforme seu backend
+    return this.http.patch<Lancamento>(`${this.API_URL}/${id}/pagar`, dados).pipe(
+      tap((pago) => {
+        const listaAtual = this._lancamentos.value.map(l => 
+          l.id === id ? { ...l, ...pago, status: 'Paga' as const } : l
+        );
+        this._lancamentos.next(listaAtual);
+      })
+    );
+  }
+
+  /**
+   * Remove um lançamento
+   */
+  excluir(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${id}`).pipe(
+      tap(() => {
+        const listaAtual = this._lancamentos.value.filter(l => l.id !== id);
+        this._lancamentos.next(listaAtual);
+      })
+    );
+  }
+
+  /**
+   * Utilitário para calcular o status visual (front-end)
+   */
+  calcularStatus(lancamento: Lancamento): 'Pendente' | 'Vencida' | 'Paga' {
+    if (lancamento.status === 'Paga') return 'Paga';
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
     
-    // Simulação para funcionamento local:
-    const novo = { ...lancamento, id: Math.random().toString(36).substr(2, 9) };
-    const listaAtual = [...this._lancamentos.value, novo];
-    this._lancamentos.next(listaAtual); // Notifica todos os interessados
-    return of(novo);
-  }
-    registrarPagamento(id: string, dados: Partial<Lancamento>): Observable<Lancamento> {
-      const listaAtual = this._lancamentos.value.map(l => {
-        if (l.id === id) {
-          return { ...l, ...dados, status: 'Paga' as const };
-        }
-        return l;
-      });
-      
-      this._lancamentos.next(listaAtual); // Atualiza a lista globalmente
-      return of(listaAtual.find(l => l.id === id)!);
-    }
+    // Garantindo que a string de data seja tratada corretamente
+    const vencimento = new Date(lancamento.dataVencimento + 'T00:00:00');
 
-  
-    // Lógica de cálculo de status baseada na data atual
-    calcularStatus(lancamento: Lancamento): 'Pendente' | 'Vencida' | 'Paga' {
-      if (lancamento.status === 'Paga') return 'Paga';
-      
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      const vencimento = new Date(lancamento.dataVencimento + 'T00:00:00');
-  
-      return vencimento < hoje ? 'Vencida' : 'Pendente';
-    }
+    return vencimento < hoje ? 'Vencida' : 'Pendente';
   }
-
+}

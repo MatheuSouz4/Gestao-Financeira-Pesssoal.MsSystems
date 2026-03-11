@@ -1,157 +1,151 @@
-/* Variáveis de Cores (Padrão das Imagens) */
-$primary-color: #5a7F78;    // Verde acinzentado
-$success-color: #2D8A4E;    // Verde Ativo/Pago
-$warning-color: #F39C12;    // Laranja Inativo/Pendente
-$danger-color: #dc3545;     // Vermelho Vencido
-$bg-light: #f4f7f6;         // Fundo cinza claro
-$border-color: #e0e0e0;
-$white: #ffffff;
+@import "../../../styles/variables.scss";
 
-// Correção do seletor (removido o espaço entre classes)
-.container.mt-4 {
-    padding: 30px;
-    background-color: $bg-light;
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-    h2 {
-        color: $primary-color;
-        margin-bottom: 25px;
-    }
-}
-
-/* ------------------------------------
-   Abas (Nav Tabs)
-   ------------------------------------ */
-.nav-tabs {
-    display: flex;
-    border-bottom: 2px solid $border-color;
-
-    
-
-    .nav-link {
-        border: none;
-        color: #666;
-        font-weight: 500;
-        padding: 10px 15px;
-        transition: 0.3s;
-
-        &:hover { border: none; color: $primary-color; }
-
-        &.active {
-            color: $primary-color;
-            background: none;
-            border-bottom: 3px solid $primary-color; // Linha de destaque
-            font-weight: bold;
-        }
-    }
-}
-
-/* ------------------------------------
-   Card e Formulários (Lançamentos)
-   ------------------------------------ */
-.card {
-    padding: 25px;
-    border: none;
+.lancamento-page {
+    padding: 20px;
+    background-color: white;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-    background-color: $white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
 
-    // Container que envolve os campos
-    form .row {
-        display: flex;
-        align-items: flex-end; // Alinha o botão pela base dos inputs
-        gap: 50px;;             // Espaçamento entre as colunas
-        flex-wrap: nowrap;     // Mantém tudo na mesma linha
-    }
+h2 {
+    color:$primary-color;
+    margin-bottom: 25px;
+}
 
-    .form-group {
-        flex-direction: column;
-        flex: 1;               // Faz os campos crescerem proporcionalmente
-        text-align:justify;
 
-        label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px; // Reduzido de 50px para 8px para evitar sobreposição
-            font-size: 14px;
-        }
-    }
+.top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
 
-    .form-control {
+.search-bar {
+    position: relative;
+    width: 400px;
+    input {
         width: 100%;
-        border: 1px solid $border-color;
-        padding: 10px;
+        padding: 10px 10px 10px 10px;
+        border: 1px solid #ccc;
         border-radius: 4px;
-        height: 42px; // Altura fixa para alinhar com o botão
-
-        &:focus {
-            border-color: $primary-color;
-            box-shadow: none;
-        }
+        font-size: 16px;
     }
+    .search-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #888;
+    }
+}
 
-    .btn-primary {
-        height: 42px;         // Mesma altura dos inputs
-        padding: 0 25px;
-        background-color: $primary-color;
-        border: none;
-        border-radius: 4px;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.3s;
-        white-space: nowrap; // Impede o texto do botão de quebrar
+/* Botões */
+.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s;
 
-        &:hover { 
-            background-color: darken($primary-color, 10%); 
-        }
+    i {
+        margin-right: 8px;
+    }
+}
 
-        &:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
+.btn-primary {
+    background-color:$primary-color;
+    color: white;
+    &:hover {
+        background-color:$secondary-color;
+    }
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 5px;
+    color: #444;
+    margin-left: 5px;
+    &:hover {
+        color: #0d47a1;
     }
 }
 
 
-/* ------------------------------------
-   Tabela (Pagamentos) - Estilo Imagem 640666
-   ------------------------------------ */
-.table {
+table {
     width: 100%;
     border-collapse: collapse;
     background-color: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
+}
 
-    thead th {
-        background-color: $white !important; // Cabeçalho branco conforme imagem
-        color: #666;
-        font-weight: 600;
-        border-bottom: 2px solid #f4f4f4;
-        padding: 10px 20px;
-        text-transform:none;
-        text-align:justify;
-    }
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
 
-    tbody td {
-        padding: 15px 20px;
-        vertical-align:middle;
-        color: #444;
-        border-bottom: 1px solid #f4f4f4;
-    }
+th {
+    
+    background-color: #f8f8f8;
+    color: #333;
+    font-weight: 600;
+}
 
-    // Customização dos Badges para os status das imagens
-    .badge {
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-weight: bold;
-        text-transform: capitalize;
+tr:hover {
+    background-color:#f9f9f9;
+}
 
-        &.bg-success { background-color: transparent !important; color: $success-color; }
-        &.bg-warning { background-color: transparent !important; color: $warning-color; }
-        &.bg-danger { background-color: transparent !important; color: $danger-color; }
+
+.status-ativo {
+    color: green;
+    font-weight: bold;
+}
+
+.status-inativo {
+    color: orange;
+    font-weight: bold;
+}
+
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+}
+
+
+.form-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.form-card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    margin-top: 20px;
+    &:hover {
+        background-color: #5a6268;
     }
 }

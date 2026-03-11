@@ -1,0 +1,35 @@
+<div class="form-container">
+    <h3>{{ lancamentoEdicao ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label for="contaId">Conta Base</label>
+            <select id="contaId" formControlName="contaId">
+                <option value="">Selecione uma conta...</option>
+                <option *ngFor="let conta of contas" [value]="conta.id">
+                    {{ conta.nome }} ({{ conta.tipo }})
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="vencimento">Data de Vencimento</label>
+            <input id="vencimento" type="date" formControlName="vencimento">
+        </div>
+
+        <div class="form-group">
+            <label for="valor">Valor</label>
+            <input id="valor" type="number" step="0.01" formControlName="valor" placeholder="R$ 0,00">
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição (Opcional)</label>
+            <textarea id="descricao" formControlName="descricao"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="fechar.emit()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Salvar Lançamento</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,31 @@
+<div class="form-container">
+    <h3>Registrar Pagamento / Recebimento</h3>
+    <p>Conta: <strong>{{ lancamento?.valor | currency:'BRL' }}</strong> com vencimento em {{ lancamento?.dataVencimento | date:'dd/MM/yyyy' }}</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+            <label for="dataPagamento">Data do Pagamento</label>
+            <input id="dataPagamento" type="date" formControlName="dataPagamento">
+        </div>
+
+        <div class="form-group">
+            <label for="valorPago">Valor Pago</label>
+            <input id="valorPago" type="number" step="0.01" formControlName="valorPago">
+            <small *ngIf="form.get('valorPago')?.value !== lancamento?.valor" style="color: orange;">
+                Aviso: Valor diferente do original.
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="comprovanteUrl">Link do Comprovante (Opcional)</label>
+            <input id="comprovanteUrl" type="text" formControlName="comprovanteUrl" placeholder="http://...">
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="fechar.emit()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+                Confirmar Baixa
+            </button>
+        </div>
+    </form>
+</div>

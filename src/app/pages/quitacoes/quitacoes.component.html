@@ -1,1 +1,55 @@
-<p>quitacoes works!</p>
+<div class="quitacoes-page">
+    <h2>Gerenciamento de Quitações</h2>
+
+    <div class="top-actions">
+        <div class="search-bar">
+            <input 
+                type="text" 
+                placeholder="Pesquisar por conta..."
+                [(ngModel)]="termoPesquisa" 
+                (ngModelChange)="aplicarFiltro()">
+        </div>
+    </div>
+
+    <div class="contas-list">
+        <table *ngIf="filtroPendentes.length > 0">
+            <thead>
+                <tr>
+                    <th>Conta</th>
+                    <th>Vencimento</th>
+                    <th>Valor Original</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let l of filtroPendentes">
+                    <td>{{ l.nomeConta }}</td>
+                    <td>{{ l.dataVencimento | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ l.valor | currency:'BRL' }}</td>
+                    <td>
+                        <span [ngClass]="l.statusReal === 'Vencida' ? 'status-inativo' : 'status-ativo'">
+                            {{ l.statusReal }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" (click)="abrirModalPagamento(l)">
+                            <i class="material-icons">check_circle</i> Baixar
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p *ngIf="filtroPendentes.length === 0" class="no-results">Nenhuma pendência encontrada.</p>
+    </div>
+
+    <div *ngIf="isFormularioAberto" class="form-modal-overlay">
+        <div class="form-card">
+            <app-quitacoes-form
+                [lancamento]="lancamentoParaQuitar"
+                (confirmar)="confirmarPagamento($event)"
+                (fechar)="fecharFormulario()">
+            </app-quitacoes-form>
+        </div>
+    </div>
+</div>
