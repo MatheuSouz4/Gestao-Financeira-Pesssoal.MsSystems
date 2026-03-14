@@ -1,4 +1,3 @@
-
 <div class="clientes-page">
     <h2>Gerenciamento de Clientes</h2>
 
@@ -34,18 +33,21 @@
                     <td>{{ cliente.nome }}</td>
                     <td>{{ cliente.email }}</td>
                     <td>{{ cliente.telefone |telefone }}</td>
-                    <td>{{ cliente.cpf_Cnpj |cpfCnpj }}</td>
-                    <td [class.status-ativo]="cliente.status === 'Ativo'" [class.status-inativo]="cliente.status === 'Inativo'">
-                        {{ cliente.status }}
+                    <td>{{ cliente.cpfCnpj |cpfCnpj }}</td>
+                    <td>
+                        <span [ngClass]="cliente.status === 'ATIVO' ? 'status-ativo' : 'status-inativo'">
+                            {{ cliente.status }}
+                        </span>
                     </td>
+
                     <td>
                         <button class="btn btn-icon edit-btn" (click)="editarCliente(cliente)">
                             <i class="material-icons">Editar</i>
                         </button>
                         
-                        <button class="btn btn-icon" (click)="alternarStatus(cliente)">
-                            <i class="material-icons" [title]="cliente.status === 'Ativo' ? 'Inativar' : 'Ativar'">
-                                {{ cliente.status === 'Ativo' ? 'Inativar' : 'Ativar' }}
+                        <button class="btn-icon" (click)="alternarStatus(cliente)">
+                            <i class="material-icons"[title]="cliente.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
+                                {{ cliente.status === 'ATIVO' ? 'Inativar' : 'Ativar' }}
                             </i>
                         </button>
                     </td>

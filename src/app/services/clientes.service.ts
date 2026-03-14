@@ -2,16 +2,23 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+
+export enum Status{
+  ATIVO = 'ATIVO',
+  INATIVO = 'INATIVO',
+  BLOQUEADO = 'BLOQUEADO'
+}
 // 1. Definimos a interface AQUI mesmo (sem arquivo de model separado)
 export interface Cliente {
   id: string; // Opcional pois na criação não temos ID
   nome: string;
   email: string;
   telefone: string;
-  cpf_Cnpj: string;
+  cpfCnpj: string;
   endereco: string;
   descricao: string;
-  status: 'Ativo' | 'Inativo';
+  status: Status
+  dataCadastro?: Date;
 }
 
 @Injectable({

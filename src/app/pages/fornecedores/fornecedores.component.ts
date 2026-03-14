@@ -3,8 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
-import { CpfCnpjPipe } from '../../components/pipes/cpf-cnpj.pipe';
-import { TelefonePipe } from '../../components/pipes/telefone.pipe';
+import { CpfCnpjPipe } from '../../components/utilitarios/cpf-cnpj.pipe';
+import { TelefonePipe } from '../../components/utilitarios/telefone.pipe';
 import { Fornecedor, FornecedoresService } from '../../services/fornecedores.service';
 import { FornecedoresFormComponent } from './fornecedores-form/fornecedores-form.component';
 

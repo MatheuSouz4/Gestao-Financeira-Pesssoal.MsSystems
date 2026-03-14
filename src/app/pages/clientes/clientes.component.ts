@@ -3,9 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
-import { CpfCnpjPipe } from '../../components/pipes/cpf-cnpj.pipe';
-import { TelefonePipe } from '../../components/pipes/telefone.pipe';
-import { Cliente, ClientesService } from '../../services/clientes.service';
+import { CpfCnpjPipe } from '../../components/utilitarios/cpf-cnpj.pipe';
+import { TelefonePipe } from '../../components/utilitarios/telefone.pipe';
+import { Cliente, ClientesService, Status } from '../../services/clientes.service';
 import { ClientesFormComponent } from './clientes-form/clientes-form.component';
 
 @Component({
@@ -55,7 +55,7 @@ export class ClientesComponent implements OnInit {
   return this.clientes.filter(cliente =>
     cliente.nome.toLowerCase().includes(termo) ||
     cliente.email.toLowerCase().includes(termo) ||
-    (cliente.cpf_Cnpj && cliente.cpf_Cnpj.includes(termo)) // Proteção contra CPF nulo
+    (cliente.cpfCnpj && cliente.cpfCnpj.includes(termo)) // Proteção contra CPF nulo
   );
 }
 
@@ -112,7 +112,7 @@ export class ClientesComponent implements OnInit {
 
 alternarStatus(cliente: Cliente): void {
 
-  const novoStatus: 'Ativo' | 'Inativo' = cliente.status === 'Ativo' ? 'Inativo' : 'Ativo';
+  const novoStatus = cliente.status === Status.ATIVO ? Status.INATIVO : Status.ATIVO;
   
   Swal.fire({
     title: 'Confirmação de Status',

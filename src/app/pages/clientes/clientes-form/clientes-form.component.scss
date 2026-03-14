@@ -1,79 +1,62 @@
 @import "../../../../styles/variables.scss";
 
-
 .form-container {
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-
-    max-height: 90vh;
-    overflow-y: auto;
-    width: 100%;
-    max-width: 600px;
-
+  padding: 10px; // Espaçamento interno suave
+  
+  h3 {
+    color: $primary-color;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+  }
 }
 
-h3 {
-    color:$primary-color;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 15px;
-    margin-top: 0;
-    margin-bottom: 25px;
-    font-weight: 600;
+.form-row {
+  display: flex;
+  gap: 15px;
+  @media (max-width: 600px) { flex-direction: column; }
 }
-
 
 .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 15px;
+  flex: 1;
 
-    label {
-        display: block;
-        font-weight: 500;
-        margin-bottom: 5px;
-        color: #333;
-    }
+  label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: 600;
+  }
 
-    input[type="text"],
-    input[type="email"],
-    textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 16px;
-        box-sizing: border-box;
-        transition: border-color 0.3s, box-shadow 0.3s;
-    }
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
 
-    input:focus,
-    textarea:focus {
-        border-color:$secondary-color;
-        box-shadow: 0 0 0 3px $secondary-color(30, 136, 229, 0.2);
-        outline: none;
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      outline: none;
     }
-
-    textarea {
-        resize: vertical;
-        min-height: 80px;
-    }
+  }
 }
 
 .error-message {
-    color: #d32f2f;
-    font-size: 12px;
-    margin-top: 5px;
-    span {
-        display: block;
-    }
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 4px;
 }
 
 .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-    margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 25px;
 
     .btn {
         padding: 10px 15px;
@@ -82,8 +65,8 @@ h3 {
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
-        display: flex;
-        align-items: center;
+        display:flex;
+        align-items:center;
         transition: background-color 0.3s;
         
         i {

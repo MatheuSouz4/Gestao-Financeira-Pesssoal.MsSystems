@@ -1,95 +1,62 @@
 <div class="form-container">
-    <h3>{{ isEditMode ? 'Editar Cliente' : 'Novo Cliente' }}</h3>
+  <h3>{{ isEditMode ? 'Editar Cliente' : 'Novo Cliente' }}</h3>
 
-    <form [formGroup]="clienteForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="clienteForm" (ngSubmit)="onSubmit()">
+    
+    <div class="form-group">
+      <label for="nome">Nome Completo</label>
+      <input id="nome" type="text" formControlName="nome" placeholder="Ex: Maria da Silva">
+      <div *ngIf="clienteForm.get('nome')?.touched && clienteForm.get('nome')?.invalid" class="error-message">
+        <small *ngIf="clienteForm.get('nome')?.errors?.['required']">O nome é obrigatório.</small>
+        <small *ngIf="clienteForm.get('nome')?.errors?.['minlength']">Mínimo de 3 caracteres.</small>
+      </div>
+    </div>
 
-        <div class="form-group">
-            <label for="nome">Nome Completo</label>
-            <input 
-                id="nome" 
-                type="text" 
-                formControlName="nome" 
-                placeholder="Ex: Maria da Silva"
-            >
-            <div *ngIf="clienteForm.get('nome')?.touched && clienteForm.get('nome')?.errors" class="error-message">
-                <span *ngIf="clienteForm.get('nome')?.errors?.['required']">O nome é obrigatório.</span>
-                <span *ngIf="clienteForm.get('nome')?.errors?.['minlength']">O nome deve ter pelo menos 3 caracteres.</span>
-            </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="contato@exemplo.com">
+        <div *ngIf="clienteForm.get('email')?.touched && clienteForm.get('email')?.invalid" class="error-message">
+          <small *ngIf="clienteForm.get('email')?.errors?.['email']">Email inválido.</small>
         </div>
+      </div>
 
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input 
-                id="email" 
-                type="email" 
-                formControlName="email" 
-                placeholder="Ex: contato@empresa.com"
-            >
-            <div *ngIf="clienteForm.get('email')?.touched && clienteForm.get('email')?.errors" class="error-message">
-                <span *ngIf="clienteForm.get('email')?.errors?.['required']">O email é obrigatório.</span>
-                <span *ngIf="clienteForm.get('email')?.errors?.['email']">O formato do email é inválido.</span>
-            </div>
-        </div>
+      <div class="form-group">
+        <label for="telefone">Telefone</label>
+        <input id="telefone" type="text" formControlName="telefone" 
+               mask="(00) 00000-0000" [dropSpecialCharacters]="true" placeholder="(99) 99999-9999">
+      </div>
+    </div>
 
-        <div class="form-group">
-            <label for="telefone">Telefone (Ex: (99) 99999-9999)</label>
-            <input
-                id="telefone"
-                type="text"
-                formControlName="telefone"
-                placeholder="(99) 99999-9999"
-                mask="(00) 00000-0000"
-                [dropSpecialCharacters]="true"
-                
-            >
-            <div *ngIf="clienteForm.get('telefone')?.touched && clienteForm.get('telefone')?.errors" class="error-message">
-                <span *ngIf="clienteForm.get('telefone')?.errors?.['required']">O telefone é obrigatório.</span>
-                <span *ngIf="clienteForm.get('telefone')?.errors?.['pattern']">Formato de telefone inválido.</span>
-            </div>
-        </div>
+    <div class="form-group">
+        <label for="cpfCnpj">CPF / CNPJ</label>
+            <input id="cpfCnpj" type="text" formControlName="cpfCnpj" 
+                [mask]="cpfCnpjMask" [dropSpecialCharacters]="true">
+  
+                <div *ngIf="clienteForm.get('cpfCnpj')?.touched && clienteForm.get('cpfCnpj')?.invalid" class="error-message">
+                    <small *ngIf="clienteForm.get('cpfCnpj')?.errors?.['required']">O CPF/CNPJ é obrigatório.</small>
+                    <small *ngIf="clienteForm.get('cpfCnpj')?.errors?.['cpfInvalido']">O número de CPF informado é inválido.</small>
+                    <small *ngIf="clienteForm.get('cpfCnpj')?.errors?.['cnpjInvalido']">O número de CNPJ informado é inválido.</small>
+                    <small *ngIf="clienteForm.get('cpfCnpj')?.errors?.['lengthInvalido']">Documento incompleto.</small>
+                </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="endereco">Endereço</label>
+      <input id="endereco" type="text" formControlName="endereco" placeholder="Rua, Número, Bairro...">
+    </div>
 
-        <div class="form-group">
-            <label for="cpf_Cnpj">CPF / CNPJ</label>
-            <input
-                id="cpf_Cnpj"
-                type="text"
-                formControlName="cpf_Cnpj"
-                placeholder="Ex: 999.999.999-99 ou 99.999.999/9999-99"
-        
-                [mask] = cpfCnpjMask
-                [dropSpecialCharacters]="true"
-            
-                
-                maxlength="18"
-            >
-            <div *ngIf="clienteForm.get('cpf_Cnpj')?.touched && clienteForm.get('cpf_Cnpj')?.errors" class="error-message">
-                <span *ngIf="clienteForm.get('cpf_Cnpj')?.errors?.['required']">O CPF/CNPJ é obrigatório.</span>
-                <span *ngIf="clienteForm.get('cpf_Cnpj')?.errors?.['minlength']">CPF/CNPJ inválido (mínimo 11 caracteres).</span>
-                <span *ngIf="clienteForm.get('cpf_Cnpj')?.errors?.['cpfCnpjInvalido']">O CPF deve ter 11 dígitos ou o CNPJ deve ter 14 dígitos.</span>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label for="endereco">Endereço Completo</label>
-            <input id="endereco" type="text" formControlName="endereco" placeholder="Ex: Rua das Flores, 100 - Centro">
-            <div *ngIf="clienteForm.get('endereco')?.touched && clienteForm.get('endereco')?.errors" class="error-message">
-                <span *ngIf="clienteForm.get('endereco')?.errors?.['required']">O endereço é obrigatório.</span>
-            </div>
-        </div>
+    <div class="form-group">
+      <label for="descricao">Observações</label>
+      <textarea id="descricao" formControlName="descricao" rows="2"></textarea>
+    </div>
 
-        <div class="form-group">
-            <label for="descricao">Descrição / Observações (Opcional)</label>
-            <textarea id="descricao" formControlName="descricao" rows="3" placeholder="Informações adicionais sobre o cliente..."></textarea>
-        </div>
-        
-        <div class="form-actions">
-            <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="clienteForm.invalid">
-                <i class="material-icons"></i> 
-                {{ isEditMode ? 'Salvar Alterações' : 'Cadastrar' }}
-            </button>
-            
-        </div>
-
-    </form>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="clienteForm.invalid">
+        <i class="material-icons"></i>
+            {{ isEditMode ? 'Salvar Alterações' : 'Cadastrar'}} 
+      </button>
+    </div>
+  </form>
 </div>
