@@ -13,6 +13,7 @@ import { Cliente } from '../../../services/clientes.service';
   styleUrl: './clientes-form.component.scss',
   providers: [provideNgxMask()],
 })
+
 export class ClientesFormComponent implements OnInit {
   @Input() clienteEdicao: Cliente | null = null;
   @Output() clienteSalvo = new EventEmitter<Cliente>();
@@ -58,9 +59,7 @@ export class ClientesFormComponent implements OnInit {
   onSubmit(): void {
     if (this.clienteForm.valid) {
         const clientePayload: Cliente = this.clienteForm.value;
-    
         console.log(this.isEditMode ? 'Atualizando cliente...' : 'Cadastrando novo cliente...', clientePayload);
-    
         this.clienteSalvo.emit(clientePayload);
         this.fechar.emit();
     } else {

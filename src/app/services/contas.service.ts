@@ -3,26 +3,29 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface ClienteBase {
-  id: string;
+  id: Number;
   nome: string; }
 
 export interface FornecedorBase {
-  id: string;
+  id: Number;
   nomeFantasia: string; }
 
 export type TipoConta = 'RECEITA' | 'DESPESA';
 export type Recorrencia = 'UNICA' | 'SEMANAL' | 'MENSAL' | 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';
 
+export enum Status{
+  ATIVO = 'ATIVO',
+  INATIVO = 'INATIVO',
+  BLOQUEADO = 'BLOQUEADO'
+}
 
 export interface Conta {
-  id: string;
+  id: Number;
   nome: string;
   descricao?: string;
   tipo: TipoConta;
   recorrencia: Recorrencia;
-  status: 'Ativo' | 'Inativo';
-  
-
+  status: Status
   cliente?: ClienteBase;
   fornecedor?: FornecedorBase;
 }

@@ -10,7 +10,7 @@ export enum Status{
 }
 // 1. Definimos a interface AQUI mesmo (sem arquivo de model separado)
 export interface Cliente {
-  id: string; // Opcional pois na criação não temos ID
+  id: Number; // Opcional pois na criação não temos ID
   nome: string;
   email: string;
   telefone: string;

@@ -34,13 +34,15 @@
             <tbody>
                 <tr *ngFor="let conta of contasFiltrados">
                     <td>{{ conta.nome }}</td>
-                    <td>{{ conta.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}</td> 
+                    <td>{{ conta.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}</td>
                     <td>{{ conta.recorrencia }}</td>
-                    <td>
+                     <td>
                         {{ conta.tipo === 'RECEITA' ? (conta.cliente?.nome) : (conta.fornecedor?.nomeFantasia) }}
                     </td>
-                    <td [class.status-ativo]="conta.status === 'Ativo'" [class.status-inativo]="conta.status === 'Inativo'">
+                    <td>
+                        <span [ngClass]="conta.status === 'ATIVO'? 'status-ativo' : 'status-inativo'">
                         {{ conta.status }}
+                        </span>
                     </td>
                     <td>
                         <button class="btn btn-icon edit-btn" (click)="editarContas(conta)">
@@ -48,8 +50,8 @@
                         </button>
                         
                         <button class="btn btn-icon" (click)="alternarStatus(conta)">
-                            <i class="material-icons" [title]="conta.status === 'Ativo' ? 'Inativar' : 'Ativar'">
-                                {{ conta.status === 'Ativo' ? 'Inativar' : 'Ativar' }}
+                             <i class="material-icons" [title]="conta.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
+                                {{ conta.status === 'ATIVO' ? 'Inativar' : 'Ativar' }}
                             </i>
                         </button>
                         

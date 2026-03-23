@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface Lancamento {
   id?: string;
-  contaId: string;
+  contaId: Number;
   dataEmissao: string;
   dataVencimento: string;
   valor: number;

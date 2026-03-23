@@ -64,17 +64,19 @@
         <div class="form-group">
             <label for="cpf_Cnpj">CPF / CNPJ</label>
             <input 
-                id="cpf_Cnpj"
+                id="cpfCnpj"
                 type="text"
-                formControlName="cpf_Cnpj"
+                formControlName="cpfCnpj"
                 placeholder="Ex: 999.999.999-99 ou 99.999.999/9999-99"
                 [mask] = cpfCnpjMask
                 [dropSpecialCharacters]="true"
                 maxlength="18"
                 >
-            <div *ngIf="fornecedorForm.get('cpf_Cnpj')?.touched && fornecedorForm.get('cpf_Cnpj')?.errors" class="error-message">
-                <span *ngIf="fornecedorForm.get('cpf_Cnpj')?.errors?.['required']">O CPF/CNPJ é obrigatório.</span>
-                <span *ngIf="fornecedorForm.get('cpf_Cnpj')?.errors?.['minlength']">CPF/CNPJ inválido (mínimo 11 caracteres).</span>
+            <div *ngIf="fornecedorForm.get('cpfCnpj')?.touched && fornecedorForm.get('cpfCnpj')?.invalid" class="error-message">
+                <small *ngIf="fornecedorForm.get('cpfCnpj')?.errors?.['required']">O CPF/CNPJ é obrigatório.</small>
+                    <small *ngIf="fornecedorForm.get('cpfCnpj')?.errors?.['cpfInvalido']">O número de CPF informado é inválido.</small>
+                    <small *ngIf="fornecedorForm.get('cpfCnpj')?.errors?.['cnpjInvalido']">O número de CNPJ informado é inválido.</small>
+                    <small *ngIf="fornecedorForm.get('cpfCnpj')?.errors?.['lengthInvalido']">Documento incompleto.</small>
             </div>
         </div>
         
@@ -99,6 +101,5 @@
             </button>
             
         </div>
-
     </form>
 </div>

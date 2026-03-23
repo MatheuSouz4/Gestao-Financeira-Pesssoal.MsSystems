@@ -32,10 +32,12 @@
                 <tr *ngFor="let fornecedor of fornecedoresFiltrados">
                     <td>{{ fornecedor.nomeFantasia }}</td>
                     <td>{{ fornecedor.razaoSocial }}</td>
-                    <td>{{ fornecedor.cpf_Cnpj | cpfCnpj }}</td>
+                    <td>{{ fornecedor.cpfCnpj | cpfCnpj }}</td>
                     <td>{{ fornecedor.telefone | telefone }}</td>
-                    <td [class.status-ativo]="fornecedor.status === 'Ativo'" [class.status-inativo]="fornecedor.status === 'Inativo'">
+                    <td>
+                        <span [ngClass]="fornecedor.status === 'ATIVO'? 'status-ativo' : 'status-inativo'">
                         {{ fornecedor.status }}
+                        </span>
                     </td>
                     <td>
                         <button class="btn btn-icon edit-btn" (click)="editarFornecedor(fornecedor)">
@@ -43,8 +45,8 @@
                         </button>
                         
                         <button class="btn btn-icon" (click)="alternarStatus(fornecedor)">
-                            <i class="material-icons" [title]="fornecedor.status === 'Ativo' ? 'Inativar' : 'Ativar'">
-                                {{ fornecedor.status === 'Ativo' ? 'Inativar' : 'Ativar' }}
+                            <i class="material-icons" [title]="fornecedor.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
+                                {{ fornecedor.status === 'ATIVO' ? 'Inativar' : 'Ativar' }}
                             </i>
                         </button>
                     </td>

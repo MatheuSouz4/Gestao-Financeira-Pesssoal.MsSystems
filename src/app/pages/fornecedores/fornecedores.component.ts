@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { CpfCnpjPipe } from '../../components/utilitarios/cpf-cnpj.pipe';
 import { TelefonePipe } from '../../components/utilitarios/telefone.pipe';
-import { Fornecedor, FornecedoresService } from '../../services/fornecedores.service';
+import { Fornecedor, FornecedoresService, Status } from '../../services/fornecedores.service';
 import { FornecedoresFormComponent } from './fornecedores-form/fornecedores-form.component';
 
 @Component({
@@ -38,7 +38,7 @@ export class FornecedoresComponent implements OnInit {
         this.fornecedores = dados;
       },
       error: (erro) => {
-        this.toastService.error('Erro ao buscar fornecedores:');
+        this.toastService.error('Erro ao buscar fornecedores:',erro);
       }
     });
   }
@@ -53,7 +53,7 @@ export class FornecedoresComponent implements OnInit {
       fornecedor.nomeFantasia.toLowerCase().includes(termo) ||
       fornecedor.razaoSocial.toLowerCase().includes(termo) ||
       fornecedor.email.toLowerCase().includes(termo) ||
-      fornecedor.cpf_Cnpj.includes(termo)
+      fornecedor.cpfCnpj.includes(termo)
     );
   }
 
@@ -111,36 +111,35 @@ export class FornecedoresComponent implements OnInit {
 
 alternarStatus(fornecedor: Fornecedor): void {
 
-  const novoStatus: 'Ativo' | 'Inativo' = fornecedor.status === 'Ativo' ? 'Inativo' : 'Ativo';
-  
+  const novoStatus = fornecedor.status === Status.ATIVO ? Status.INATIVO : Status.ATIVO;
   
   Swal.fire({
-      title: 'Confirmação de Status',
-      html: `Você tem certeza que deseja alterar o status do fornecedor ${fornecedor.nomeFantasia} para ${novoStatus}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: `Sim`,
-      cancelButtonText: 'Não',
-    }).then((result) => {
-      
-      if (result.isConfirmed) {
-        
-        const fornecedorAtualizado: Fornecedor = { ...fornecedor, status: novoStatus };
-  
-        this.fornecedorService.atualizar(fornecedorAtualizado).subscribe({
-          next: () => {
-            fornecedor.status = novoStatus;
-            this.toastService.success(`Status de ${fornecedor.nomeFantasia} alterado para ${novoStatus}!`);
-          },
-          error: (err) => {
-            this.toastService.error('Erro ao alterar status. Verifique o console.');
-            console.error(err);
-          }
-        });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
-      }
+    title: 'Confirmação de Status',
+    html: `Você tem certeza que deseja alterar o status do cliente ${fornecedor.nomeFantasia} para ${novoStatus}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: `Sim`,
+    cancelButtonText: 'Não',
+  }).then((result) => {
+    
+    if (result.isConfirmed) {
+      
+      const fornecedorAtualizado: Fornecedor = { ...fornecedor, status: novoStatus };
+
+      this.fornecedorService.atualizar(fornecedorAtualizado).subscribe({
+        next: () => {
+          fornecedor.status = novoStatus
+          this.toastService.success(`Status de ${fornecedor.nomeFantasia} alterado para ${novoStatus}!`);
+        },
+        error: (err) => {
+          this.toastService.error('Erro ao alterar status. Verifique o console.');
+          console.error(err);
+        }
+      });
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+          this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
+    }
     });
   }}

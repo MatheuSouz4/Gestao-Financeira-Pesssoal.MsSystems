@@ -8,7 +8,7 @@ import { Conta, ContasService, Recorrencia, TipoConta } from '../../../services/
 import { Fornecedor, FornecedoresService } from '../../../services/fornecedores.service';
 
 export interface ContaRequestPayload {
-  id?: string;
+  id?: Number;
   nome: string;
   tipo: TipoConta;
   recorrencia: Recorrencia;
@@ -127,16 +127,15 @@ loadDependentData(): void {
     
     const formValue = this.contaForm.value;
     const payload: ContaRequestPayload = {
-        id: this.contaEdicao?.id, 
+        id: this.contaEdicao?.id,
         nome: formValue.nome,
         tipo: formValue.tipo,
         recorrencia: formValue.recorrencia,
         descricao: formValue.descricao,
-        status: this.contaEdicao?.status || 'Ativo',
-        
+        status: this.contaEdicao?.status || 'ATIVO',
         clienteId: formValue.tipo === 'RECEITA' ? formValue.clienteId : null,
         fornecedorId: formValue.tipo === 'DESPESA' ? formValue.fornecedorId : null,
-    }; 
+    };
     
     console.log(this.isEditMode ? 'Atualizando conta...' : 'Cadastrando um nova conta...', payload);
 
@@ -152,7 +151,7 @@ loadDependentData(): void {
 
     operacao$.subscribe({
         next: (response) => {
-            this.toastService.success(`Conta ${this.isEditMode ? 'atualizada' : 'cadastrada'} com sucesso!`);
+            this.toastService.success(`Conta ${this.isEditMode ? 'Atualizada' : 'Cadastrada'} com sucesso!`);
             this.contaSalva.emit(response);
             this.fechar.emit();
         },

@@ -6,7 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Cliente, ClientesService } from '../../services/clientes.service';
-import { Conta, ContasService } from '../../services/contas.service';
+import { Conta, ContasService, Status } from '../../services/contas.service';
 import { Fornecedor, FornecedoresService } from '../../services/fornecedores.service';
 import { ContasFormComponent } from './contas-form/contas-form.component';
 
@@ -59,67 +59,60 @@ carregarDependencias(): void {
 }
 
 carregarContas(): void {
-    this.contasService.listar().subscribe({ 
-      next: (data: Conta[]) => {
+  this.contasService.listar().subscribe({
+    next: (data: Conta[]) => {
+      this.contas = data.map(conta => {
+      // --- 1. TRATAMENTO PARA RECEITA (CLIENTES) ---
+const relacionamentoCliente = (conta as any).clienteId || conta.cliente;
 
-        this.contas = data.map(conta => {
+if (conta.tipo === 'RECEITA' && relacionamentoCliente) {
+    // Descobre se o ID está solto (número/string) ou dentro de um objeto
+    const clienteIdParaBusca = typeof relacionamentoCliente === 'object' 
+        ? relacionamentoCliente.id 
+        : relacionamentoCliente;
 
-            const relacionamentoCliente = (conta as any).clienteId || conta.cliente; 
-            
-            if (conta.tipo === 'RECEITA' && relacionamentoCliente) {
-                
-                let clienteIdParaBusca: string | undefined = undefined;
+    if (clienteIdParaBusca) {
+        // O Number() garante que o ID 1 ache o ID "1" sem dar erro de tipagem
+        const clienteCompleto = this.clientes.find(c => Number(c.id) === Number(clienteIdParaBusca));
+        
+        if (clienteCompleto) {
+            conta.cliente = clienteCompleto;
+        }
+    }
+}
 
-                if (typeof relacionamentoCliente === 'string') {
-                    clienteIdParaBusca = relacionamentoCliente;
-                } else if (typeof relacionamentoCliente === 'object' && relacionamentoCliente.id) {
-                    clienteIdParaBusca = relacionamentoCliente.id;
-                    if (!conta.cliente) {
-                        conta.cliente = relacionamentoCliente;
-                    }
-                }
-                
-                if (clienteIdParaBusca) {
-                    const clienteCompleto = this.clientes.find(c => c.id === clienteIdParaBusca); 
-                    if (clienteCompleto) {
-                        conta.cliente = clienteCompleto;
-                    }
-                }
-            } 
-            
-            const relacionamentoFornecedor = (conta as any).fornecedorId || conta.fornecedor;
+// --- 2. TRATAMENTO PARA DESPESA (FORNECEDORES) ---
+const relacionamentoFornecedor = (conta as any).fornecedorId || conta.fornecedor;
 
-            if (conta.tipo === 'DESPESA' && relacionamentoFornecedor) {
-                
-                let fornecedorIdParaBusca: string | undefined = undefined;
+if (conta.tipo === 'DESPESA' && relacionamentoFornecedor) {
+    // Descobre se o ID está solto (número/string) ou dentro de um objeto
+    const fornecedorIdParaBusca = typeof relacionamentoFornecedor === 'object' 
+        ? relacionamentoFornecedor.id 
+        : relacionamentoFornecedor;
 
-                if (typeof relacionamentoFornecedor === 'string') {
-                    fornecedorIdParaBusca = relacionamentoFornecedor;
-                } else if (typeof relacionamentoFornecedor === 'object' && relacionamentoFornecedor.id) {
-                    fornecedorIdParaBusca = relacionamentoFornecedor.id;
+    if (fornecedorIdParaBusca) {
+        // O Number() garante que o ID 1 ache o ID "1" sem dar erro de tipagem
+        const fornecedorCompleto = this.fornecedores.find(f => Number(f.id) === Number(fornecedorIdParaBusca));
+        
+        if (fornecedorCompleto) {
+            conta.fornecedor = fornecedorCompleto;
+        }
+    }
+}
 
-                    if (!conta.fornecedor) {
-                        conta.fornecedor = relacionamentoFornecedor;
-                    }
-                }
+return conta;
+      });
 
-                if (fornecedorIdParaBusca) {
-                    const fornecedorCompleto = this.fornecedores.find(f => f.id === fornecedorIdParaBusca); 
-                    if (fornecedorCompleto) {
-                        conta.fornecedor = fornecedorCompleto;
-                    }
-                }
-            }
-            return conta;
-        });
+      // 🚨 TESTE DE DIAGNÓSTICO: Vamos ver o que está chegando!
+      console.log('Contas processadas:', this.contas);
 
-        this.aplicarFiltro();
-      },
-      error: (err: any) => {
-        console.error('Erro ao carregar contas:', err);
-      }
-    });
-  }
+      this.aplicarFiltro();
+    },
+    error: (err: any) => {
+      console.error('Erro ao carregar contas:', err);
+    }
+  });
+}
   
   aplicarFiltro(): void {
     const termo = this.termoPesquisa.toLowerCase();
@@ -174,7 +167,7 @@ carregarContas(): void {
 
   
   alternarStatus(conta: Conta): void {
-    const novoStatus: 'Ativo' | 'Inativo' = conta.status === 'Ativo' ? 'Inativo' : 'Ativo';
+    const novoStatus = conta.status === Status.ATIVO ? Status.INATIVO : Status.ATIVO;
       
       
       Swal.fire({
