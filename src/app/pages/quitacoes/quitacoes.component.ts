@@ -40,7 +40,7 @@ export class QuitacoesComponent implements OnInit {
       map(([lancamentos, contas]) => {
         // Filtra apenas Pendentes e Vencidas
         return lancamentos
-          .filter(l => l.status !== 'Paga')
+          .filter(l => l.status !== 'PAGA')
           .map(l => {
             const conta = contas.find(c => c.id === l.contaId);
             return {
