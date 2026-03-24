@@ -10,7 +10,6 @@ import { ProjecoesComponent } from './pages/projecoes/projecoes.component';
 import { QuitacoesComponent } from './pages/quitacoes/quitacoes.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { SignUpComponent } from './pages/signup/signup.component';
-import { TransacoesComponent } from './pages/transacoes/transacoes.component';
 import { AuthGuard } from './services/auth-guard.service';
 
 export const routes: Routes = [
@@ -36,7 +35,6 @@ export const routes: Routes = [
       { path: 'contas', component: ContasComponent },
       { path: 'lancamentos', component: LancamentosComponent },
       { path: 'quitacoes', component: QuitacoesComponent },
-      { path: 'transacoes', component: TransacoesComponent },
       { path: 'projecoes', component: ProjecoesComponent },
       { path: 'relatorios', component: RelatoriosComponent },
     ],
