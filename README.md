@@ -1,27 +1,95 @@
-# LoginPage
+# 🎨 MsSystems - Frontend UI
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.2.3.
+> Interface de usuário moderna, responsiva e intuitiva para o controle financeiro pessoal **"MsSystems"**.
 
-## Development server
+Desenvolvida em Angular, esta aplicação oferece uma experiência fluida para o gerenciamento de finanças pessoais, permitindo o acompanhamento em tempo real de lançamentos, saldos e o status de quitação de contas.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## 🛠️ Tecnologias e Ferramentas
 
-## Code scaffolding
+* **Framework:** Angular 16+
+* **Linguagem:** TypeScript
+* **Gerenciamento de Estado:** RxJS (Programação Reativa)
+* **Estilização:** Angular Material
+* **Consumo de API:** Angular HttpClient
+* **Gerenciador de Pacotes:** NPM
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## 📌 Funcionalidades Principais
 
-## Build
+* **Dashboard Financeiro:** Visualização consolidada de saldos, receitas e despesas.
+* **Formulários Reativos:** Validações robustas no lado do cliente para garantir a entrada de dados precisos.
+* **Módulo de Quitações:** Interface interativa para alteração rápida do status de pagamentos e recebimentos.
+* **Design Responsivo:** Adaptável a diferentes tamanhos de tela para uso em desktop ou dispositivos móveis.
+* **Serviços de Integração:** Camada de serviços dedicada para comunicação assíncrona com o Backend.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## 🏗️ Padrões de Desenvolvimento
 
-## Running unit tests
+* **Componentização:** Interface dividida em componentes reutilizáveis para facilitar a manutenção.
+* **Tipagem Estrita:** Uso pleno do TypeScript para garantir a robustez do código e evitar erros em tempo de execução.
+* **Lazy Loading:** Implementação de rotas otimizadas para carregamento sob demanda.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## ⚙️ Como Executar o Projeto
 
-## Running end-to-end tests
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/MatheuSouz4/mssystems-frontend.git](https://github.com/MatheuSouz4/mssystems-frontend.git)
+    ```
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+3.  **Inicie o servidor de desenvolvimento:**
+    ```bash
+    ng serve
+    ```
+4.  **Acesse no navegador:**
+    Abra `http://localhost:4200`
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+---
+🔌 **Cérebro do Projeto:** [Acesse o Repositório Backend](# 🎨 MsSystems - Frontend UI
 
-## Further help
+> Interface de usuário moderna, responsiva e intuitiva para o controle financeiro **MsSystems**.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Desenvolvida em Angular, esta aplicação oferece uma experiência fluida para o gerenciamento de finanças pessoais, permitindo o acompanhamento em tempo real de lançamentos, saldos e o status de quitação de contas.
+
+## 🛠️ Tecnologias e Ferramentas
+
+* **Framework:** Angular 16+
+* **Linguagem:** TypeScript
+* **Gerenciamento de Estado:** RxJS (Programação Reativa)
+* **Estilização:** Bootstrap / Angular Material
+* **Consumo de API:** Angular HttpClient
+* **Gerenciador de Pacotes:** NPM
+
+## 📌 Funcionalidades Principais
+
+* **Dashboard Financeiro:** Visualização consolidada de saldos, receitas e despesas.
+* **Formulários Reativos:** Validações robustas no lado do cliente para garantir a entrada de dados precisos.
+* **Módulo de Quitações:** Interface interativa para alteração rápida do status de pagamentos e recebimentos.
+* **Design Responsivo:** Adaptável a diferentes tamanhos de tela para uso em desktop ou dispositivos móveis.
+* **Serviços de Integração:** Camada de serviços dedicada para comunicação assíncrona com o Backend.
+
+## 🏗️ Padrões de Desenvolvimento
+
+* **Componentização:** Interface dividida em componentes reutilizáveis para facilitar a manutenção.
+* **Tipagem Estrita:** Uso pleno do TypeScript para garantir a robustez do código e evitar erros em tempo de execução.
+* **Lazy Loading:** Implementação de rotas otimizadas para carregamento sob demanda.
+
+## ⚙️ Como Executar o Projeto
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/MatheuSouz4/mssystems-frontend.git](https://github.com/MatheuSouz4/mssystems-frontend.git)
+    ```
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+3.  **Inicie o servidor de desenvolvimento:**
+    ```bash
+    ng serve
+    ```
+4.  **Acesse no navegador:**
+    Abra `http://localhost:4200`
+
+---
+🔌 **Cérebro do Projeto:** [Acesse o Repositório Backend](https://github.com/MatheuSouz4/mssystems-backend))
