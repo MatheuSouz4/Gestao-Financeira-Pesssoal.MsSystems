@@ -6,7 +6,7 @@
             <input 
                 type="text" 
                 placeholder="Pesquisar cliente por nome, cpf/cnpj e email..."
-                [(ngModel)]="termoPesquisa" 
+                [(ngModel)]="termoPesquisa"
             >
             <i class="material-icons search-icon"></i>
         </div>
@@ -41,7 +41,7 @@
                     </td>
 
                     <td>
-                        <button class="btn btn-icon edit-btn" (click)="editarCliente(cliente)">
+                        <button class="btn btn-icon edit-btn" (click)="editarItem(cliente)">
                             <i class="material-icons">Editar</i>
                         </button>
                         
@@ -62,7 +62,7 @@
         <div class="form-card">
         
         <app-clientes-form
-            [clienteEdicao]="clienteEmEdicao"
+            [clienteEdicao]="itemEmEdicao"
             (clienteSalvo)="salvarCliente($event)"
             (fechar)="fecharFormulario()"
         ></app-clientes-form>

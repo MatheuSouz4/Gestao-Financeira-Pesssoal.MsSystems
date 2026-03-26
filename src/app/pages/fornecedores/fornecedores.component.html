@@ -40,7 +40,7 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-icon edit-btn" (click)="editarFornecedor(fornecedor)">
+                        <button class="btn btn-icon edit-btn" (click)="editarItem(fornecedor)">
                             <i class="material-icons">Editar</i>
                         </button>
                         
@@ -61,7 +61,7 @@
         <div class="form-card">
         
         <app-fornecedores-form
-            [fornecedorEdicao]="fornecedorEmEdicao"
+            [fornecedorEdicao]="itemEmEdicao"
             (fornecedorSalvo)="salvarFornecedor($event)"
             (fechar)="fecharFormulario()"
         ></app-fornecedores-form>

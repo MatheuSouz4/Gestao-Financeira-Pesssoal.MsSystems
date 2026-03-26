@@ -1,206 +1,121 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
+import { BaseCrudComponent } from '../../components/core/base-crud.component';
 import { Cliente, ClientesService } from '../../services/clientes.service';
 import { Conta, ContasService, Status } from '../../services/contas.service';
 import { Fornecedor, FornecedoresService } from '../../services/fornecedores.service';
 import { ContasFormComponent } from './contas-form/contas-form.component';
 
-
 @Component({
   selector: 'app-contas',
   standalone: true,
-  imports: [CommonModule, FormsModule, ContasFormComponent], 
+  imports: [CommonModule, FormsModule, ContasFormComponent],
   templateUrl: './contas.component.html',
-  styleUrls: ['./contas.component.scss']
+  styleUrl: './contas.component.scss'
 })
-export class ContasComponent implements OnInit {
-  contas: Conta[] = [];
-  contasFiltrados: Conta[] = [];
-  termoPesquisa: string = '';
-  clientes: Cliente[] = []; 
-  fornecedores: Fornecedor[] = [];
+export class ContasComponent extends BaseCrudComponent<Conta> implements OnInit {
   
-  isFormularioAberto: boolean = false;
-  contaEmEdicao: Conta | null = null;
-  
+  // Listas auxiliares para o cruzamento de dados
+  private clientes: Cliente[] = [];
+  private fornecedores: Fornecedor[] = [];
+
   constructor(
     private contasService: ContasService,
-    private router: Router,
-    private toastService: ToastrService,
-    private clientesService: ClientesService, 
+    private clientesService: ClientesService,
     private fornecedoresService: FornecedoresService
-  ) {}
-
-  ngOnInit(): void {
-    this.carregarDependencias();
+  ) {
+    super();
   }
 
-carregarDependencias(): void {
+  ngOnInit(): void {
+    this.carregarDadosIniciais();
+  }
 
-    forkJoin({
-        clientesData: this.clientesService.listar(),
-        fornecedoresData: this.fornecedoresService.listar()
-    }).subscribe({
-        next: ({ clientesData, fornecedoresData }) => {
-            this.clientes = clientesData;
-            this.fornecedores = fornecedoresData;
-            
-            this.carregarContas();
-        },
-        error: (err) => {
-            console.error('Erro ao carregar dependências:', err);
-        }
-    });
-}
-
-carregarContas(): void {
-  this.contasService.listar().subscribe({
-    next: (data: Conta[]) => {
-      this.contas = data.map(conta => {
-      // --- 1. TRATAMENTO PARA RECEITA (CLIENTES) ---
-const relacionamentoCliente = (conta as any).clienteId || conta.cliente;
-
-if (conta.tipo === 'RECEITA' && relacionamentoCliente) {
-    // Descobre se o ID está solto (número/string) ou dentro de um objeto
-    const clienteIdParaBusca = typeof relacionamentoCliente === 'object' 
-        ? relacionamentoCliente.id 
-        : relacionamentoCliente;
-
-    if (clienteIdParaBusca) {
-        // O Number() garante que o ID 1 ache o ID "1" sem dar erro de tipagem
-        const clienteCompleto = this.clientes.find(c => Number(c.id) === Number(clienteIdParaBusca));
-        
-        if (clienteCompleto) {
-            conta.cliente = clienteCompleto;
-        }
-    }
-}
-
-// --- 2. TRATAMENTO PARA DESPESA (FORNECEDORES) ---
-const relacionamentoFornecedor = (conta as any).fornecedorId || conta.fornecedor;
-
-if (conta.tipo === 'DESPESA' && relacionamentoFornecedor) {
-    // Descobre se o ID está solto (número/string) ou dentro de um objeto
-    const fornecedorIdParaBusca = typeof relacionamentoFornecedor === 'object' 
-        ? relacionamentoFornecedor.id 
-        : relacionamentoFornecedor;
-
-    if (fornecedorIdParaBusca) {
-        // O Number() garante que o ID 1 ache o ID "1" sem dar erro de tipagem
-        const fornecedorCompleto = this.fornecedores.find(f => Number(f.id) === Number(fornecedorIdParaBusca));
-        
-        if (fornecedorCompleto) {
-            conta.fornecedor = fornecedorCompleto;
-        }
-    }
-}
-
-return conta;
+  /**
+   * Carrega primeiro as dependências e depois as contas
+   */
+  carregarDadosIniciais(): void {
+    // Carregamos clientes e fornecedores simultaneamente
+    this.clientesService.listar().subscribe(c => {
+      this.clientes = c;
+      this.fornecedoresService.listar().subscribe(f => {
+        this.fornecedores = f;
+        this.carregarDados(); // Só carrega contas quando tiver as outras listas
       });
+    });
+  }
 
-      // 🚨 TESTE DE DIAGNÓSTICO: Vamos ver o que está chegando!
-      console.log('Contas processadas:', this.contas);
+  carregarDados(): void {
+    this.contasService.listar().subscribe({
+      next: (dados) => {
+        // Mapeia os IDs para objetos completos para exibição na tabela
+        this.itens = dados.map(conta => this.vincularRelacionamentos(conta));
+      },
+      error: () => this.toastService.error('Erro ao carregar contas.')
+    });
+  }
 
-      this.aplicarFiltro();
-    },
-    error: (err: any) => {
-      console.error('Erro ao carregar contas:', err);
+  private vincularRelacionamentos(conta: Conta): Conta {
+    // Se for RECEITA, busca o cliente pelo ID
+    if (conta.tipo === 'RECEITA' && (conta as any).clienteId) {
+      conta.cliente = this.clientes.find(c => Number(c.id) === Number((conta as any).clienteId));
     }
-  });
-}
-  
-  aplicarFiltro(): void {
+    // Se for DESPESA, busca o fornecedor pelo ID
+    if (conta.tipo === 'DESPESA' && (conta as any).fornecedorId) {
+      conta.fornecedor = this.fornecedores.find(f => Number(f.id) === Number((conta as any).fornecedorId));
+    }
+    return conta;
+  }
+
+  get contasFiltrados(): Conta[] {
+    if (!this.termoPesquisa) return this.itens;
     const termo = this.termoPesquisa.toLowerCase();
-    this.contasFiltrados = this.contas.filter(conta => 
-      conta.nome.toLowerCase().includes(termo) ||
-      conta.tipo.toLowerCase().includes(termo)
+    return this.itens.filter(c =>
+      c.descricao?.toLowerCase().includes(termo) ||
+      c.cliente?.nome.toLowerCase().includes(termo) ||
+      c.fornecedor?.nomeFantasia.toLowerCase().includes(termo)
     );
   }
 
-  onPesquisaChange(): void {
-    this.aplicarFiltro();
-  }
-
-  abrirFormularioCadastro(): void {
-    this.contaEmEdicao = null;
-    this.isFormularioAberto = true;
-  }
-  
-  editarContas(conta: Conta): void {
-    this.contaEmEdicao = conta;
-    this.isFormularioAberto = true;
-  }
-
-
   salvarConta(contaRecebida: Conta): void {
-      if (contaRecebida.id) {
-        // --- ATUALIZAR (PUT) ---
-        this.contasService.atualizar(contaRecebida).subscribe({
-          next: (contaAtualizado) => {
-            
-            this.carregarContas();
-            this.fecharFormulario();
-          },
-        });
-  
-      } else {
-        // --- ADICIONAR (POST) ---
-        this.contasService.adicionar(contaRecebida).subscribe({
-          next: (novaConta) => {
-            this.carregarContas();
-            this.fecharFormulario();
-          },
-        });
-      }
-    }
-  
-  fecharFormulario(): void {
-    this.isFormularioAberto = false;
-    this.contaEmEdicao = null;
+    const operacao = contaRecebida.id
+      ? this.contasService.atualizar(contaRecebida)
+      : this.contasService.adicionar(contaRecebida);
+
+    operacao.subscribe({
+      next: (res) => {
+        const contaVinculada = this.vincularRelacionamentos(res);
+        contaRecebida.id ? this.atualizarItemNaLista(contaVinculada) : this.itens.push(contaVinculada);
+        
+        this.toastService.success('Conta salva com sucesso!');
+        this.fecharFormulario();
+      },
+      error: () => this.toastService.error('Erro ao salvar conta.')
+    });
   }
 
-
-  
   alternarStatus(conta: Conta): void {
     const novoStatus = conta.status === Status.ATIVO ? Status.INATIVO : Status.ATIVO;
-      
-      
-      Swal.fire({
-          title: 'Confirmação de Status',
-          html: `Você tem certeza que deseja alterar o status da conta ${conta.nome} para ${novoStatus}?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: `Sim`,
-          cancelButtonText: 'Não',
-        }).then((result) => {
-          
-          if (result.isConfirmed) {
-            
-            const contaAtualizado: Conta = { ...conta, status: novoStatus };
-      
-            this.contasService.atualizar(contaAtualizado).subscribe({
-              next: () => {
-                conta.status = novoStatus;
-
-                
-                this.toastService.success(`Status de ${conta.nome} alterado para ${novoStatus}!`);
-              },
-              error: (err) => {
-                this.toastService.error('Erro ao alterar status. Verifique o console.');
-                console.error(err);
-              }
-            });
-          } else if (result.dismiss === Swal.DismissReason.cancel) {
-
-            this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
-          }
-        });
-      }}
     
+    Swal.fire({
+      title: 'Confirmação',
+      text: `Alterar o status de ${conta.nome} para ${novoStatus}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sim',
+      cancelButtonText: 'Não'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const fornecedorAtualizado = { ...conta, status: novoStatus };
+        this.contasService.atualizar(fornecedorAtualizado).subscribe({
+          next: () => {
+            conta.status = novoStatus;
+            this.toastService.success(`Status alterado!`);
+          }
+        });
+      }
+    });
+  }
+}

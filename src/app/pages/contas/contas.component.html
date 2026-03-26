@@ -7,7 +7,6 @@
                 type="text" 
                 placeholder="Pesquisar conta por nome ou tipo de conta..."
                 [(ngModel)]="termoPesquisa" 
-                (ngModelChange)="onPesquisaChange()" 
                 >
             <i class="material-icons search-icon"></i>
             </div>
@@ -18,7 +17,7 @@
     </div>
 
     <div class="contas-list">
-        <p *ngIf="contas.length === 0 && !termoPesquisa">Nenhuma conta cadastrada!</p>
+        <p *ngIf="itens.length === 0 && !termoPesquisa">Nenhuma conta cadastrada!</p>
         
         <table *ngIf="contasFiltrados.length > 0">
             <thead>
@@ -45,7 +44,7 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-icon edit-btn" (click)="editarContas(conta)">
+                        <button class="btn btn-icon edit-btn" (click)="editarItem(conta)">
                             <i class="material-icons">Editar</i>
                         </button>
                         
@@ -67,7 +66,7 @@
         <div class="form-card">
         
         <app-contas-form
-            [contaEdicao]="contaEmEdicao"
+            [contaEdicao]="itemEmEdicao"
             (contaSalva)="salvarConta($event)"
             (fechar)="fecharFormulario()"
         ></app-contas-form>

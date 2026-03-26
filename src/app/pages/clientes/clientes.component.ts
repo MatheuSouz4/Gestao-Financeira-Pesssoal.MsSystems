@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { BaseCrudComponent } from '../../components/core/base-crud.component';
 import { CpfCnpjPipe } from '../../components/utilitarios/cpf-cnpj.pipe';
 import { TelefonePipe } from '../../components/utilitarios/telefone.pipe';
 import { Cliente, ClientesService, Status } from '../../services/clientes.service';
@@ -11,136 +11,77 @@ import { ClientesFormComponent } from './clientes-form/clientes-form.component';
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ClientesFormComponent,CpfCnpjPipe,TelefonePipe],
+  imports: [CommonModule, FormsModule, ClientesFormComponent, CpfCnpjPipe, TelefonePipe],
   templateUrl: './clientes.component.html',
-  styleUrl: './clientes.component.scss',
+  styleUrl: './clientes.component.scss'
 })
-export class ClientesComponent implements OnInit {
-  
+export class ClientesComponent extends BaseCrudComponent<Cliente> implements OnInit {
 
-  isFormularioAberto: boolean = false;
-  termoPesquisa: string = '';
-  clienteEmEdicao: Cliente | null = null;
-
-
-  clientes: Cliente[] = [];
-
-  constructor(
-    private clienteService: ClientesService,
-    private toastService: ToastrService) {}
-
-
-  ngOnInit(): void {
-    this.carregarClientes();
+  constructor(private clientesService: ClientesService) {
+    super(); // Inicializa a lógica da BaseCrudComponent
   }
 
-  carregarClientes(): void {
-    this.clienteService.listar().subscribe({
-      next: (dados) => {
-        this.clientes = dados;
-      },
-      error: (erro) => {
-        this.toastService.error('Erro ao buscar clientes:', erro);
-      }
+  ngOnInit(): void {
+    this.carregarDados();
+  }
+
+  // Implementação obrigatória da busca de dados
+  carregarDados(): void {
+    this.clientesService.listar().subscribe({
+      next: (dados) => this.itens = dados,
+      error: (erro) => this.toastService.error('Erro ao buscar clientes.')
     });
   }
 
-    get clientesFiltrados(): Cliente[] {
-  const termo = this.termoPesquisa?.trim().toLowerCase();
-  
-  if (!termo) {
-    return this.clientes;
+  // Lógica de filtro específica para Clientes
+  get clientesFiltrados(): Cliente[] {
+    if (!this.termoPesquisa) return this.itens;
+
+    const termo = this.termoPesquisa.toLowerCase();
+    return this.itens.filter(c =>
+      c.nome.toLowerCase().includes(termo) ||
+      c.cpfCnpj.includes(termo) ||
+      c.email.toLowerCase().includes(termo)
+    );
   }
-
-  return this.clientes.filter(cliente =>
-    cliente.nome.toLowerCase().includes(termo) ||
-    cliente.email.toLowerCase().includes(termo) ||
-    (cliente.cpfCnpj && cliente.cpfCnpj.includes(termo)) // Proteção contra CPF nulo
-  );
-}
-
-
-  abrirFormularioCadastro(): void {
-    this.clienteEmEdicao = null;
-    this.isFormularioAberto = true;
-  }
-
-
-  editarCliente(cliente: Cliente): void {
-    this.clienteEmEdicao = cliente;
-    this.isFormularioAberto = true;
-  }
-
 
   salvarCliente(clienteRecebido: Cliente): void {
-    if (clienteRecebido.id) {
-      // --- ATUALIZAR (PUT) ---
-      this.clienteService.atualizar(clienteRecebido).subscribe({
-        next: (clienteAtualizado) => {
-          
-          const index = this.clientes.findIndex(c => c.id === clienteAtualizado.id);
-          if (index !== -1) {
-            this.clientes[index] = clienteAtualizado;
-          }
-          this.toastService.success('Cliente atualizado com sucesso!');
-          this.fecharFormulario();
-        },
-        error: (err) => {
-          this.toastService.error('Erro ao atualizar no servidor.');
-        }
-      });
+    const operacao = clienteRecebido.id 
+      ? this.clientesService.atualizar(clienteRecebido) 
+      : this.clientesService.adicionar(clienteRecebido);
 
-    } else {
-      // --- ADICIONAR (POST) ---
-      this.clienteService.adicionar(clienteRecebido).subscribe({
-        next: (novoCliente) => {
-          this.clientes.push(novoCliente);
-          this.toastService.success('Cliente cadastrado com sucesso!');
-          this.fecharFormulario();
-        },
-        error: (err) => {
-          this.toastService.error('Cliente já existe no sistema.');
-        }
-      });
-    }
+    operacao.subscribe({
+      next: (res) => {
+        // Se for edição, atualiza na lista. Se for novo, adiciona.
+        clienteRecebido.id ? this.atualizarItemNaLista(res) : this.itens.push(res);
+        
+        this.toastService.success('Cliente salvo com sucesso!');
+        this.fecharFormulario();
+      },
+      error: () => this.toastService.error('Erro ao processar cliente. Verifique os dados.')
+    });
   }
 
-  fecharFormulario(): void {
-    this.isFormularioAberto = false;
-    this.clienteEmEdicao = null;
+  alternarStatus(cliente: Cliente): void {
+    const novoStatus = cliente.status === Status.ATIVO ? Status.INATIVO : Status.ATIVO;
+
+    Swal.fire({
+      title: 'Alterar Status?',
+      text: `Deseja mudar o status de ${cliente.nome} para ${novoStatus}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, alterar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.clientesService.atualizar({ ...cliente, status: novoStatus }).subscribe({
+          next: () => {
+            cliente.status = novoStatus;
+            this.toastService.success('Status atualizado!');
+          },
+          error: () => this.toastService.error('Erro ao atualizar status.')
+        });
+      }
+    });
   }
-
-alternarStatus(cliente: Cliente): void {
-
-  const novoStatus = cliente.status === Status.ATIVO ? Status.INATIVO : Status.ATIVO;
-  
-  Swal.fire({
-    title: 'Confirmação de Status',
-    html: `Você tem certeza que deseja alterar o status do cliente ${cliente.nome} para ${novoStatus}?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: `Sim`,
-    cancelButtonText: 'Não',
-  }).then((result) => {
-    
-    if (result.isConfirmed) {
-      
-      const clienteAtualizado: Cliente = { ...cliente, status: novoStatus };
-
-      this.clienteService.atualizar(clienteAtualizado).subscribe({
-        next: () => {
-          cliente.status = novoStatus
-          this.toastService.success(`Status de ${cliente.nome} alterado para ${novoStatus}!`);
-        },
-        error: (err) => {
-          this.toastService.error('Erro ao alterar status. Verifique o console.');
-          console.error(err);
-        }
-      });
-    } else if (result.dismiss === Swal.DismissReason.cancel) {
-          this.toastService.info('Alteração de status cancelada.', 'Ação Cancelada');
-    }
-  });
-}}
+}
