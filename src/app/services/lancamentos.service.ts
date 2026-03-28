@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface Lancamento {
-  id?: Number;
+  id?: any;
   contaId: Number;
   dataEmissao: string;
   dataVencimento: string;

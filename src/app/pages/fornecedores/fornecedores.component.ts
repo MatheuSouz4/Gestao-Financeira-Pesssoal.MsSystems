@@ -3,15 +3,16 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { BaseCrudComponent } from '../../components/core/base-crud.component';
+import { PessoaFormComponent } from '../../components/pessoa/pessoa-form/pessoa-form.component';
+import { Fornecedor, Status } from '../../components/pessoa/pessoa.component';
 import { CpfCnpjPipe } from '../../components/utilitarios/cpf-cnpj.pipe';
 import { TelefonePipe } from '../../components/utilitarios/telefone.pipe';
-import { Fornecedor, FornecedoresService, Status } from '../../services/fornecedores.service';
-import { FornecedoresFormComponent } from './fornecedores-form/fornecedores-form.component';
+import { FornecedoresService } from '../../services/fornecedores.service';
 
 @Component({
   selector: 'app-fornecedores',
   standalone: true,
-  imports: [CommonModule, FormsModule, FornecedoresFormComponent, CpfCnpjPipe, TelefonePipe],
+  imports: [CommonModule, FormsModule, PessoaFormComponent, CpfCnpjPipe, TelefonePipe],
   templateUrl: './fornecedores.component.html',
   styleUrl: './fornecedores.component.scss',
 })
@@ -39,7 +40,7 @@ export class FornecedoresComponent extends BaseCrudComponent<Fornecedor> impleme
     
     const termo = this.termoPesquisa.toLowerCase();
     return this.itens.filter(f =>
-      f.nomeFantasia.toLowerCase().includes(termo) ||
+      f.nomeOuNomeFantasia.toLowerCase().includes(termo) ||
       f.cpfCnpj.includes(termo) ||
       f.email.toLowerCase().includes(termo)
     );
@@ -65,7 +66,7 @@ export class FornecedoresComponent extends BaseCrudComponent<Fornecedor> impleme
     
     Swal.fire({
       title: 'Alterar Status?',
-      text: `Confirma a alteração para ${novoStatus}?`,
+      text: `Deseja mudar o status de ${fornecedor.nomeOuNomeFantasia} para ${novoStatus}?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sim',

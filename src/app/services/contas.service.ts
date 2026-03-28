@@ -3,12 +3,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface ClienteBase {
-  id: Number;
-  nome: string; }
+  id?: Number;
+  nomeOuNomeFantasia: string; }
 
 export interface FornecedorBase {
-  id: Number;
-  nomeFantasia: string; }
+  id?: Number;
+  nomeOuNomeFantasia: string; }
 
 export type TipoConta = 'RECEITA' | 'DESPESA';
 export type Recorrencia = 'UNICA' | 'SEMANAL' | 'MENSAL' | 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';

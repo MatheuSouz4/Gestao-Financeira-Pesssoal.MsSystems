@@ -5,7 +5,7 @@
         <div class="search-bar">
             <input 
                 type="text" 
-                placeholder="Pesquisar fornecedor por nome fantasia, cpf/cnpj e email..."
+                placeholder="Pesquisar fornecedor por nome/razão social, cpf/cnpj e email..."
                 [(ngModel)]="termoPesquisa" 
             >
             <i class="material-icons search-icon"></i>
@@ -20,9 +20,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Nome Fantasia</th>
-                    <th>Razão Social</th>
-                    <th>CPF/CNPJ</th>
+                    <th>Nome / Razão Social</th>
+                    <th>CPF / CNPJ</th>
+                    <th>Email</th>
                     <th>Telefone</th>
                     <th>Status</th>
                     <th>Ações</th>
@@ -30,13 +30,15 @@
             </thead>
             <tbody>
                 <tr *ngFor="let fornecedor of fornecedoresFiltrados">
-                    <td>{{ fornecedor.nomeFantasia }}</td>
-                    <td>{{ fornecedor.razaoSocial }}</td>
+                    <td>{{ fornecedor.nomeOuNomeFantasia }} <br>
+                        <small style="color: #888;" *ngIf="fornecedor.razaoSocial">{{ fornecedor.razaoSocial }}</small>
+                    </td>
                     <td>{{ fornecedor.cpfCnpj | cpfCnpj }}</td>
+                    <td>{{ fornecedor.email }}</td>
                     <td>{{ fornecedor.telefone | telefone }}</td>
                     <td>
-                        <span [ngClass]="fornecedor.status === 'ATIVO'? 'status-ativo' : 'status-inativo'">
-                        {{ fornecedor.status }}
+                        <span [ngClass]="fornecedor.status === 'ATIVO' ? 'status-ativo' : 'status-inativo'">
+                            {{ fornecedor.status }}
                         </span>
                     </td>
                     <td>
@@ -46,7 +48,7 @@
                         
                         <button class="btn btn-icon" (click)="alternarStatus(fornecedor)">
                             <i class="material-icons" [title]="fornecedor.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
-                                {{ fornecedor.status === 'ATIVO' ? 'Inativar' : 'Ativar' }}
+                                {{ fornecedor.status === 'ATIVO' ? 'block' : 'check_circle' }}
                             </i>
                         </button>
                     </td>
@@ -59,12 +61,12 @@
 
     <div *ngIf="isFormularioAberto" class="form-modal-overlay">
         <div class="form-card">
-        
-        <app-fornecedores-form
-            [fornecedorEdicao]="itemEmEdicao"
-            (fornecedorSalvo)="salvarFornecedor($event)"
-            (fechar)="fecharFormulario()"
-        ></app-fornecedores-form>
+            <app-pessoa-form
+                [titulo]="itemEmEdicao ? 'Editar Fornecedor' : 'Novo Fornecedor'"
+                [itemEdicao]="itemEmEdicao"
+                (salvar)="salvarFornecedor($any($event))"
+                (fechar)="fecharFormulario()">
+            </app-pessoa-form>
         </div>
     </div>
 </div>

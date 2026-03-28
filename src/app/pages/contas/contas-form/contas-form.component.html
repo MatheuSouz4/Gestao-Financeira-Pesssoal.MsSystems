@@ -24,7 +24,7 @@
             <label for="clienteId">Cliente (Receita)</label>
             <select id="clienteId" formControlName="clienteId">
                 <option [ngValue]="null">Selecione um Cliente</option>
-                <option *ngFor="let cliente of clientes" [ngValue]="cliente.id">{{ cliente.nome }}</option>
+                <option *ngFor="let cliente of clientes" [ngValue]="cliente.id">{{ cliente.nomeOuNomeFantasia }}</option>
             </select>
         </div>
     </ng-container>
@@ -34,7 +34,7 @@
             <label for="fornecedorId">Fornecedor (Despesa)</label>
             <select id="fornecedorId" formControlName="fornecedorId">
                 <option [ngValue]="null">Selecione um Fornecedor</option>
-                <option *ngFor="let fornecedor of fornecedores" [ngValue]="fornecedor.id">{{ fornecedor.nomeFantasia }}</option>
+                <option *ngFor="let fornecedor of fornecedores" [ngValue]="fornecedor.id">{{ fornecedor.nomeOuNomeFantasia }}</option>
             </select>
         </div>
     </ng-container>

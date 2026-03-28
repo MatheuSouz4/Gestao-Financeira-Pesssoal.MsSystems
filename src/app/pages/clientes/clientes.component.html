@@ -5,7 +5,7 @@
         <div class="search-bar">
             <input 
                 type="text" 
-                placeholder="Pesquisar cliente por nome, cpf/cnpj e email..."
+                placeholder="Pesquisar cliente por nome/razão social, cpf/cnpj e email..."
                 [(ngModel)]="termoPesquisa"
             >
             <i class="material-icons search-icon"></i>
@@ -20,34 +20,35 @@
         <table>
             <thead>
                 <tr>
-                    <th>Nome</th>
+                    <th>Nome / Razão Social</th>
+                    <th>CPF / CNPJ</th>
                     <th>Email</th>
                     <th>Telefone</th>
-                    <th>CPF/CNPJ</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let cliente of clientesFiltrados">
-                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.nomeOuNomeFantasia }} <br>
+                        <small style="color: #888;" *ngIf="cliente.nomeOuNomeFantasia">{{ cliente.nomeOuNomeFantasia }}</small>
+                    </td>
+                    <td>{{ cliente.cpfCnpj | cpfCnpj }}</td>
                     <td>{{ cliente.email }}</td>
-                    <td>{{ cliente.telefone |telefone }}</td>
-                    <td>{{ cliente.cpfCnpj |cpfCnpj }}</td>
+                    <td>{{ cliente.telefone | telefone }}</td>
                     <td>
                         <span [ngClass]="cliente.status === 'ATIVO' ? 'status-ativo' : 'status-inativo'">
                             {{ cliente.status }}
                         </span>
                     </td>
-
                     <td>
                         <button class="btn btn-icon edit-btn" (click)="editarItem(cliente)">
                             <i class="material-icons">Editar</i>
                         </button>
                         
-                        <button class="btn-icon" (click)="alternarStatus(cliente)">
-                            <i class="material-icons"[title]="cliente.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
-                                {{ cliente.status === 'ATIVO' ? 'Inativar' : 'Ativar' }}
+                        <button class="btn btn-icon" (click)="alternarStatus(cliente)">
+                            <i class="material-icons" [title]="cliente.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
+                                {{ cliente.status === 'ATIVO' ? 'block' : 'check_circle' }}
                             </i>
                         </button>
                     </td>
@@ -60,12 +61,12 @@
 
     <div *ngIf="isFormularioAberto" class="form-modal-overlay">
         <div class="form-card">
-        
-        <app-clientes-form
-            [clienteEdicao]="itemEmEdicao"
-            (clienteSalvo)="salvarCliente($event)"
-            (fechar)="fecharFormulario()"
-        ></app-clientes-form>
+            <app-pessoa-form
+                [titulo]="itemEmEdicao ? 'Editar Cliente' : 'Novo Cliente'"
+                [itemEdicao]="itemEmEdicao"
+                (salvar)="salvarCliente($event)"
+                (fechar)="fecharFormulario()">
+            </app-pessoa-form>
         </div>
     </div>
 </div>

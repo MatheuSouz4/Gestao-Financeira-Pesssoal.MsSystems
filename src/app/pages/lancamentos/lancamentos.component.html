@@ -33,13 +33,14 @@
                     <td>{{ l.valor | currency:'BRL' }}</td>
                     <td>
                         <span [ngClass]="{
-                            'status-ativo': l.statusReal === 'PAGO' || l.statusReal === 'RECEBIDO',
-                            'status-inativo': l.statusReal === 'PENDENTE'
+                            'status-Pago': l.statusReal === 'PAGO' || l.statusReal === 'RECEBIDO',
+                            'status-Pendente': l.statusReal === 'PENDENTE',
+                            'status-vencido': l.statusReal === 'VENCIDO'
                         }">{{ l.statusReal }}</span>
                     </td>
                     <td>
                         <button class="btn btn-icon" (click)="editarLancamento(l)">
-                            <i class="material-icons">edit</i>
+                            <i class="material-icons">Editar</i>
                         </button>
                     </td>
                 </tr>

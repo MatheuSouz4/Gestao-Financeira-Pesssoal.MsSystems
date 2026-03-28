@@ -3,9 +3,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
-import { Cliente, ClientesService } from '../../../services/clientes.service';
+import { Cliente, Fornecedor } from '../../../components/pessoa/pessoa.component';
+import { ClientesService } from '../../../services/clientes.service';
 import { Conta, ContasService, Recorrencia, TipoConta } from '../../../services/contas.service';
-import { Fornecedor, FornecedoresService } from '../../../services/fornecedores.service';
+import { FornecedoresService } from '../../../services/fornecedores.service';
 
 export interface ContaRequestPayload {
   id?: Number;

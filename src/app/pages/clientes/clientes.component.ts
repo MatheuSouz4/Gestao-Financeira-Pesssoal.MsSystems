@@ -3,15 +3,16 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { BaseCrudComponent } from '../../components/core/base-crud.component';
+import { PessoaFormComponent } from '../../components/pessoa/pessoa-form/pessoa-form.component';
+import { Cliente, Status } from '../../components/pessoa/pessoa.component';
 import { CpfCnpjPipe } from '../../components/utilitarios/cpf-cnpj.pipe';
 import { TelefonePipe } from '../../components/utilitarios/telefone.pipe';
-import { Cliente, ClientesService, Status } from '../../services/clientes.service';
-import { ClientesFormComponent } from './clientes-form/clientes-form.component';
+import { ClientesService } from '../../services/clientes.service';
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ClientesFormComponent, CpfCnpjPipe, TelefonePipe],
+  imports: [CommonModule, FormsModule, PessoaFormComponent, CpfCnpjPipe, TelefonePipe],
   templateUrl: './clientes.component.html',
   styleUrl: './clientes.component.scss'
 })
@@ -39,7 +40,7 @@ export class ClientesComponent extends BaseCrudComponent<Cliente> implements OnI
 
     const termo = this.termoPesquisa.toLowerCase();
     return this.itens.filter(c =>
-      c.nome.toLowerCase().includes(termo) ||
+      c.nomeOuNomeFantasia.toLowerCase().includes(termo) ||
       c.cpfCnpj.includes(termo) ||
       c.email.toLowerCase().includes(termo)
     );
@@ -67,7 +68,7 @@ export class ClientesComponent extends BaseCrudComponent<Cliente> implements OnI
 
     Swal.fire({
       title: 'Alterar Status?',
-      text: `Deseja mudar o status de ${cliente.nome} para ${novoStatus}?`,
+      text: `Deseja mudar o status de ${cliente.nomeOuNomeFantasia} para ${novoStatus}?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Sim, alterar',

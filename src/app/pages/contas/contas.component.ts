@@ -3,9 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { BaseCrudComponent } from '../../components/core/base-crud.component';
-import { Cliente, ClientesService } from '../../services/clientes.service';
+import { Cliente, Fornecedor } from '../../components/pessoa/pessoa.component';
+import { ClientesService } from '../../services/clientes.service';
 import { Conta, ContasService, Status } from '../../services/contas.service';
-import { Fornecedor, FornecedoresService } from '../../services/fornecedores.service';
+import { FornecedoresService } from '../../services/fornecedores.service';
 import { ContasFormComponent } from './contas-form/contas-form.component';
 
 @Component({
@@ -58,24 +59,29 @@ export class ContasComponent extends BaseCrudComponent<Conta> implements OnInit 
   }
 
   private vincularRelacionamentos(conta: Conta): Conta {
-    // Se for RECEITA, busca o cliente pelo ID
-    if (conta.tipo === 'RECEITA' && (conta as any).clienteId) {
-      conta.cliente = this.clientes.find(c => Number(c.id) === Number((conta as any).clienteId));
-    }
-    // Se for DESPESA, busca o fornecedor pelo ID
-    if (conta.tipo === 'DESPESA' && (conta as any).fornecedorId) {
-      conta.fornecedor = this.fornecedores.find(f => Number(f.id) === Number((conta as any).fornecedorId));
-    }
-    return conta;
+  // Criamos uma referência (any) para acessar as propriedades clienteId/fornecedorId do JSON
+  const contaAux = conta as any;
+
+  if (conta.tipo === 'RECEITA' && contaAux.clienteId) {
+    // Buscamos o cliente e garantimos que o tipo é compatível
+    conta.cliente = this.clientes.find(c => Number(c.id) === Number(contaAux.clienteId));
   }
+
+  if (conta.tipo === 'DESPESA' && contaAux.fornecedorId) {
+    // Buscamos o fornecedor
+    conta.fornecedor = this.fornecedores.find(f => Number(f.id) === Number(contaAux.fornecedorId));
+  }
+
+  return conta;
+}
 
   get contasFiltrados(): Conta[] {
     if (!this.termoPesquisa) return this.itens;
     const termo = this.termoPesquisa.toLowerCase();
     return this.itens.filter(c =>
       c.descricao?.toLowerCase().includes(termo) ||
-      c.cliente?.nome.toLowerCase().includes(termo) ||
-      c.fornecedor?.nomeFantasia.toLowerCase().includes(termo)
+      c.cliente?.nomeOuNomeFantasia.toLowerCase().includes(termo) ||
+      c.fornecedor?.nomeOuNomeFantasia.toLowerCase().includes(termo)
     );
   }
 

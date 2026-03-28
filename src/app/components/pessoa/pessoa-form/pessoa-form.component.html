@@ -1,0 +1,85 @@
+<div class="form-container">
+  <h3>{{ titulo }}</h3>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    
+    <div class="form-group type-selector">
+      <label>Tipo de Cadastro</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" formControlName="tipoPessoa" value="FISICA"> Pessoa Física (CPF)
+        </label>
+        <label>
+          <input type="radio" formControlName="tipoPessoa" value="JURIDICA"> Pessoa Jurídica (CNPJ)
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="nomeOuNomeFantasia">{{ isPessoaFisica ? 'Nome Completo' : 'Nome Fantasia' }}</label>
+      <input id="nomeOuNomeFantasia" type="text" formControlName="nomeOuNomeFantasia" 
+             [placeholder]="isPessoaFisica ? 'Ex: Maria da Silva' : 'Ex: Empresa XYZ Ltda'">
+      <div *ngIf="form.get('nomeOuNomeFantasia')?.touched && form.get('nomeOuNomeFantasia')?.invalid" class="error-message">
+        <small *ngIf="form.get('nomeOuNomeFantasia')?.errors?.['required']">Este campo é obrigatório.</small>
+      </div>
+    </div>
+
+    <div class="form-group" *ngIf="!isPessoaFisica">
+      <label for="nomeFantasia">Razão Social</label>
+      <input id="nomeFantasia" type="text" formControlName="nomeFantasia" placeholder="Ex: Mercado XYZ">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="cpfCnpj">{{ isPessoaFisica ? 'CPF' : 'CNPJ' }}</label>
+        <input id="cpfCnpj" type="text" formControlName="cpfCnpj" 
+               [mask]="mascaraCpfCnpj" [dropSpecialCharacters]="true">
+        <div *ngIf="form.get('cpfCnpj')?.touched && form.get('cpfCnpj')?.invalid" class="error-message">
+          <small *ngIf="form.get('cpfCnpj')?.errors?.['required']">O documento é obrigatório.</small>
+          <small *ngIf="form.get('cpfCnpj')?.errors?.['cpfInvalido'] || form.get('cpfCnpj')?.errors?.['cnpjInvalido']">Documento inválido.</small>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="isPessoaFisica">
+        <label for="rg">RG</label>
+        <input id="rg" type="text" formControlName="rg" placeholder="Apenas números">
+      </div>
+
+      <div class="form-group" *ngIf="!isPessoaFisica">
+        <label for="inscricaoEstadual">Inscrição Estadual</label>
+        <input id="inscricaoEstadual" type="text" formControlName="inscricaoEstadual" placeholder="Apenas números">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="contato@exemplo.com">
+      </div>
+
+      <div class="form-group">
+        <label for="telefone">Telefone</label>
+        <input id="telefone" type="text" formControlName="telefone" 
+               mask="(00) 00000-0000" [dropSpecialCharacters]="true">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="endereco">Endereço</label>
+      <input id="endereco" type="text" formControlName="endereco" placeholder="Rua, Número, Bairro...">
+    </div>
+
+    <div class="form-group">
+      <label for="descricao">Observações</label>
+      <textarea id="descricao" formControlName="descricao" rows="2"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        <i class="material-icons"></i> {{ isEditMode ? 'Salvar Alterações' : 'Cadastrar' }}
+      </button>
+    </div>
+
+  </form>
+</div>
