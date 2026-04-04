@@ -31,7 +31,7 @@
             <tbody>
                 <tr *ngFor="let cliente of clientesFiltrados">
                     <td>{{ cliente.nomeOuNomeFantasia }} <br>
-                        <small style="color: #888;" *ngIf="cliente.nomeOuNomeFantasia">{{ cliente.nomeOuNomeFantasia }}</small>
+                        <small style="color: #888;" *ngIf="cliente.razaoSocial">{{ cliente.razaoSocial }}</small>
                     </td>
                     <td>{{ cliente.cpfCnpj | cpfCnpj }}</td>
                     <td>{{ cliente.email }}</td>
@@ -48,7 +48,7 @@
                         
                         <button class="btn btn-icon" (click)="alternarStatus(cliente)">
                             <i class="material-icons" [title]="cliente.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
-                                {{ cliente.status === 'ATIVO' ? 'block' : 'check_circle' }}
+                                {{ cliente.status === 'ATIVO' ? 'Inativar' : 'Ativar' }}
                             </i>
                         </button>
                     </td>

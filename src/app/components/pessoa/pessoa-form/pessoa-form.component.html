@@ -24,11 +24,13 @@
       </div>
     </div>
 
-    <div class="form-group" *ngIf="!isPessoaFisica">
-      <label for="nomeFantasia">Razão Social</label>
-      <input id="nomeFantasia" type="text" formControlName="nomeFantasia" placeholder="Ex: Mercado XYZ">
-    </div>
+    
 
+    <div class="form-group" *ngIf="!isPessoaFisica">
+        <label for="razaoSocial">Razão Social</label>
+        <input id="razaoSocial" type="text" formControlName="razaoSocial" placeholder="Ex: Mercado XYZ">
+    </div>
+    
     <div class="form-row">
       <div class="form-group">
         <label for="cpfCnpj">{{ isPessoaFisica ? 'CPF' : 'CNPJ' }}</label>

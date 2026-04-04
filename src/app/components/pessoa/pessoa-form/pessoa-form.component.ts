@@ -32,39 +32,55 @@ export class PessoaFormComponent implements OnInit {
     this.setupListeners();
   }
 
-  private initForm(): void {
-    const tipo = this.itemEdicao?.tipoPessoa || TipoPessoa.FISICA;
-    this.mascaraCpfCnpj = tipo === TipoPessoa.FISICA ? '000.000.000-00' : '00.000.000/0000-00';
+private initForm(): void {
+  // 1. Pegamos o tipo inicial (padrão FISICA)
+  const tipoInicial = this.itemEdicao?.tipoPessoa || TipoPessoa.FISICA;
 
-    this.form = this.fb.group({
-      id: [this.itemEdicao?.id || null],
-      tipoPessoa: [tipo, Validators.required],
-      
-      nomeOuNomeFantasia: [
-        this.itemEdicao?.nomeOuNomeFantasia || '', 
-        [Validators.required, Validators.minLength(3)]
-      ],
-      cpfCnpj: [
-        this.itemEdicao?.cpfCnpj || '', 
-        [Validators.required, GenericValidator.isValidCpfCnpj]
-      ],
-      
-      // Campos dinâmicos
-      rg: [this.itemEdicao?.rg || ''],
-      razaoSocial: [this.itemEdicao?.razaoSocial || ''],
-      inscricaoEstadual: [this.itemEdicao?.inscricaoEstadual || ''],
-      
-      // Campos Comuns
-      email: [this.itemEdicao?.email || '', [Validators.required, Validators.email]],
-      telefone: [this.itemEdicao?.telefone || '', [Validators.required, Validators.minLength(10)]],
-      endereco: [this.itemEdicao?.endereco || ''],
-      descricao: [this.itemEdicao?.descricao || ''],
-      status: [this.itemEdicao?.status || 'ATIVO']
-    });
+  this.form = this.fb.group({
+    id: [this.itemEdicao?.id || null],
+    tipoPessoa: [tipoInicial, Validators.required], // MUDADO: de 'tipo' para 'tipoPessoa'
+    
+    nomeOuNomeFantasia: [
+      this.itemEdicao?.nomeOuNomeFantasia || '', 
+      [Validators.required, Validators.minLength(3)]
+    ],
+    cpfCnpj: [
+      this.itemEdicao?.cpfCnpj || '', 
+      [Validators.required, GenericValidator.isValidCpfCnpj]
+    ],
+    
+    rg: [this.itemEdicao?.rg || ''],
+    razaoSocial: [this.itemEdicao?.razaoSocial || ''], // Manteremos razaoSocial para bater com o DTO
+    inscricaoEstadual: [this.itemEdicao?.inscricaoEstadual || ''],
+    
+    email: [this.itemEdicao?.email || '', [Validators.required, Validators.email]],
+    telefone: [this.itemEdicao?.telefone || '', [Validators.required, Validators.minLength(10)]],
+    endereco: [this.itemEdicao?.endereco || ''],
+    descricao: [this.itemEdicao?.descricao || ''],
+    status: [this.itemEdicao?.status || 'ATIVO']
+  });
 
-    // Aplica as validações corretas logo na inicialização
-    this.atualizarValidacoesDinamicas(tipo);
+  this.atualizarValidacoesDinamicas(tipoInicial);
+}
+
+private atualizarValidacoesDinamicas(tipo: TipoPessoa): void {
+  const rgControl = this.form.get('rg');
+  const razaoSocialControl = this.form.get('razaoSocial'); // Corrigido o nome aqui
+  const inscricaoEstadualControl = this.form.get('inscricaoEstadual');
+
+  if (tipo === TipoPessoa.FISICA) {
+    this.mascaraCpfCnpj = '000.000.000-00';
+    razaoSocialControl?.setValue(null);
+    razaoSocialControl?.clearValidators(); 
+  } else {
+    this.mascaraCpfCnpj = '00.000.000/0000-00';
+    rgControl?.setValue(null);
+    razaoSocialControl?.setValidators([Validators.required]); // Razão Social obrigatória para PJ
   }
+
+  razaoSocialControl?.updateValueAndValidity();
+  rgControl?.updateValueAndValidity();
+}
 
   private setupListeners(): void {
     // Escuta as mudanças no radio button de Tipo de Pessoa
@@ -73,42 +89,6 @@ export class PessoaFormComponent implements OnInit {
     });
   }
 
-  private atualizarValidacoesDinamicas(tipo: TipoPessoa): void {
-    const rgControl = this.form.get('rg');
-    const nomeFantasiaControl = this.form.get('nomeFantasia');
-    const inscricaoEstadualControl = this.form.get('inscricaoEstadual');
-    const cpfCnpjControl = this.form.get('cpfCnpj');
-
-    if (tipo === TipoPessoa.FISICA) {
-      this.mascaraCpfCnpj = '000.000.000-00';
-      
-      // Limpa dados de PJ caso o usuário tenha digitado e depois trocado
-      nomeFantasiaControl?.setValue(null);
-      inscricaoEstadualControl?.setValue(null);
-      
-      // Opcional: Adicionar validação de RG se for obrigatório para o seu negócio
-      // rgControl?.setValidators([Validators.required]);
-      
-    } else {
-      this.mascaraCpfCnpj = '00.000.000/0000-00';
-      
-      // Limpa dados de PF
-      rgControl?.setValue(null);
-      
-      // Se Nome Fantasia for obrigatório para PJ, adicione aqui:
-      // nomeFantasiaControl?.setValidators([Validators.required]);
-    }
-
-    // Recalcula a validade dos campos
-    rgControl?.updateValueAndValidity();
-    nomeFantasiaControl?.updateValueAndValidity();
-    inscricaoEstadualControl?.updateValueAndValidity();
-    
-    // Força a revalidação do documento atual limpando a máscara temporariamente
-    const documentoAtual = cpfCnpjControl?.value;
-    cpfCnpjControl?.setValue('');
-    cpfCnpjControl?.setValue(documentoAtual);
-  }
 
   get isPessoaFisica(): boolean {
     return this.form.get('tipoPessoa')?.value === TipoPessoa.FISICA;
