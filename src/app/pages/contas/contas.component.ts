@@ -59,48 +59,62 @@ export class ContasComponent extends BaseCrudComponent<Conta> implements OnInit 
   }
 
   private vincularRelacionamentos(conta: Conta): Conta {
-  // Criamos uma referência (any) para acessar as propriedades clienteId/fornecedorId do JSON
-  const contaAux = conta as any;
+  // Cria uma cópia para garantir imutabilidade
+  const novaConta = { ...conta }; 
+  const contaAux = novaConta as any;
 
-  if (conta.tipo === 'RECEITA' && contaAux.clienteId) {
-    // Buscamos o cliente e garantimos que o tipo é compatível
-    conta.cliente = this.clientes.find(c => Number(c.id) === Number(contaAux.clienteId));
+  if (novaConta.tipo === 'RECEITA' && contaAux.clienteId) {
+    novaConta.cliente = this.clientes.find(c => Number(c.id) === Number(contaAux.clienteId));
   }
 
-  if (conta.tipo === 'DESPESA' && contaAux.fornecedorId) {
-    // Buscamos o fornecedor
-    conta.fornecedor = this.fornecedores.find(f => Number(f.id) === Number(contaAux.fornecedorId));
+  if (novaConta.tipo === 'DESPESA' && contaAux.fornecedorId) {
+    novaConta.fornecedor = this.fornecedores.find(f => Number(f.id) === Number(contaAux.fornecedorId));
   }
 
-  return conta;
+  return novaConta;
 }
 
   get contasFiltrados(): Conta[] {
     if (!this.termoPesquisa) return this.itens;
     const termo = this.termoPesquisa.toLowerCase();
     return this.itens.filter(c =>
+      c.nome?.toLowerCase().includes(termo) ||
       c.descricao?.toLowerCase().includes(termo) ||
       c.cliente?.nomeOuNomeFantasia.toLowerCase().includes(termo) ||
       c.fornecedor?.nomeOuNomeFantasia.toLowerCase().includes(termo)
     );
   }
 
-  salvarConta(contaRecebida: Conta): void {
-    const operacao = contaRecebida.id
-      ? this.contasService.atualizar(contaRecebida)
-      : this.contasService.adicionar(contaRecebida);
+  salvarConta(dadosDoForm: any): void {
+  const operacao = dadosDoForm.id
+    ? this.contasService.atualizar(dadosDoForm)
+    : this.contasService.adicionar(dadosDoForm);
 
-    operacao.subscribe({
-      next: (res) => {
-        const contaVinculada = this.vincularRelacionamentos(res);
-        contaRecebida.id ? this.atualizarItemNaLista(contaVinculada) : this.itens.push(contaVinculada);
-        
-        this.toastService.success('Conta salva com sucesso!');
-        this.fecharFormulario();
-      },
-      error: () => this.toastService.error('Erro ao salvar conta.')
-    });
-  }
+  operacao.subscribe({
+    next: (res) => {
+      // res é o objeto que veio do backend
+      // Injetamos os IDs de volta para o vincularRelacionamentos funcionar
+      const objetoCompleto = {
+        ...res,
+        clienteId: dadosDoForm.clienteId,
+        fornecedorId: dadosDoForm.fornecedorId
+      };
+
+      const contaVinculada = this.vincularRelacionamentos(objetoCompleto);
+
+      if (dadosDoForm.id) {
+        this.atualizarItemNaLista(contaVinculada);
+      } else {
+        // Agora sim a reatividade acontece: novo array!
+        this.itens = [...this.itens, contaVinculada];
+      }
+
+      this.toastService.success('Operação realizada com sucesso!');
+      this.fecharFormulario();
+    },
+    error: () => this.toastService.error('Erro ao salvar conta.')
+  });
+}
 
   alternarStatus(conta: Conta): void {
     const novoStatus = conta.status === Status.ATIVO ? Status.INATIVO : Status.ATIVO;

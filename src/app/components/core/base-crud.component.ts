@@ -42,6 +42,7 @@ export abstract class BaseCrudComponent<T> {
     const index = this.itens.findIndex((item: any) => item[idProp] === (itemAtualizado as any)[idProp]);
     if (index !== -1) {
       this.itens[index] = itemAtualizado;
+      this.itens = [...this.itens];
     }
   }
 }

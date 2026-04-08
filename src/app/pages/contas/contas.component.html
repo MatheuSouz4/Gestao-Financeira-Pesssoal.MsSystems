@@ -24,7 +24,6 @@
                 <tr>
                     <th>Nome</th>
                     <th>Tipo de Conta</th>
-                    <th>Recorrência</th>
                     <th>(Cliente/Fornecedor)</th>
                     <th>Status</th>
                     <th>Ações</th>
@@ -33,9 +32,12 @@
             <tbody>
                 <tr *ngFor="let conta of contasFiltrados">
                     <td>{{ conta.nome }}</td>
-                    <td>{{ conta.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}</td>
-                    <td>{{ conta.recorrencia }}</td>
-                     <td>
+                    <td>
+                        <span [ngClass]="conta.tipo === 'RECEITA' ? 'text-success' : 'text-danger'" style="font-weight: bold;">
+                            {{ conta.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}
+                        </span>
+                    </td>
+                    <td>
                         {{ conta.tipo === 'RECEITA' ? (conta.cliente?.nomeOuNomeFantasia) : (conta.fornecedor?.nomeOuNomeFantasia) }}
                     </td>
                     <td>

@@ -3,15 +3,14 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export interface ClienteBase {
-  id?: Number;
+  id?: number;
   nomeOuNomeFantasia: string; }
 
 export interface FornecedorBase {
-  id?: Number;
+  id?: number;
   nomeOuNomeFantasia: string; }
 
 export type TipoConta = 'RECEITA' | 'DESPESA';
-export type Recorrencia = 'UNICA' | 'SEMANAL' | 'MENSAL' | 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL';
 
 export enum Status{
   ATIVO = 'ATIVO',
@@ -20,11 +19,10 @@ export enum Status{
 }
 
 export interface Conta {
-  id: Number;
+  id: number;
   nome: string;
   descricao?: string;
   tipo: TipoConta;
-  recorrencia: Recorrencia;
   status: Status
   cliente?: ClienteBase;
   fornecedor?: FornecedorBase;
@@ -48,10 +46,9 @@ export class ContasService {
   }
 
   atualizar(conta: Conta): Observable<Conta> {
-    const url = `${this.API_URL}/${conta.id}`;
-      return this.http.put<Conta>(`${this.API_URL}/${conta.id}`, conta);
-  
-}
+    if (!conta.id) throw new Error("ID da conta é obrigatório para atualização.");
+    return this.http.put<Conta>(`${this.API_URL}/${conta.id}`, conta);
+  }
 
   excluir(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`);
