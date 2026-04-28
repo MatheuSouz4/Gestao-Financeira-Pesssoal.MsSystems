@@ -2,12 +2,11 @@ import { Routes } from '@angular/router';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ContasComponent } from './pages/contas/contas.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { FinanceiroComponent } from './pages/financeiro/financeiro.component';
 import { FornecedoresComponent } from './pages/fornecedores/fornecedores.component';
 import { HomeComponent } from './pages/home/home.component';
-import { LancamentosComponent } from './pages/lancamentos/lancamentos.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ProjecoesComponent } from './pages/projecoes/projecoes.component';
-import { QuitacoesComponent } from './pages/quitacoes/quitacoes.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { SignUpComponent } from './pages/signup/signup.component';
 import { AuthGuard } from './services/auth-guard.service';
@@ -33,8 +32,7 @@ export const routes: Routes = [
       { path: 'clientes', component: ClientesComponent },
       { path: 'fornecedores', component: FornecedoresComponent },
       { path: 'contas', component: ContasComponent },
-      { path: 'lancamentos', component: LancamentosComponent },
-      { path: 'quitacoes', component: QuitacoesComponent },
+      { path: 'financeiro', component: FinanceiroComponent },
       { path: 'projecoes', component: ProjecoesComponent },
       { path: 'relatorios', component: RelatoriosComponent },
     ],
