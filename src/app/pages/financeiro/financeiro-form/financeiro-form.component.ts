@@ -16,7 +16,7 @@ export class FinanceiroFormComponent implements OnInit {
   @Output() fechar = new EventEmitter<void>();
 
   financeiroForm!: FormGroup;
-  contas: any[] = []; // Lista de contas para o Select
+  contas: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -45,18 +45,33 @@ export class FinanceiroFormComponent implements OnInit {
       contaId: ['', Validators.required],
       descricao: ['', Validators.required],
       vencimento: ['', Validators.required],
-      valor: ['', [Validators.required, Validators.min(0.01)]]
+      valor: ['', [Validators.required, Validators.min(0.01)]],
+      tipoRecorrencia: ['NENHUMA'], // Novo campo
+      quantidadeParcelas: [1]       // Novo campo
+    });
+
+    // Monitora as mudanças do tipo de recorrência para exigir parcelas
+    this.financeiroForm.get('tipoRecorrencia')?.valueChanges.subscribe(tipo => {
+      const parcelasCtrl = this.financeiroForm.get('quantidadeParcelas');
+      if (tipo === 'NENHUMA') {
+        parcelasCtrl?.setValue(1);
+        parcelasCtrl?.clearValidators();
+      } else {
+        parcelasCtrl?.setValidators([Validators.required, Validators.min(2)]);
+      }
+      parcelasCtrl?.updateValueAndValidity();
     });
   }
 
   preencherFormulario(): void {
-    // Quando editamos, precisamos mapear os dados que vêm da tabela para o formato do DTO
     this.financeiroForm.patchValue({
       id: this.financeiroEdicao.id,
-      contaId: this.financeiroEdicao.conta?.id, // Extrai o ID do objeto Conta
+      contaId: this.financeiroEdicao.conta?.id,
       descricao: this.financeiroEdicao.descricao,
-      vencimento: this.financeiroEdicao.dataVencimento, // Backend manda dataVencimento, DTO espera vencimento
-      valor: this.financeiroEdicao.valor
+      vencimento: this.financeiroEdicao.dataVencimento,
+      valor: this.financeiroEdicao.valor,
+      tipoRecorrencia: 'NENHUMA', // Na edição de 1 item, a recorrência é padrão
+      quantidadeParcelas: 1
     });
   }
 
@@ -64,7 +79,7 @@ export class FinanceiroFormComponent implements OnInit {
     if (this.financeiroForm.valid) {
       this.salvar.emit(this.financeiroForm.value);
     } else {
-      this.financeiroForm.markAllAsTouched(); // Destaca os campos com erro em vermelho
+      this.financeiroForm.markAllAsTouched();
     }
   }
 

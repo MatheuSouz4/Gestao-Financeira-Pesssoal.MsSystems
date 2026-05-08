@@ -7,7 +7,8 @@ import { map } from 'rxjs/operators';
 
 import { ContasService } from '../../services/contas.service';
 import { Financeiro, FinanceiroService } from '../../services/financeiro.service';
-import { FinanceiroFormComponent } from '../financeiro/financeiro-form/financeiro-form.component';
+import { FinanceiroFormComponent } from './financeiro-form/financeiro-form.component';
+import { QuitacaoFormComponent } from './quitacao-form/quitacao-form.component';
 
 interface FinanceiroVM extends Financeiro {
   nomeConta: string;
@@ -17,7 +18,7 @@ interface FinanceiroVM extends Financeiro {
 @Component({
   selector: 'app-financeiro',
   standalone: true,
-  imports: [CommonModule, FormsModule, FinanceiroFormComponent],
+  imports: [CommonModule, FormsModule, FinanceiroFormComponent, QuitacaoFormComponent],
   templateUrl: './financeiro.component.html',
   styleUrls: ['./financeiro.component.scss']
 })
@@ -26,8 +27,12 @@ export class FinanceiroComponent implements OnInit {
   financeirosFiltrados: FinanceiroVM[] = [];
   termoPesquisa: string = '';
   
+  // Controles de Modais
   isFormularioAberto: boolean = false;
+  isModalQuitacaoAberto: boolean = false;
+
   financeiroEmEdicao: Financeiro | null = null;
+  lancamentoParaQuitar: FinanceiroVM | null = null;
 
   constructor(
     private financeiroService: FinanceiroService,
@@ -46,7 +51,6 @@ export class FinanceiroComponent implements OnInit {
     ]).pipe(
       map(([financeiros, contas]) => {
         return financeiros.map(f => {
-          // O backend agora traz a conta vinculada automaticamente
           const nomeContaBase = f.conta ? f.conta.nome : 'Conta desconhecida';
           return {
             ...f,
@@ -70,6 +74,7 @@ export class FinanceiroComponent implements OnInit {
     );
   }
 
+  // --- LÓGICA DE CADASTRO/EDIÇÃO ---
   abrirFormularioCadastro(): void {
     this.financeiroEmEdicao = null;
     this.isFormularioAberto = true;
@@ -81,7 +86,6 @@ export class FinanceiroComponent implements OnInit {
   }
 
   salvarFinanceiro(dados: any): void {
-    // Note que dados.id é usado na URL para atualizar, mas o body deve seguir o DTO
     const operacao$ = dados.id 
       ? this.financeiroService.atualizar(dados.id, dados) 
       : this.financeiroService.adicionar(dados);
@@ -91,9 +95,7 @@ export class FinanceiroComponent implements OnInit {
         this.toast.success('Operação realizada com sucesso!');
         this.fecharFormulario();
       },
-      error: () => {
-        this.toast.error('Ocorreu um erro ao processar a solicitação.');
-      }
+      error: () => this.toast.error('Erro ao processar a solicitação.')
     });
   }
 
@@ -102,15 +104,32 @@ export class FinanceiroComponent implements OnInit {
     this.financeiroEmEdicao = null;
   }
 
-  // Exemplo de como calcular para o HTML
+  // --- LÓGICA DE QUITAÇÃO ---
+  abrirModalQuitacao(f: FinanceiroVM): void {
+    this.lancamentoParaQuitar = f;
+    this.isModalQuitacaoAberto = true;
+  }
+
+  processarQuitacao(formData: FormData): void {
+    if (this.lancamentoParaQuitar?.id) {
+      this.financeiroService.quitar(this.lancamentoParaQuitar.id, formData).subscribe({
+        next: () => {
+          this.toast.success('Lançamento quitado com sucesso!');
+          this.isModalQuitacaoAberto = false;
+          this.lancamentoParaQuitar = null;
+          // O service reativo deve atualizar a lista automaticamente
+        },
+        error: () => this.toast.error('Erro ao registrar quitação.')
+      });
+    }
+  }
+
+  // --- AUXILIARES DE UI ---
   getProgressoVencimento(dataVencimento: string) {
     const hoje = new Date();
     const vencimento = new Date(dataVencimento);
-    const diffTime = vencimento.getTime() - hoje.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Se faltar mais de 30 dias, mostra no início (0%)
-    // Se estiver no dia, mostra no fim (100%)
     if (diffDays > 30) return 0;
     if (diffDays <= 0) return 100;
     return ((30 - diffDays) / 30) * 100;

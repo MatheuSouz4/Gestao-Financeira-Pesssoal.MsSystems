@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 // Interface espelhando a Entidade Financeiro do Java
 export interface Financeiro {
   id?: number;
-  conta?: any; // O Backend devolve o objeto Conta completo
+  conta?: any; 
   dataEmissao: string;
   dataVencimento: string;
   valor: number;
@@ -17,20 +17,15 @@ export interface Financeiro {
   tipo?: string;
 }
 
-// Interface espelhando o FinanceiroRequestDTO do Java
+// Interface atualizada para suportar Recorrência
 export interface FinanceiroRequest {
   id?: number;
   contaId: number;
   vencimento: string;
   valor: number;
   descricao?: string;
-}
-
-// Interface espelhando o QuitacaoRequestDTO do Java
-export interface QuitacaoRequest {
-  dataPagamento: string;
-  valorPago: number;
-  comprovanteUrl?: string;
+  tipoRecorrencia?: 'NENHUMA' | 'MENSAL' | 'SEMESTRAL' | 'ANUAL';
+  quantidadeParcelas?: number;
 }
 
 @Injectable({
@@ -53,27 +48,36 @@ export class FinanceiroService {
     });
   }
 
-  adicionar(dados: FinanceiroRequest): Observable<Financeiro> {
-    return this.http.post<Financeiro>(this.API_URL, dados).pipe(
-      tap((novo) => {
-        const listaAtual = [...this._financeiros.value, novo];
+  // Refatorado: O backend agora retorna uma lista (List<Financeiro>) devido à recorrência
+  adicionar(dados: FinanceiroRequest): Observable<Financeiro[]> {
+    return this.http.post<Financeiro[]>(this.API_URL, dados).pipe(
+      tap((novosRegistros) => {
+        const listaAtual = [...this._financeiros.value, ...novosRegistros];
         this._financeiros.next(listaAtual);
       })
     );
   }
 
-  atualizar(id: number, dados: FinanceiroRequest): Observable<Financeiro> {
-    return this.http.put<Financeiro>(`${this.API_URL}/${id}`, dados).pipe(
-      tap((atualizado) => {
-        const listaAtual = this._financeiros.value.map(f =>
-          f.id === atualizado.id ? atualizado : f
-        );
+  // Refatorado: Mantém o retorno como lista para consistência com o DTO do Controller
+  atualizar(id: number, dados: FinanceiroRequest): Observable<Financeiro[]> {
+    return this.http.put<Financeiro[]>(`${this.API_URL}/${id}`, dados).pipe(
+      tap((atualizados) => {
+        // Atualiza os registros na lista local comparando IDs
+        const idsAtualizados = atualizados.map(a => a.id);
+        const listaAtual = this._financeiros.value.map(f => {
+          const correspondente = atualizados.find(a => a.id === f.id);
+          return correspondente ? correspondente : f;
+        });
         this._financeiros.next(listaAtual);
       })
     );
   }
 
-  quitar(id: number, dados: QuitacaoRequest): Observable<Financeiro> {
+  /**
+   * Refatorado para resolver o erro TS2345:
+   * Agora aceita FormData para suportar o upload de comprovante (multipart/form-data)
+   */
+  quitar(id: number, dados: FormData): Observable<Financeiro> {
     return this.http.patch<Financeiro>(`${this.API_URL}/${id}/quitar`, dados).pipe(
       tap((pago) => {
         const listaAtual = this._financeiros.value.map(f =>
@@ -92,7 +96,10 @@ export class FinanceiroService {
     
     if (!financeiro.dataVencimento) return 'PENDENTE';
     
-    const vencimento = new Date(financeiro.dataVencimento + 'T00:00:00');
+    // Ajuste para evitar problemas de fuso horário na conversão da string de data
+    const [ano, mes, dia] = financeiro.dataVencimento.split('-').map(Number);
+    const vencimento = new Date(ano, mes - 1, dia);
+    
     return vencimento < hoje ? 'VENCIDA' : 'PENDENTE';
   }
 }

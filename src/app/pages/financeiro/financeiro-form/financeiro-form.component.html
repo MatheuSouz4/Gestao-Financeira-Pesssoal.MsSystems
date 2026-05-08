@@ -1,6 +1,5 @@
 <div class="form-container">
     <h3>{{ financeiroEdicao ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
-    <hr>
 
     <form [formGroup]="financeiroForm" (ngSubmit)="onSubmit()">
         
@@ -49,10 +48,33 @@
             </div>
         </div>
 
+        <!-- SESSÃO DE RECORRÊNCIA (Apenas ao criar um novo) -->
+        <div class="form-row" *ngIf="!financeiroEdicao">
+            <div class="form-group half-width">
+                <label for="tipoRecorrencia">Recorrência</label>
+                <select id="tipoRecorrencia" formControlName="tipoRecorrencia" class="form-control">
+                    <option value="NENHUMA">Nenhuma (Única)</option>
+                    <option value="MENSAL">Mensal</option>
+                    <option value="SEMESTRAL">Semestral</option>
+                    <option value="ANUAL">Anual</option>
+                </select>
+            </div>
+
+            <!-- Aparece apenas se Recorrência for diferente de NENHUMA -->
+            <div class="form-group half-width" *ngIf="financeiroForm.get('tipoRecorrencia')?.value !== 'NENHUMA'">
+                <label for="quantidadeParcelas">Quantidade de Parcelas</label>
+                <input type="number" id="quantidadeParcelas" formControlName="quantidadeParcelas" class="form-control" min="2"
+                       [ngClass]="{'is-invalid': financeiroForm.get('quantidadeParcelas')?.invalid && financeiroForm.get('quantidadeParcelas')?.touched}">
+                <small class="error-text" *ngIf="financeiroForm.get('quantidadeParcelas')?.invalid && financeiroForm.get('quantidadeParcelas')?.touched">
+                    Insira ao menos 2 parcelas.
+                </small>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" (click)="onCancelar()">Cancelar</button>
             <button type="submit" class="btn btn-primary" [disabled]="financeiroForm.invalid">
-                <i class="material-icons">save</i> Salvar
+                <i class="material-icons"></i> Salvar
             </button>
         </div>
     </form>
