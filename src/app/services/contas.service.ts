@@ -37,8 +37,16 @@ export class ContasService {
 
   constructor(private http: HttpClient) { }
 
-  listar(): Observable<Conta[]> {
-    return this.http.get<Conta[]>(this.API_URL);
+  listar(status?: string, tipo?: string): Observable<Conta[]> {
+  const params: any = {};
+
+  // Se o valor for "null", "undefined" ou "", o Angular não deve enviar o parâmetro
+  if (status) params.status = status;
+  if (tipo) params.tipo = tipo;
+
+  console.log('Objeto de parâmetros enviado ao HttpClient:', params);
+
+    return this.http.get<Conta[]>(this.API_URL, { params });
   }
 
   adicionar(conta: Conta): Observable<Conta> {

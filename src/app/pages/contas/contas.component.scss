@@ -25,6 +25,19 @@
     }
 }
 
+.filters-container {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .select-filters {
+        display: flex;
+        gap: 10px;
+    }
+}
+
 .search-bar {
     position: relative;
     flex: 1;
@@ -43,6 +56,40 @@
             outline: none;
         }
     }
+}
+
+.form-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    min-width: 150px;
+    cursor: pointer;
+
+    &:focus {
+        border-color: $primary-color;
+        outline: none;
+    }
+}
+
+/* Tipos de Conta */
+.text-receita { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #e8f5f4;
+    color: #2e687d;
+    font-weight: bold;
+}
+
+.text-despesa { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #f5e8e8;
+    color: #ff0000;
+    font-weight: bold;
 }
 
 /* Botões */
@@ -111,8 +158,22 @@ table {
 }
 
 /* Tipos de Conta */
-.text-success { color: #2e7d32; font-weight: bold; }
-.text-danger { color: #c62828; font-weight: bold; }
+.text-receita { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #e8f5f4;
+    color: #2e687d;
+    font-weight: bold;
+ }
+.text-despesa { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #f5e8e8;
+    color: #ff0000;
+    font-weight: bold;
+ }
 
 /* Status */
 .status-ativo {

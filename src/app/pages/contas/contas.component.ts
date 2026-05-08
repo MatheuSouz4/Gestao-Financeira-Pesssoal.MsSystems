@@ -18,6 +18,9 @@ import { ContasFormComponent } from './contas-form/contas-form.component';
 })
 export class ContasComponent extends BaseCrudComponent<Conta> implements OnInit {
   
+  public filtroStatus: string = '';
+  public filtroTipo: string = '';
+
   // Listas auxiliares para o cruzamento de dados
   private clientes: Cliente[] = [];
   private fornecedores: Fornecedor[] = [];
@@ -48,15 +51,29 @@ export class ContasComponent extends BaseCrudComponent<Conta> implements OnInit 
     });
   }
 
-  carregarDados(): void {
-    this.contasService.listar().subscribe({
-      next: (dados) => {
-        // Mapeia os IDs para objetos completos para exibição na tabela
-        this.itens = dados.map(conta => this.vincularRelacionamentos(conta));
-      },
-      error: () => this.toastService.error('Erro ao carregar contas.')
-    });
-  }
+  // Altere a assinatura da função para receber os parâmetros
+onFiltrar(tipoSelecionado: string, statusSelecionado: string): void {
+  // Atualizamos as variáveis de classe manualmente para garantir
+  this.filtroTipo = tipoSelecionado;
+  this.filtroStatus = statusSelecionado;
+
+  console.log('VALORES REAIS CAPTURADOS:', { 
+    tipo: tipoSelecionado, 
+    status: statusSelecionado 
+  });
+
+  this.carregarDados();
+}
+
+// Ajuste o carregarDados para usar as variáveis que acabamos de atualizar
+carregarDados(): void {
+  this.contasService.listar(this.filtroStatus, this.filtroTipo).subscribe({
+    next: (dados) => {
+      this.itens = dados.map(conta => this.vincularRelacionamentos(conta));
+    },
+    error: () => this.toastService.error('Erro ao carregar contas.')
+  });
+}
 
   private vincularRelacionamentos(conta: Conta): Conta {
   // Cria uma cópia para garantir imutabilidade

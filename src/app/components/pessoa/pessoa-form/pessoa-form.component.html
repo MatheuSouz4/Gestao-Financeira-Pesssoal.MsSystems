@@ -29,6 +29,9 @@
     <div class="form-group" *ngIf="!isPessoaFisica">
         <label for="razaoSocial">Razão Social</label>
         <input id="razaoSocial" type="text" formControlName="razaoSocial" placeholder="Ex: Mercado XYZ">
+        <div *ngIf="form.get('razaoSocial')?.touched && form.get('razaoSocial')?.invalid" class="error-message">
+        <small *ngIf="form.get('razaoSocial')?.errors?.['required']">Este campo é obrigatório.</small>
+      </div>
     </div>
     
     <div class="form-row">
@@ -37,7 +40,7 @@
         <input id="cpfCnpj" type="text" formControlName="cpfCnpj" 
                [mask]="mascaraCpfCnpj" [dropSpecialCharacters]="true">
         <div *ngIf="form.get('cpfCnpj')?.touched && form.get('cpfCnpj')?.invalid" class="error-message">
-          <small *ngIf="form.get('cpfCnpj')?.errors?.['required']">O documento é obrigatório.</small>
+          <small *ngIf="form.get('cpfCnpj')?.errors?.['required']">Este campo é obrigatório.</small>
           <small *ngIf="form.get('cpfCnpj')?.errors?.['cpfInvalido'] || form.get('cpfCnpj')?.errors?.['cnpjInvalido']">Documento inválido.</small>
         </div>
       </div>
@@ -57,6 +60,9 @@
       <div class="form-group">
         <label for="email">Email</label>
         <input id="email" type="email" formControlName="email" placeholder="contato@exemplo.com">
+        <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="error-message">
+        <small *ngIf="form.get('email')?.errors?.['required']">Este campo é obrigatório.</small>
+      </div>
       </div>
 
       <div class="form-group">

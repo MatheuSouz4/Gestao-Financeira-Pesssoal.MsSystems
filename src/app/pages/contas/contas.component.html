@@ -2,14 +2,30 @@
     <h2>Gerenciamento de Contas</h2>
 
     <div class="top-actions">
-        <div class="search-bar">
-            <input 
-                type="text" 
-                placeholder="Pesquisar conta por nome ou tipo de conta..."
-                [(ngModel)]="termoPesquisa" 
-                >
-            <i class="material-icons search-icon"></i>
+        <div class="filters-container">
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    placeholder="Pesquisar"
+                    [(ngModel)]="termoPesquisa" 
+                    >
+                <i class="material-icons search-icon"></i>
             </div>
+
+            <div class="select-filters">
+                <select #tipo (change)="onFiltrar(tipo.value, status.value)" class="form-select">
+                    <option value="">Todos os Tipos</option>
+                    <option value="RECEITA">RECEITA</option>
+                    <option value="DESPESA">DESPESA</option>
+                </select>
+
+                <select #status (change)="onFiltrar(tipo.value, status.value)" class="form-select">
+                    <option value="">Todos os Status</option>
+                    <option value="ATIVO">ATIVO</option>
+                    <option value="INATIVO">INATIVO</option>
+                </select>
+            </div>
+        </div>
 
         <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
             <i class="material-icons"></i> Adicionar Nova Conta
@@ -33,8 +49,8 @@
                 <tr *ngFor="let conta of contasFiltrados">
                     <td>{{ conta.nome }}</td>
                     <td>
-                        <span [ngClass]="conta.tipo === 'RECEITA' ? 'text-success' : 'text-danger'" style="font-weight: bold;">
-                            {{ conta.tipo === 'RECEITA' ? 'Receita' : 'Despesa' }}
+                        <span [ngClass]="conta.tipo === 'RECEITA' ? 'text-receita' : 'text-despesa'">
+                            {{ conta.tipo === 'RECEITA' ? 'RECEITA' : 'DESPESA' }}
                         </span>
                     </td>
                     <td>
@@ -55,23 +71,23 @@
                                 {{ conta.status === 'ATIVO' ? 'Inativar' : 'Ativar' }}
                             </i>
                         </button>
-                        
-                        </td>
+                    </td>
                 </tr>
             </tbody>
         </table>
         
-        <p *ngIf="termoPesquisa && contasFiltrados.length === 0" class="no-results">Nenhuma conta encontrada com o termo "{{ termoPesquisa }}".</p>
+        <p *ngIf="termoPesquisa && contasFiltrados.length === 0" class="no-results">
+            Nenhuma conta encontrada com o termo "{{ termoPesquisa }}".
+        </p>
     </div>
 
     <div *ngIf="isFormularioAberto" class="form-modal-overlay">
         <div class="form-card">
-        
-        <app-contas-form
-            [contaEdicao]="itemEmEdicao"
-            (contaSalva)="salvarConta($event)"
-            (fechar)="fecharFormulario()"
-        ></app-contas-form>
+            <app-contas-form
+                [contaEdicao]="itemEmEdicao"
+                (contaSalva)="salvarConta($event)"
+                (fechar)="fecharFormulario()"
+            ></app-contas-form>
         </div>
     </div>
 </div>
