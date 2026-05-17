@@ -1,23 +1,23 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-// Interface espelhando a Entidade Financeiro do Java
 export interface Financeiro {
   id?: number;
   conta?: any; 
   dataEmissao: string;
   dataVencimento: string;
   valor: number;
-  status: 'PENDENTE' | 'VENCIDA' | 'PAGA';
+  status: 'PENDENTE' | 'VENCIDA' | 'PAGA' | 'PAGAMENTO_PARCIAL' | 'ESTORNADA';
   dataPagamento?: string;
   valorPago?: number;
   comprovanteUrl?: string;
   descricao?: string;
   tipo?: string;
+  idReferencia?: number; // Para identificar a origem de pagamentos parciais
+  motivoAlteracao?: string;
 }
 
-// Interface atualizada para suportar Recorrência
 export interface FinanceiroRequest {
   id?: number;
   contaId: number;
@@ -26,6 +26,7 @@ export interface FinanceiroRequest {
   descricao?: string;
   tipoRecorrencia?: 'NENHUMA' | 'MENSAL' | 'SEMESTRAL' | 'ANUAL';
   quantidadeParcelas?: number;
+  motivoAlteracao?: string;
 }
 
 @Injectable({
@@ -38,68 +39,45 @@ export class FinanceiroService {
   public financeiros$ = this._financeiros.asObservable();
 
   constructor(private http: HttpClient) {
-    this.carregarDados();
+    this.listar();
   }
 
-  carregarDados(): void {
-    this.http.get<Financeiro[]>(this.API_URL).subscribe({
-      next: (dados) => this._financeiros.next(dados),
-      error: (err) => console.error('Erro ao carregar financeiro:', err)
-    });
-  }
+  listar(status?: string, tipo?: string, contaId?: string, inicio?: string, fim?: string): Observable<any[]> {
+    let params = new HttpParams();
 
-  // Refatorado: O backend agora retorna uma lista (List<Financeiro>) devido à recorrência
+    if (status) params = params.set('status', status);
+    if (tipo) params = params.set('tipo', tipo); 
+    if (contaId) params = params.set('contaId', contaId);
+    if (inicio) params = params.set('inicio', inicio);
+    if (fim) params = params.set('fim', fim);
+
+    return this.http.get<any[]>(`${this.API_URL}/filtro`, { params }).pipe(
+      tap(dados => this._financeiros.next(dados))
+    );
+}
+
   adicionar(dados: FinanceiroRequest): Observable<Financeiro[]> {
     return this.http.post<Financeiro[]>(this.API_URL, dados).pipe(
-      tap((novosRegistros) => {
-        const listaAtual = [...this._financeiros.value, ...novosRegistros];
-        this._financeiros.next(listaAtual);
-      })
+      tap(() => this.listar().subscribe()) // Atualiza a lista após inserir
     );
   }
 
-  // Refatorado: Mantém o retorno como lista para consistência com o DTO do Controller
   atualizar(id: number, dados: FinanceiroRequest): Observable<Financeiro[]> {
     return this.http.put<Financeiro[]>(`${this.API_URL}/${id}`, dados).pipe(
-      tap((atualizados) => {
-        // Atualiza os registros na lista local comparando IDs
-        const idsAtualizados = atualizados.map(a => a.id);
-        const listaAtual = this._financeiros.value.map(f => {
-          const correspondente = atualizados.find(a => a.id === f.id);
-          return correspondente ? correspondente : f;
-        });
-        this._financeiros.next(listaAtual);
-      })
+      tap(() => this.listar().subscribe()) // Atualiza a lista após editar
     );
   }
 
-  /**
-   * Refatorado para resolver o erro TS2345:
-   * Agora aceita FormData para suportar o upload de comprovante (multipart/form-data)
-   */
-  quitar(id: number, dados: FormData): Observable<Financeiro> {
-    return this.http.patch<Financeiro>(`${this.API_URL}/${id}/quitar`, dados).pipe(
-      tap((pago) => {
-        const listaAtual = this._financeiros.value.map(f =>
-          f.id === id ? pago : f
-        );
-        this._financeiros.next(listaAtual);
-      })
-    );
-  }
+  // No seu financeiro.service.ts
+quitar(id: number, dados: FormData): Observable<any> {
+  // O backend usa @PatchMapping("/{id}/quitar")
+  return this.http.patch(`${this.API_URL}/${id}/quitar`, dados);
+}
 
-  calcularStatus(financeiro: Financeiro): 'PENDENTE' | 'VENCIDA' | 'PAGA' {
-    if (financeiro.status === 'PAGA') return 'PAGA';
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    
-    if (!financeiro.dataVencimento) return 'PENDENTE';
-    
-    // Ajuste para evitar problemas de fuso horário na conversão da string de data
-    const [ano, mes, dia] = financeiro.dataVencimento.split('-').map(Number);
-    const vencimento = new Date(ano, mes - 1, dia);
-    
-    return vencimento < hoje ? 'VENCIDA' : 'PENDENTE';
+  calcularStatus(financeiro: Financeiro): string {
+    // O backend já está mapeando os novos status corretamente, 
+    // mas mantemos um fallback caso venha vazio.
+    if (financeiro.status) return financeiro.status;
+    return 'PENDENTE';
   }
 }

@@ -1,11 +1,24 @@
-@import "../../../../styles/variables.scss";
+// Variáveis de cores para manter a consistência
+$primary-color: #3f51b5;
+$success-color: #28a745; // Verde para Receita
+$danger-color: #dc3545;  // Vermelho para Despesa
+$bg-light: #f8f9fa;
+$border-color: #e0e0e0;
+$text-main: #333;
+$text-muted: #666;
 
 .form-container {
     padding: 10px;
-    width: 100%;
+    background-color: #fff;
 
-    h3 {
-        color: $primary-color;
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+     h3 {
+        color: #5a7F78;
         font-size: 1.5rem;
         margin-bottom: 20px;
         border-bottom: 2px solid #f0f0f0;
@@ -13,29 +26,113 @@
     }
 }
 
+// Estilização das Novas Flags de Seleção
+.flag-container {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    margin-bottom: 5px;
+
+    .flag-btn {
+        flex: 1;
+        padding: 14px;
+        border: 2px solid $border-color;
+        border-radius: 10px;
+        background: #fff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.25s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        i {
+            font-size: 1.1rem;
+        }
+
+        // Efeito de Hover (passar o mouse)
+        &.receita:hover {
+            border-color: $success-color;
+            color: $success-color;
+            background-color: rgba($success-color, 0.05);
+        }
+
+        &.despesa:hover {
+            border-color: $danger-color;
+            color: $danger-color;
+            background-color: rgba($danger-color, 0.05);
+        }
+
+        // Estado Ativo (Selecionado)
+        &.receita.active {
+            background-color: $success-color;
+            border-color: $success-color;
+            color: white;
+            box-shadow: 0 4px 12px rgba($success-color, 0.3);
+            transform: translateY(-1px);
+        }
+
+        &.despesa.active {
+            background-color: $danger-color;
+            border-color: $danger-color;
+            color: white;
+            box-shadow: 0 4px 12px rgba($danger-color, 0.3);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+}
+
+// Estrutura de Grid para campos lado a lado (Valor/Status e Datas)
+.grid-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr; // Divide em duas colunas iguais
+    gap: 15px;
+}
+
+// Estilização Geral dos Grupos de Formulário
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 
     label {
         display: block;
-        font-size: 0.9rem;
-        margin-bottom: 8px;
-        color: #555;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
         font-weight: 600;
+        color: $text-main;
     }
 
-    input, textarea, select {
+    input, select, textarea {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
+        padding: 10px 12px;
+        border: 1px solid $border-color;
         border-radius: 6px;
         font-size: 1rem;
-        transition: all 0.2s ease;
+        color: $text-main;
+        background-color: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
 
         &:focus {
             border-color: $primary-color;
             box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
             outline: none;
+        }
+
+        &::placeholder {
+            color: #ccc;
+        }
+
+        &:disabled {
+            background-color: $bg-light;
+            cursor: not-allowed;
         }
     }
 
@@ -45,34 +142,100 @@
     }
 }
 
+// Ações do Formulário (Botões de Rodapé)
 .form-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 30px;
-    border-top: 1px solid #eee;
-    padding-top: 20px;
 
     .btn {
-        padding: 10px 20px;
-        border-radius: 4px;
-        font-weight: 500;
+        padding: 10px 25px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.95rem;
         cursor: pointer;
-        transition: all 0.3s;
         border: none;
+        transition: filter 0.2s, transform 0.1s;
+
+        &:active {
+            transform: scale(0.97);
+        }
+
+        &:disabled {
+            filter: grayscale(1);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    .btn-secondary {
+        background-color: #e0e0e0;
+        color: #444;
+        &:hover { background-color: #d5d5d5; }
     }
 
     .btn-primary {
         background-color: $primary-color;
         color: white;
-        &:hover:not(:disabled) { background-color: $secondary-color; }
-        &:disabled { background-color: #ccc; cursor: not-allowed; }
+        &:hover { filter: brightness(1.1); }
     }
+}
 
-    .btn-secondary {
-        background-color: transparent;
-        border: 1px solid #6c757d;
-        color: #6c757d;
-        &:hover { background-color: #f8f9fa; }
-    }
+.alert-info {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 4px solid #2196f3;
+}
+
+input:disabled, select:disabled {
+  background-color: #f5f5f5 !important;
+  color: #888 !important;
+  cursor: not-allowed;
+  border-color: #ddd !important;
+}
+
+.error-text {
+  color: #dc3545;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.is-invalid {
+    border-color: $danger-color !important;
+    box-shadow: 0 0 0 3px rgba($danger-color, 0.1) !important;
+}
+
+.text-danger {
+    color: $danger-color;
+}
+
+.error-text {
+  color: $danger-color;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.alert-info {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 4px solid #2196f3;
 }

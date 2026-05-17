@@ -1,33 +1,41 @@
 <div class="form-container">
     <h3>Quitar Lançamento</h3>
-    <hr>
     
-    <div class="info-resumo">
-        <p><strong>Conta:</strong> {{ lancamento?.nomeConta }}</p>
-        <p><strong>Descrição:</strong> {{ lancamento?.descricao || 'Sem descrição' }}</p>
-    </div>
+   <div class="info-resumo">
+    <p><strong>Conta:</strong> {{ lancamento?.conta?.nome }}</p>
+    <p><strong>Descrição:</strong> {{ lancamento?.descricao }}</p>
+    <p><strong>Valor Total Original:</strong> R$ {{ lancamento?.valor | number:'1.2-2' }}</p>
+</div>
 
     <form [formGroup]="quitacaoForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
-            <label>Data do Pagamento</label>
-            <input type="date" formControlName="dataPagamento" class="form-control">
+            <label>Data do Pagamento <span class="text-danger">*</span></label>
+            <input type="date" formControlName="dataPagamento" 
+                   [ngClass]="{'is-invalid': quitacaoForm.get('dataPagamento')?.invalid && quitacaoForm.get('dataPagamento')?.touched}">
+            <small class="text-danger error-text" *ngIf="quitacaoForm.get('dataPagamento')?.invalid && quitacaoForm.get('dataPagamento')?.touched">
+                A data de pagamento é obrigatória.
+            </small>
         </div>
 
         <div class="form-group">
-            <label>Valor Pago (R$)</label>
-            <input type="number" step="0.01" formControlName="valorPago" class="form-control">
+            <label>Valor Pago (R$) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" formControlName="valorPago" 
+                   [ngClass]="{'is-invalid': quitacaoForm.get('valorPago')?.invalid && quitacaoForm.get('valorPago')?.touched}">
+            <small class="text-danger error-text" *ngIf="quitacaoForm.get('valorPago')?.invalid && quitacaoForm.get('valorPago')?.touched">
+                Informe um valor válido e maior que zero.
+            </small>
         </div>
 
         <div class="form-group">
             <label>Comprovante (Opcional)</label>
-            <input type="file" (change)="onFileChange($event)" class="form-control" accept="image/*,application/pdf">
-            <small class="text-muted">Formatos: PDF ou Imagem</small>
+            <input type="file" (change)="onFileChange($event)" accept="image/*,application/pdf">
+            <small class="text-muted">Formatos aceites: PDF, JPG, PNG.</small>
         </div>
 
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" (click)="fechar.emit()">Cancelar</button>
             <button type="submit" class="btn btn-success" [disabled]="quitacaoForm.invalid">
-                <i class="material-icons"></i> Confirmar Pagamento
+                <i class="fas fa-check-circle"></i> Confirmar Pagamento
             </button>
         </div>
     </form>

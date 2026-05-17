@@ -1,27 +1,50 @@
 <div class="financeiro-page"> 
     <h2>Gestão Financeira</h2>
 
-    <!-- Ações de Topo -->
     <div class="top-actions">
         <div class="search-bar">
             <input 
                 type="text" 
-                placeholder="Pesquisar"
+                placeholder="Pesquisar por descrição ou conta"
                 [(ngModel)]="termoPesquisa" 
-                (ngModelChange)="aplicarFiltro()">
+                (ngModelChange)="aplicarFiltroLocal()">
             <i class="material-icons search-icon"></i>
         </div>
 
         <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
-            <i class="material-icons"></i> Adicionar Novo Lançamento
+            <i class="material-icons"></i> Novo Lançamento
         </button>
     </div>
 
-    <!-- Listagem -->
+    <div class="filters-grid">
+    <select #fTipo (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+        <option value="">Todos os Tipos</option> <option value="RECEITA">RECEITA</option>
+        <option value="DESPESA">DESPESA</option>
+    </select>
+
+    <select #fStatus (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+        <option value="">Todos os Status</option>
+        <option value="PENDENTE">PENDENTE</option>
+        <option value="VENCIDA">VENCIDA</option>
+        <option value="PAGA">PAGA</option>
+        <option value="PAGAMENTO_PARCIAL">PAGAMENTO PARCIAL</option>
+        <option value="ESTORNADA">ESTORNADA</option>
+    </select>
+
+    <select #fConta (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+        <option value="">Todas as Contas</option>
+        <option *ngFor="let c of contasDisponiveis" [value]="c.id">{{ c.nome }}</option>
+    </select>
+
+    <input type="date" #fIni (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+    <input type="date" #fFim (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+</div>
+
     <div class="contas-list">
         <table *ngIf="financeirosFiltrados.length > 0">
             <thead>
                 <tr>
+                    <th class="col-id">ID</th>
                     <th class="col-conta">Conta</th>
                     <th class="col-descricao">Descrição</th>
                     <th class="col-vencimento">Vencimento</th>
@@ -32,12 +55,16 @@
             </thead>
             <tbody>
                 <tr *ngFor="let f of financeirosFiltrados">
+                    <td class="col-id-valor">#{{ f.id }}</td>
                     <td>{{ f.nomeConta }}</td>
-                    <td>{{ f.descricao || '--' }}</td>
+                    <td>
+                        {{ f.descricao || '--' }}
+                        <span *ngIf="f.idReferencia" class="badge-referencia" title="Lançamento residual">Ref: #{{ f.idReferencia }}</span>
+                    </td>
                     
                     <td>
                         <div class="timeline-wrapper" 
-                            [ngClass]="getCorTimeline(f.dataVencimento)"
+                            [ngClass]="getCorTimeline(f.dataVencimento, f.statusReal)"
                             [title]="'Vencimento: ' + (f.dataVencimento | date:'dd/MM/yyyy')">
                             
                             <div class="timeline-track"></div>
@@ -53,11 +80,7 @@
                     <td class="valor-celula">{{ f.valor | currency:'BRL' }}</td>
                     
                     <td>
-                        <span [ngClass]="{
-                            'status-PAGA': f.statusReal === 'PAGA',
-                            'status-PENDENTE': f.statusReal === 'PENDENTE',
-                            'status-VENCIDA': f.statusReal === 'VENCIDA'
-                        }">{{ f.statusReal }}</span>
+                        <span [ngClass]="'status-' + f.statusReal">{{ f.statusReal }}</span>
                     </td>
 
                     <td class="acoes-celula">
@@ -65,8 +88,7 @@
                             <i class="material-icons">Editar</i>
                         </button>
                         
-                        <!-- Botão de Quitação chama o novo modal -->
-                        <button *ngIf="f.statusReal !== 'PAGA'" 
+                        <button *ngIf="f.statusReal !== 'PAGA' && f.statusReal !== 'ESTORNADA'" 
                                 class="btn btn-icon btn-success" 
                                 title="Quitar" 
                                 (click)="abrirModalQuitacao(f)">
@@ -80,7 +102,6 @@
         <p *ngIf="financeirosFiltrados.length === 0" class="no-results">Nenhum registro financeiro encontrado.</p>
     </div>
 
-    <!-- MODAL 1: CADASTRO E EDIÇÃO (Recorrência inclusa no filho) -->
     <div *ngIf="isFormularioAberto" class="form-modal-overlay">
         <div class="form-card">
             <app-financeiro-form
@@ -91,7 +112,6 @@
         </div>
     </div>
 
-    <!-- MODAL 2: QUITAÇÃO (Comprovante incluso no filho) -->
     <div *ngIf="isModalQuitacaoAberto" class="form-modal-overlay">
         <div class="form-card">
             <app-quitacao-form

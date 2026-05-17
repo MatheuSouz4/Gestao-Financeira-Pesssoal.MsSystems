@@ -10,7 +10,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
   styleUrls: ['./quitacao-form.component.scss']
 })
 export class QuitacaoFormComponent implements OnInit {
-  @Input() lancamento: any; // Recebe o lançamento que será quitado
+  @Input() lancamento: any; // Recebe o lançamento do backend
   @Output() confirmar = new EventEmitter<FormData>();
   @Output() fechar = new EventEmitter<void>();
 
@@ -20,10 +20,12 @@ export class QuitacaoFormComponent implements OnInit {
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
+    // Pega a data de hoje no formato YYYY-MM-DD
     const hoje = new Date().toISOString().split('T')[0];
     
     this.quitacaoForm = this.fb.group({
       dataPagamento: [hoje, Validators.required],
+      // Inicia com o valor previsto do lançamento
       valorPago: [this.lancamento?.valor || 0, [Validators.required, Validators.min(0.01)]]
     });
   }
@@ -35,16 +37,24 @@ export class QuitacaoFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.quitacaoForm.valid) {
-      const formData = new FormData();
-      formData.append('dataPagamento', this.quitacaoForm.get('dataPagamento')?.value);
-      formData.append('valorPago', this.quitacaoForm.get('valorPago')?.value);
-      
-      if (this.arquivoSelecionado) {
-        formData.append('comprovante', this.arquivoSelecionado);
-      }
+  if (this.quitacaoForm.valid) {
+    const formData = new FormData();
+    
+    // 1. Pegamos os valores do formulário
+    const dataPagamento = this.quitacaoForm.get('dataPagamento')?.value;
+    const valorPago = this.quitacaoForm.get('valorPago')?.value;
 
-      this.confirmar.emit(formData);
+    // 2. Preparamos o FormData exatamente como no Postman
+    formData.append('dataPagamento', dataPagamento); 
+    formData.append('valorPago', valorPago.toString()); // O Java recebe como BigDecimal
+    
+    if (this.arquivoSelecionado) {
+      formData.append('comprovante', this.arquivoSelecionado);
     }
+
+    // 3. Emitimos o FormData para o componente pai
+    // Certifique-se de que o componente pai saiba QUAL ID quitar
+    this.confirmar.emit(formData);
   }
+}
 }

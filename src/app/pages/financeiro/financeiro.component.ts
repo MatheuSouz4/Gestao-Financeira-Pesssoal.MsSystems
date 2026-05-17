@@ -2,9 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
-
 import { ContasService } from '../../services/contas.service';
 import { Financeiro, FinanceiroService } from '../../services/financeiro.service';
 import { FinanceiroFormComponent } from './financeiro-form/financeiro-form.component';
@@ -25,12 +22,18 @@ interface FinanceiroVM extends Financeiro {
 export class FinanceiroComponent implements OnInit {
   financeiros: FinanceiroVM[] = [];
   financeirosFiltrados: FinanceiroVM[] = [];
+  contasDisponiveis: any[] = [];
   termoPesquisa: string = '';
+
+  // Filtros Backend
+  filtroStatus: string = '';
+  filtroTipo: string = '';
+  filtroContaId: string = '';
+  filtroDataInicio: string = '';
+  filtroDataFim: string = '';
   
-  // Controles de Modais
   isFormularioAberto: boolean = false;
   isModalQuitacaoAberto: boolean = false;
-
   financeiroEmEdicao: Financeiro | null = null;
   lancamentoParaQuitar: FinanceiroVM | null = null;
 
@@ -41,31 +44,55 @@ export class FinanceiroComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.carregarDados();
-  }
-
-  carregarDados(): void {
-    combineLatest([
-      this.financeiroService.financeiros$,
-      this.contasService.listar()
-    ]).pipe(
-      map(([financeiros, contas]) => {
-        return financeiros.map(f => {
-          const nomeContaBase = f.conta ? f.conta.nome : 'Conta desconhecida';
-          return {
-            ...f,
-            nomeConta: nomeContaBase,
-            statusReal: this.financeiroService.calcularStatus(f)
-          } as FinanceiroVM;
-        });
-      })
-    ).subscribe(res => {
-      this.financeiros = res;
-      this.aplicarFiltro();
+    this.carregarContas();
+    this.carregarFinanceiro();
+    
+    // Inscreve-se nas mudanças da lista
+    this.financeiroService.financeiros$.subscribe(dados => {
+      this.financeiros = dados.map(f => ({
+        ...f,
+        nomeConta: f.conta ? f.conta.nome : 'Conta desconhecida',
+        statusReal: this.financeiroService.calcularStatus(f)
+      }));
+      this.aplicarFiltroLocal();
     });
   }
 
-  aplicarFiltro(): void {
+  carregarContas(): void {
+    this.contasService.listar().subscribe(contas => {
+      this.contasDisponiveis = contas;
+    });
+  }
+
+  carregarFinanceiro(): void {
+    this.financeiroService.listar().subscribe(financeiros =>{})
+  }
+
+  onFiltrar(status: string, tipo: string, contaId: string, inicio: string, fim: string): void {
+    this.filtroStatus = status;
+    this.filtroTipo = tipo;
+    this.filtroContaId = contaId;
+    this.filtroDataInicio = inicio;
+    this.filtroDataFim = fim;
+
+    // Dispara a requisição ao backend
+    this.financeiroService.listar(
+      this.filtroStatus, 
+      this.filtroTipo, 
+      this.filtroContaId, 
+      this.filtroDataInicio, 
+      this.filtroDataFim
+    ).subscribe({
+      error: () => this.toast.error('Erro ao aplicar filtros no servidor.')
+    });
+  }
+
+  aplicarFiltroLocal(): void {
+    if (!this.termoPesquisa) {
+      this.financeirosFiltrados = [...this.financeiros];
+      return;
+    }
+    
     const termo = this.termoPesquisa.toLowerCase();
     this.financeirosFiltrados = this.financeiros.filter(f =>
       f.nomeConta.toLowerCase().includes(termo) ||
@@ -114,10 +141,9 @@ export class FinanceiroComponent implements OnInit {
     if (this.lancamentoParaQuitar?.id) {
       this.financeiroService.quitar(this.lancamentoParaQuitar.id, formData).subscribe({
         next: () => {
-          this.toast.success('Lançamento quitado com sucesso!');
+          this.toast.success('Baixa registrada com sucesso!');
           this.isModalQuitacaoAberto = false;
           this.lancamentoParaQuitar = null;
-          // O service reativo deve atualizar a lista automaticamente
         },
         error: () => this.toast.error('Erro ao registrar quitação.')
       });
@@ -135,7 +161,8 @@ export class FinanceiroComponent implements OnInit {
     return ((30 - diffDays) / 30) * 100;
   }
 
-  getCorTimeline(dataVencimento: string) {
+  getCorTimeline(dataVencimento: string, status: string) {
+    if (status === 'PAGA') return 'prazo-neutro'; // Se pago, remove alerta
     const hoje = new Date();
     const vencimento = new Date(dataVencimento);
     const diffDays = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));

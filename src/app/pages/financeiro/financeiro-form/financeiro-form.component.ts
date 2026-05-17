@@ -15,8 +15,12 @@ export class FinanceiroFormComponent implements OnInit {
   @Output() salvar = new EventEmitter<any>();
   @Output() fechar = new EventEmitter<void>();
 
+  isEditMode: boolean = false;
+  
   financeiroForm!: FormGroup;
-  contas: any[] = [];
+  todasContas: any[] = [];
+  contasFiltradas: any[] = [];
+  tipoSelecionado: string = ''; 
 
   constructor(
     private fb: FormBuilder,
@@ -24,33 +28,22 @@ export class FinanceiroFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.carregarContas();
     this.iniciarFormulario();
-
-    if (this.financeiroEdicao) {
-      this.preencherFormulario();
-    }
-  }
-
-  carregarContas(): void {
-    this.contasService.listar().subscribe({
-      next: (dados) => this.contas = dados,
-      error: (err) => console.error('Erro ao buscar contas:', err)
-    });
+    this.carregarContas();
   }
 
   iniciarFormulario(): void {
     this.financeiroForm = this.fb.group({
       id: [null],
-      contaId: ['', Validators.required],
       descricao: ['', Validators.required],
+      valor: [null, [Validators.required, Validators.min(0.01)]],
       vencimento: ['', Validators.required],
-      valor: ['', [Validators.required, Validators.min(0.01)]],
-      tipoRecorrencia: ['NENHUMA'], // Novo campo
-      quantidadeParcelas: [1]       // Novo campo
+      contaId: [null, Validators.required],
+      tipoRecorrencia: ['NENHUMA'],
+      quantidadeParcelas: [1],
+      motivoAlteracao: ['']
     });
 
-    // Monitora as mudanças do tipo de recorrência para exigir parcelas
     this.financeiroForm.get('tipoRecorrencia')?.valueChanges.subscribe(tipo => {
       const parcelasCtrl = this.financeiroForm.get('quantidadeParcelas');
       if (tipo === 'NENHUMA') {
@@ -63,27 +56,72 @@ export class FinanceiroFormComponent implements OnInit {
     });
   }
 
+  carregarContas(): void {
+    this.contasService.listar().subscribe({
+      next: (dados) => {
+        this.todasContas = dados;
+        
+        // Se estivermos editando, precisamos preencher o form ANTES de filtrar as contas por tipo
+        if (this.financeiroEdicao) {
+          this.preencherFormulario();
+        }
+      },
+      error: (err) => console.error('Erro ao carregar contas', err)
+    });
+  }
+
   preencherFormulario(): void {
+    if (this.financeiroEdicao.conta) {
+      this.selecionarTipo(this.financeiroEdicao.conta.tipo);
+    }
+
     this.financeiroForm.patchValue({
       id: this.financeiroEdicao.id,
-      contaId: this.financeiroEdicao.conta?.id,
       descricao: this.financeiroEdicao.descricao,
-      vencimento: this.financeiroEdicao.dataVencimento,
       valor: this.financeiroEdicao.valor,
-      tipoRecorrencia: 'NENHUMA', // Na edição de 1 item, a recorrência é padrão
-      quantidadeParcelas: 1
+      vencimento: this.financeiroEdicao.dataVencimento,
+      contaId: this.financeiroEdicao.conta?.id,
+      tipoRecorrencia: 'NENHUMA',
+      quantidadeParcelas: 1,
+      motivoAlteracao: this.financeiroEdicao.motivoAlteracao || ''
     });
+
+    if (this.financeiroEdicao) {
+      this.financeiroForm.get('contaId')?.disable();
+      this.financeiroForm.get('descricao')?.disable();
+      this.financeiroForm.get('motivoAlteracao')?.setValidators([Validators.required, Validators.minLength(5)]);
+      this.financeiroForm.get('motivoAlteracao')?.updateValueAndValidity();
+    }
+  }
+
+  selecionarTipo(tipo: string): void {
+    this.tipoSelecionado = tipo;
+
+    // AQUI A MUDANÇA: Filtramos por tipo E status.
+    // Se for edição, mantemos a conta atual na lista mesmo se ela estiver INATIVA.
+    this.contasFiltradas = this.todasContas.filter(c => {
+      const pertenceAoTipo = c.tipo === tipo;
+      const estaAtiva = c.status === 'ATIVO';
+      const ehAContaJaSelecionada = this.financeiroEdicao && c.id === this.financeiroEdicao.conta?.id;
+
+      return pertenceAoTipo && (estaAtiva || ehAContaJaSelecionada);
+    });
+    
+    const contaAtualId = this.financeiroForm.get('contaId')?.value;
+    if (contaAtualId) {
+       const contaAtualObj = this.todasContas.find(c => c.id === contaAtualId);
+       if (contaAtualObj && contaAtualObj.tipo !== tipo) {
+         this.financeiroForm.get('contaId')?.setValue(null);
+       }
+    }
   }
 
   onSubmit(): void {
     if (this.financeiroForm.valid) {
-      this.salvar.emit(this.financeiroForm.value);
+      const payload = this.financeiroForm.getRawValue();
+      this.salvar.emit(payload);
     } else {
       this.financeiroForm.markAllAsTouched();
     }
-  }
-
-  onCancelar(): void {
-    this.fechar.emit();
   }
 }
