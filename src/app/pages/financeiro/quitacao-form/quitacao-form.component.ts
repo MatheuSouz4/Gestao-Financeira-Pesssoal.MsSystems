@@ -20,14 +20,30 @@ export class QuitacaoFormComponent implements OnInit {
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
-    // Pega a data de hoje no formato YYYY-MM-DD
     const hoje = new Date().toISOString().split('T')[0];
     
     this.quitacaoForm = this.fb.group({
       dataPagamento: [hoje, Validators.required],
-      // Inicia com o valor previsto do lançamento
-      valorPago: [this.lancamento?.valor || 0, [Validators.required, Validators.min(0.01)]]
+      valorPago: [this.lancamento?.valor || 0, [Validators.required, Validators.min(0.01)]],
+      novaDataVencimento: [''] // Campo inicializado vazio
     });
+
+    // Monitora o valor digitado para aplicar validação dinâmica na nova data de vencimento
+    this.quitacaoForm.get('valorPago')?.valueChanges.subscribe(valor => {
+      const novaDataCtrl = this.quitacaoForm.get('novaDataVencimento');
+      if (this.isPagamentoParcial) {
+        novaDataCtrl?.setValidators([Validators.required]);
+      } else {
+        novaDataCtrl?.clearValidators();
+      }
+      novaDataCtrl?.updateValueAndValidity();
+    });
+  }
+
+  // Getter auxiliar para identificar se é pagamento parcial na View
+  get isPagamentoParcial(): boolean {
+    const valorPago = this.quitacaoForm.get('valorPago')?.value || 0;
+    return this.lancamento && valorPago < this.lancamento.valor;
   }
 
   onFileChange(event: any): void {
@@ -37,24 +53,25 @@ export class QuitacaoFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-  if (this.quitacaoForm.valid) {
-    const formData = new FormData();
-    
-    // 1. Pegamos os valores do formulário
-    const dataPagamento = this.quitacaoForm.get('dataPagamento')?.value;
-    const valorPago = this.quitacaoForm.get('valorPago')?.value;
+    if (this.quitacaoForm.valid) {
+      const formData = new FormData();
+      const dataPagamento = this.quitacaoForm.get('dataPagamento')?.value;
+      const valorPago = this.quitacaoForm.get('valorPago')?.value;
+      const novaDataVencimento = this.quitacaoForm.get('novaDataVencimento')?.value;
 
-    // 2. Preparamos o FormData exatamente como no Postman
-    formData.append('dataPagamento', dataPagamento); 
-    formData.append('valorPago', valorPago.toString()); // O Java recebe como BigDecimal
-    
-    if (this.arquivoSelecionado) {
-      formData.append('comprovante', this.arquivoSelecionado);
+      formData.append('dataPagamento', dataPagamento); 
+      formData.append('valorPago', valorPago.toString());
+      
+      // Se for parcial, anexa a nova data ao FormData para o backend processar
+      if (this.isPagamentoParcial && novaDataVencimento) {
+        formData.append('novaDataVencimento', novaDataVencimento);
+      }
+      
+      if (this.arquivoSelecionado) {
+        formData.append('comprovante', this.arquivoSelecionado);
+      }
+
+      this.confirmar.emit(formData);
     }
-
-    // 3. Emitimos o FormData para o componente pai
-    // Certifique-se de que o componente pai saiba QUAL ID quitar
-    this.confirmar.emit(formData);
   }
-}
 }

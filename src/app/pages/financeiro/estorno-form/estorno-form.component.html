@@ -1,0 +1,55 @@
+<div class="form-container">
+    <h3 class="title-danger"><i class="fas fa-undo-alt"></i> Reverter Pagamento</h3>
+    
+   <div class="info-resumo alert-danger-light">
+    <p><strong>Atenção:</strong> Escolha abaixo como deseja tratar a reversão. O saldo da conta será recalculado automaticamente em ambas opções.</p>
+    <hr>
+    <p><strong>Conta:</strong> {{ lancamento?.conta?.nome }}</p>
+    <p><strong>Descrição:</strong> {{ lancamento?.descricao }}</p>
+    <p><strong>Valor Pago:</strong> R$ {{ lancamento?.valorPago | number:'1.2-2' }}</p>
+   </div>
+
+    <form [formGroup]="estornoForm" (ngSubmit)="onSubmit()">
+        
+        <div class="form-group">
+            <label>Qual ação deseja realizar? <span class="text-danger">*</span></label>
+            <div class="radio-group">
+                <label class="radio-option" [class.selected]="estornoForm.get('tipoAcao')?.value === 'PENDENTE'">
+                    <input type="radio" formControlName="tipoAcao" value="PENDENTE">
+                    <div class="radio-text">
+                        <strong>Desfazer Pagamento (Erro operacional)</strong>
+                        <span class="text-muted">Limpa o registro de pagamento e retorna o título para a lista de pendências.</span>
+                    </div>
+                </label>
+                
+                <label class="radio-option" [class.selected]="estornoForm.get('tipoAcao')?.value === 'ESTORNADA'">
+                    <input type="radio" formControlName="tipoAcao" value="ESTORNADA">
+                    <div class="radio-text">
+                        <strong>Estornar Lançamento (Auditoria)</strong>
+                        <span class="text-muted">Invalida o título e exige uma justificativa. Mantém o histórico do que havia sido pago.</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Justificativa <span class="text-danger" *ngIf="estornoForm.get('tipoAcao')?.value === 'ESTORNADA'">*</span></label>
+            <textarea formControlName="justificativa" rows="3" placeholder="Informe o motivo da alteração..."
+                   [ngClass]="{'is-invalid': estornoForm.get('justificativa')?.invalid && estornoForm.get('justificativa')?.touched}"></textarea>
+            
+            <small class="text-danger error-text" *ngIf="estornoForm.get('justificativa')?.invalid && estornoForm.get('justificativa')?.touched">
+                A justificativa é obrigatória para estornos e deve ter pelo menos 5 caracteres.
+            </small>
+            <small class="text-muted error-text" *ngIf="estornoForm.get('tipoAcao')?.value === 'PENDENTE'">
+                * Opcional ao desfazer pagamento.
+            </small>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="fechar.emit()">Cancelar</button>
+            <button type="submit" class="btn btn-danger" [disabled]="estornoForm.invalid">
+                <i class="fas fa-exclamation-triangle"></i> Confirmar Ação
+            </button>
+        </div>
+    </form>
+</div>

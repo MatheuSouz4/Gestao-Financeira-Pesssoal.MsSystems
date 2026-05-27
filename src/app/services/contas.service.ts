@@ -4,15 +4,17 @@ import { Observable } from 'rxjs';
 
 export interface ClienteBase {
   id?: number;
-  nomeOuNomeFantasia: string; }
+  nomeOuNomeFantasia: string; 
+}
 
 export interface FornecedorBase {
   id?: number;
-  nomeOuNomeFantasia: string; }
+  nomeOuNomeFantasia: string; 
+}
 
 export type TipoConta = 'RECEITA' | 'DESPESA';
 
-export enum Status{
+export enum Status {
   ATIVO = 'ATIVO',
   INATIVO = 'INATIVO',
   BLOQUEADO = 'BLOQUEADO'
@@ -23,9 +25,10 @@ export interface Conta {
   nome: string;
   descricao?: string;
   tipo: TipoConta;
-  status: Status
+  status: Status;
   cliente?: ClienteBase;
   fornecedor?: FornecedorBase;
+  saldoAtual?: number;
 }
 
 @Injectable({
@@ -38,19 +41,16 @@ export class ContasService {
   constructor(private http: HttpClient) { }
 
   listar(status?: string, tipo?: string): Observable<Conta[]> {
-  const params: any = {};
+    const params: any = {};
+    if (status) params.status = status;
+    if (tipo) params.tipo = tipo;
 
-  // Se o valor for "null", "undefined" ou "", o Angular não deve enviar o parâmetro
-  if (status) params.status = status;
-  if (tipo) params.tipo = tipo;
-
-  console.log('Objeto de parâmetros enviado ao HttpClient:', params);
-
+    console.log('Objeto de parâmetros enviado ao HttpClient:', params);
     return this.http.get<Conta[]>(this.API_URL, { params });
   }
 
   adicionar(conta: Conta): Observable<Conta> {
-      return this.http.post<Conta>(this.API_URL, conta);
+    return this.http.post<Conta>(this.API_URL, conta);
   }
 
   atualizar(conta: Conta): Observable<Conta> {
@@ -60,5 +60,19 @@ export class ContasService {
 
   excluir(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`);
+  }
+
+  // CORREÇÃO: Método agora aceita os parâmetros de paginação/filtro e repassa ao HTTP
+  obterSaldoConsolidado(inicio?: string, fim?: string, contaId?: string): Observable<number> {
+    const params: any = {};
+    if (inicio) params.inicio = inicio;
+    if (fim) params.fim = fim;
+    if (contaId) params.contaId = contaId;
+
+    return this.http.get<number>(`${this.API_URL}/saldo-total`, { params });
+  }
+
+  obterSaldoAtual(id: number): Observable<number> {
+    return this.http.get<number>(`${this.API_URL}/${id}/saldo`);
   }
 }

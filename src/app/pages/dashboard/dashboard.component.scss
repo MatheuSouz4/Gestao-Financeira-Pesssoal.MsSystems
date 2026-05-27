@@ -2,6 +2,7 @@ $bg-color: #f4f7fe;
 $primary: #4361ee;
 $success: #2ec4b6;
 $warning: #ff9f1c;
+$danger: #dc3545;
 $text-main: #2b3674;
 $text-sec: #a3aed0;
 
@@ -34,14 +35,81 @@ $text-sec: #a3aed0;
       border-radius: 12px;
       color: $text-main;
       box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05);
-      i { color: $primary; }
+      i { color: $primary; font-size: 20px; }
+    }
+  }
+}
+
+.saldo-consolidado-container {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+
+  .saldo-display {
+    display: flex;
+    flex-direction: column;
+
+    .label-saldo {
+      color: $text-sec;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h2 {
+      margin: 5px 0 0 0;
+      font-size: 2.2rem;
+      font-weight: 800;
+      
+      &.positivo { color: $success; }
+      &.negativo { color: $danger; }
+    }
+  }
+
+  .saldo-filtros {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .filtro-select, .filtro-input {
+      padding: 10px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      color: $text-main;
+      font-size: 0.9rem;
+      font-weight: 500;
+      background-color: #f8fafc;
+      outline: none;
+
+      &:focus {
+        border-color: $primary;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      }
+    }
+
+    .date-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      .separator { font-size: 0.85rem; color: $text-sec; }
     }
   }
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 
@@ -49,47 +117,56 @@ $text-sec: #a3aed0;
     background: white;
     border-radius: 20px;
     padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
     transition: transform 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.05);
 
-    &:hover { transform: translateY(-5px); }
+    &:hover { transform: translateY(-4px); }
 
     .icon-box {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 1rem;
       background: #f4f7fe;
-      
-      i { font-size: 28px; }
+      i { font-size: 24px; }
     }
 
-    &.pago i { color: $success; }
-    &.pendente i { color: $warning; }
+    // Configuração de Cores Dinâmicas dos Ícones baseadas no Contexto
+    &.receita i { color: $success; }
+    &.despesa i { color: $danger; }
+    &.pendente-receita i { color: $warning; }
+    &.pendente-despesa i { color: #a1887f; }
     &.balanco i { color: $primary; }
+    &.balanco-projetado i { color: #6c5ce7; }
 
     .stat-info {
-      .label { color: $text-sec; font-size: 0.9rem; font-weight: 500; }
-      .value { color: $text-main; font-size: 1.7rem; font-weight: 700; margin: 5px 0; }
+      .label { color: $text-sec; font-size: 0.85rem; font-weight: 500; }
+      .value { 
+        color: $text-main; 
+        font-size: 1.55rem; 
+        font-weight: 700; 
+        margin: 4px 0; 
+
+        &.positivo { color: $success; }
+        &.negativo { color: $danger; }
+      }
     }
 
     .stat-footer {
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      margin-top: 0.75rem;
       font-size: 0.8rem;
       font-weight: 600;
 
       &.success { color: $success; }
+      &.danger { color: $danger; }
       &.warning { color: $warning; }
       &.info { color: $primary; }
+      &.neutral { color: $text-sec; }
+      &.primary { color: #6c5ce7; }
     }
   }
 }
@@ -99,13 +176,13 @@ $text-sec: #a3aed0;
     background: white;
     border-radius: 20px;
     padding: 2rem;
-    box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+    box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.05);
 
     .chart-header {
       display: flex;
       justify-content: space-between;
       margin-bottom: 2rem;
-      h3 { color: $text-main; font-weight: 700; font-size: 1.3rem; }
+      h3 { color: $text-main; font-weight: 700; font-size: 1.2rem; }
       
       .btn-icon {
         background: #f4f7fe;
@@ -114,14 +191,13 @@ $text-sec: #a3aed0;
         border-radius: 10px;
         cursor: pointer;
         color: $primary;
-        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        transition: 0.2s;
         &:hover { background: $primary; color: white; }
       }
     }
 
-    .canvas-wrapper {
-      height: 350px;
-      width: 100%;
-    }
+    .canvas-wrapper { height: 350px; width: 100%; }
   }
 }

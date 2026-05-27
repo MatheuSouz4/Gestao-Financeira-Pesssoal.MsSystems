@@ -10,31 +10,79 @@
     </div>
   </header>
 
+  <section class="saldo-consolidado-container">
+    <div class="saldo-display">
+      <span class="label-saldo">Saldo Consolidado</span>
+      <h2 [ngClass]="{'positivo': saldoConsolidado >= 0, 'negativo': saldoConsolidado < 0}">
+        {{ saldoConsolidado | currency:'BRL' }}
+      </h2>
+    </div>
+
+    <div class="saldo-filtros">
+      <select [(ngModel)]="filtroContaId" (change)="aplicarFiltrosSaldo()" class="filtro-select">
+        <option value="">Todas as Contas</option>
+        <option *ngFor="let conta of contasDisponiveis" [value]="conta.id">{{ conta.nome }}</option>
+      </select>
+      
+      <div class="date-group">
+        <input type="date" [(ngModel)]="filtroInicio" (change)="aplicarFiltrosSaldo()" class="filtro-input" title="Data Inicial">
+        <span class="separator">até</span>
+        <input type="date" [(ngModel)]="filtroFim" (change)="aplicarFiltrosSaldo()" class="filtro-input" title="Data Final">
+      </div>
+    </div>
+  </section>
+
   <section class="stats-grid">
-    <div class="stat-card pago">
+    
+    <div class="stat-card receita">
       <div class="icon-box">
         <i class="material-icons"></i>
       </div>
       <div class="stat-info">
-        <span class="label">Total Pago</span>
-        <h2 class="value">{{ resumo.totalPago | currency:'BRL' }}</h2>
+        <span class="label">Receitas Recebidas</span>
+        <h2 class="value">{{ resumo.receitasPagas | currency:'BRL' }}</h2>
       </div>
       <div class="stat-footer success">
-        <i class="material-icons"></i>
-        <span>Entradas confirmadas</span>
+        <span>Entradas liquidadas</span>
       </div>
     </div>
 
-    <div class="stat-card pendente">
+    <div class="stat-card despesa">
       <div class="icon-box">
         <i class="material-icons"></i>
       </div>
       <div class="stat-info">
-        <span class="label">Total Pendente</span>
-        <h2 class="value">{{ resumo.totalPendente | currency:'BRL' }}</h2>
+        <span class="label">Despesas Pagas</span>
+        <h2 class="value">{{ resumo.despesasPagas | currency:'BRL' }}</h2>
+      </div>
+      <div class="stat-footer danger">
+        <span>Saídas liquidadas</span>
+      </div>
+    </div>
+
+    <div class="stat-card pendente-receita">
+      <div class="icon-box">
+        <i class="material-icons"></i>
+      </div>
+      <div class="stat-info">
+        <span class="label">A Receber</span>
+        <h2 class="value">{{ resumo.receitasPendentes | currency:'BRL' }}</h2>
       </div>
       <div class="stat-footer warning">
-        <span>{{ resumo.qtdPendentes }} lançamentos em aberto</span>
+        <span>Previsão de entradas</span>
+      </div>
+    </div>
+
+    <div class="stat-card pendente-despesa">
+      <div class="icon-box">
+        <i class="material-icons"></i>
+      </div>
+      <div class="stat-info">
+        <span class="label">A Pagar</span>
+        <h2 class="value">{{ resumo.despesasPendentes | currency:'BRL' }}</h2>
+      </div>
+      <div class="stat-footer info">
+        <span>{{ resumo.qtdPendentes }} contas em aberto</span>
       </div>
     </div>
 
@@ -43,13 +91,31 @@
         <i class="material-icons"></i>
       </div>
       <div class="stat-info">
-        <span class="label">Balanço Total</span>
-        <h2 class="value">{{ (resumo.totalPago + resumo.totalPendente) | currency:'BRL' }}</h2>
+        <span class="label">Balanço Atual</span>
+        <h2 class="value" [ngClass]="{'positivo': resumo.totalPago >= 0, 'negativo': resumo.totalPago < 0}">
+          {{ resumo.totalPago | currency:'BRL' }}
+        </h2>
       </div>
-      <div class="stat-footer info">
-        <span>Previsão de fechamento</span>
+      <div class="stat-footer neutral">
+        <span>Resultado do mês atual</span>
       </div>
     </div>
+
+    <div class="stat-card balanco-projetado">
+      <div class="icon-box">
+        <i class="material-icons"></i>
+      </div>
+      <div class="stat-info">
+        <span class="label">Balanço Projetado</span>
+        <h2 class="value">
+          {{ (resumo.totalPago + resumo.totalPendente) | currency:'BRL' }}
+        </h2>
+      </div>
+      <div class="stat-footer primary">
+        <span>Previsão final de fechamento</span>
+      </div>
+    </div>
+
   </section>
 
   <section class="chart-main-container">
@@ -57,7 +123,7 @@
       <div class="chart-header">
         <h3>Fluxo de Caixa Mensal</h3>
         <div class="chart-actions">
-          <button class="btn-icon"><i class="material-icons"></i></button>
+          <button class="btn-icon" (click)="carregarDadosGrafico()"><i class="material-icons">refresh</i></button>
         </div>
       </div>
       <div class="canvas-wrapper">

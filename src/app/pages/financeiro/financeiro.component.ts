@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ContasService } from '../../services/contas.service';
 import { Financeiro, FinanceiroService } from '../../services/financeiro.service';
+import { DashboardComponent } from '../dashboard/dashboard.component';
+import { EstornoFormComponent } from './estorno-form/estorno-form.component';
 import { FinanceiroFormComponent } from './financeiro-form/financeiro-form.component';
 import { QuitacaoFormComponent } from './quitacao-form/quitacao-form.component';
 
@@ -15,7 +17,7 @@ interface FinanceiroVM extends Financeiro {
 @Component({
   selector: 'app-financeiro',
   standalone: true,
-  imports: [CommonModule, FormsModule, FinanceiroFormComponent, QuitacaoFormComponent],
+  imports: [CommonModule, FormsModule, FinanceiroFormComponent, QuitacaoFormComponent, EstornoFormComponent, DashboardComponent],
   templateUrl: './financeiro.component.html',
   styleUrls: ['./financeiro.component.scss']
 })
@@ -34,8 +36,12 @@ export class FinanceiroComponent implements OnInit {
   
   isFormularioAberto: boolean = false;
   isModalQuitacaoAberto: boolean = false;
+  isModalEstornoAberto: boolean = false;
+
   financeiroEmEdicao: Financeiro | null = null;
   lancamentoParaQuitar: FinanceiroVM | null = null;
+  lancamentoParaEstornar: FinanceiroVM | null = null;
+  lancamentoSelecionadoDetalhes: FinanceiroVM | null = null;
 
   constructor(
     private financeiroService: FinanceiroService,
@@ -47,25 +53,27 @@ export class FinanceiroComponent implements OnInit {
     this.carregarContas();
     this.carregarFinanceiro();
     
-    // Inscreve-se nas mudanças da lista
     this.financeiroService.financeiros$.subscribe(dados => {
       this.financeiros = dados.map(f => ({
         ...f,
         nomeConta: f.conta ? f.conta.nome : 'Conta desconhecida',
         statusReal: this.financeiroService.calcularStatus(f)
       }));
+
+      this.financeiros.sort((a, b) => (b.id || 0) - (a.id || 0));
       this.aplicarFiltroLocal();
     });
   }
 
   carregarContas(): void {
-    this.contasService.listar().subscribe(contas => {
-      this.contasDisponiveis = contas;
+    this.contasService.listar().subscribe({
+      next: (contas) => this.contasDisponiveis = contas,
+      error: () => this.toast.error('Erro ao carregar contas.')
     });
   }
 
   carregarFinanceiro(): void {
-    this.financeiroService.listar().subscribe(financeiros =>{})
+    this.financeiroService.listar().subscribe();
   }
 
   onFiltrar(status: string, tipo: string, contaId: string, inicio: string, fim: string): void {
@@ -75,7 +83,6 @@ export class FinanceiroComponent implements OnInit {
     this.filtroDataInicio = inicio;
     this.filtroDataFim = fim;
 
-    // Dispara a requisição ao backend
     this.financeiroService.listar(
       this.filtroStatus, 
       this.filtroTipo, 
@@ -101,7 +108,6 @@ export class FinanceiroComponent implements OnInit {
     );
   }
 
-  // --- LÓGICA DE CADASTRO/EDIÇÃO ---
   abrirFormularioCadastro(): void {
     this.financeiroEmEdicao = null;
     this.isFormularioAberto = true;
@@ -121,6 +127,7 @@ export class FinanceiroComponent implements OnInit {
       next: () => {
         this.toast.success('Operação realizada com sucesso!');
         this.fecharFormulario();
+        this.carregarFinanceiro();
       },
       error: () => this.toast.error('Erro ao processar a solicitação.')
     });
@@ -131,7 +138,6 @@ export class FinanceiroComponent implements OnInit {
     this.financeiroEmEdicao = null;
   }
 
-  // --- LÓGICA DE QUITAÇÃO ---
   abrirModalQuitacao(f: FinanceiroVM): void {
     this.lancamentoParaQuitar = f;
     this.isModalQuitacaoAberto = true;
@@ -144,13 +150,46 @@ export class FinanceiroComponent implements OnInit {
           this.toast.success('Baixa registrada com sucesso!');
           this.isModalQuitacaoAberto = false;
           this.lancamentoParaQuitar = null;
+          this.carregarFinanceiro(); // REQUISITO: Atualizar de imediato
         },
         error: () => this.toast.error('Erro ao registrar quitação.')
       });
     }
   }
 
+  // --- MODAL DE DETALHES E ESTORNO ---
+  abrirModalDetalhes(f: FinanceiroVM): void {
+    this.lancamentoSelecionadoDetalhes = f;
+  }
+
+  fecharModalDetalhes(): void {
+    this.lancamentoSelecionadoDetalhes = null;
+  }
+
+abrirModalEstorno(f: FinanceiroVM): void {
+    this.lancamentoParaEstornar = f;
+    this.isModalEstornoAberto = true;
+  }
+
+  processarEstorno(dados: { id: number, justificativa: string, retornarPendente: boolean }): void {
+    this.financeiroService.estornar(dados.id, dados.justificativa, dados.retornarPendente).subscribe({
+      next: () => {
+        // Mensagem dinâmica dependendo da ação
+        const msg = dados.retornarPendente ? 'Pagamento desfeito com sucesso!' : 'Pagamento estornado com sucesso!';
+        this.toast.success(msg);
+        this.isModalEstornoAberto = false;
+        this.lancamentoParaEstornar = null;
+        this.carregarFinanceiro();
+      },
+      error: () => this.toast.error('Erro ao processar a solicitação.')
+    });
+  }
+
   // --- AUXILIARES DE UI ---
+  formatarStatus(status: string): string {
+    return status ? status.replace('_', ' ') : '';
+  }
+
   getProgressoVencimento(dataVencimento: string) {
     const hoje = new Date();
     const vencimento = new Date(dataVencimento);
@@ -162,7 +201,8 @@ export class FinanceiroComponent implements OnInit {
   }
 
   getCorTimeline(dataVencimento: string, status: string) {
-    if (status === 'PAGA') return 'prazo-neutro'; // Se pago, remove alerta
+    if (status === 'PAGA') return 'prazo-pago';
+    
     const hoje = new Date();
     const vencimento = new Date(dataVencimento);
     const diffDays = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));

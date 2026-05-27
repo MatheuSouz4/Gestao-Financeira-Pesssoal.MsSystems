@@ -14,8 +14,9 @@ export interface Financeiro {
   comprovanteUrl?: string;
   descricao?: string;
   tipo?: string;
-  idReferencia?: number; // Para identificar a origem de pagamentos parciais
+  idReferencia?: number;
   motivoAlteracao?: string;
+  justificativaEstorno?: string;
 }
 
 export interface FinanceiroRequest {
@@ -27,6 +28,7 @@ export interface FinanceiroRequest {
   tipoRecorrencia?: 'NENHUMA' | 'MENSAL' | 'SEMESTRAL' | 'ANUAL';
   quantidadeParcelas?: number;
   motivoAlteracao?: string;
+  justificativaEstorno?: string;
 }
 
 @Injectable({
@@ -54,29 +56,35 @@ export class FinanceiroService {
     return this.http.get<any[]>(`${this.API_URL}/filtro`, { params }).pipe(
       tap(dados => this._financeiros.next(dados))
     );
-}
+  }
 
   adicionar(dados: FinanceiroRequest): Observable<Financeiro[]> {
     return this.http.post<Financeiro[]>(this.API_URL, dados).pipe(
-      tap(() => this.listar().subscribe()) // Atualiza a lista após inserir
+      tap(() => this.listar().subscribe())
     );
   }
 
   atualizar(id: number, dados: FinanceiroRequest): Observable<Financeiro[]> {
     return this.http.put<Financeiro[]>(`${this.API_URL}/${id}`, dados).pipe(
-      tap(() => this.listar().subscribe()) // Atualiza a lista após editar
+      tap(() => this.listar().subscribe())
     );
   }
 
-  // No seu financeiro.service.ts
-quitar(id: number, dados: FormData): Observable<any> {
-  // O backend usa @PatchMapping("/{id}/quitar")
-  return this.http.patch(`${this.API_URL}/${id}/quitar`, dados);
-}
+  quitar(id: number, dados: FormData): Observable<any> {
+    return this.http.patch(`${this.API_URL}/${id}/quitar`, dados);
+  }
+
+  // MÉTODO ATUALIZADO: Agora envia o motivo no body do PATCH
+  estornar(id: number, justificativa: string, retornarPendente: boolean): Observable<any> {
+    return this.http.patch(`${this.API_URL}/${id}/estornar`, {
+      justificativaEstorno: justificativa,
+      retornarPendente: retornarPendente
+    }).pipe(
+      tap(() => this.listar().subscribe())
+    );
+  }
 
   calcularStatus(financeiro: Financeiro): string {
-    // O backend já está mapeando os novos status corretamente, 
-    // mas mantemos um fallback caso venha vazio.
     if (financeiro.status) return financeiro.status;
     return 'PENDENTE';
   }

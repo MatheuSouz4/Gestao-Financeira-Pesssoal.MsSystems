@@ -9,6 +9,75 @@
     h2 { color: $primary-color; margin-bottom: 25px; }
 }
 
+// ESTILOS DOS CARDS DE DASHBOARD
+.balance-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+
+    .balance-card {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #eef2f5;
+        transition: transform 0.2s;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #eef2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: $primary-color;
+            margin-right: 15px;
+
+            &.mini {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            
+            span {
+                font-size: 0.85rem;
+                color: #6c757d;
+                font-weight: 500;
+            }
+
+            h2, h3 {
+                margin: 4px 0 0 0;
+                font-weight: 700;
+            }
+
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.15rem; }
+            
+            .positive { color: #28a745; }
+            .negative { color: #dc3545; }
+        }
+
+        &.total-consolidado {
+            border-left: 5px solid $primary-color;
+            background: linear-gradient(135deg, #ffffff 0%, #f4f7fa 100%);
+        }
+    }
+}
+
 .top-actions {
     display: flex;
     justify-content: space-between;
@@ -47,12 +116,14 @@
     position: relative;
     flex: 1;
     max-width: 400px;
+    
     input {
         width: 100%;
         padding: 10px 15px;
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 16px;
+        
         &:focus { border-color: $primary-color; outline: none; }
     }
 }
@@ -74,15 +145,6 @@
     &:hover { background-color: $secondary-color; }
 }
 
-.btn-icon {
-    background: none;
-    padding: 5px;
-    color: #444;
-    transition: color 0.2s;
-    &:hover { color: $primary-color; }
-    &.btn-success:hover { color: #2e7d32; }
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
@@ -99,16 +161,29 @@ table {
     }
 
     th { background-color: #f8f8f8; color: #333; font-weight: 600; }
-    tr { transition: background-color 0.2s; &:hover { background-color: #fcfcfc; } }
+    
+    tr {
+        transition: background-color 0.2s;
+
+        &.linha-receita {
+            background-color: rgba(40, 167, 69, 0.04); 
+            &:hover { background-color: rgba(40, 167, 69, 0.08); }
+        }
+
+        &.linha-despesa {
+            background-color: rgba(220, 53, 69, 0.04); 
+            &:hover { background-color: rgba(220, 53, 69, 0.08); }
+        }
+    }
 }
 
 .col-id { width: 5%; }
 .col-conta { width: 15%; }
-.col-descricao { width: 20%; font-size: 0.9rem; }
-.col-vencimento { width: 30%; }
+.col-descricao { width: 25%; font-size: 0.9rem; }
+.col-vencimento { width: 25%; }
 .col-valor { width: 15%; }
 .col-status { width: 10%; }
-.col-acoes { width: 80px; } 
+.col-acoes { width: 60px; } 
 
 .col-id-valor {
     color: #888;
@@ -131,9 +206,38 @@ table {
     font-weight: 600;
     color: #2d3748;
     white-space: nowrap;
-    padding-left: 10px; 
 }
 
+.acoes-celula {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; 
+    padding: 12px 0 !important;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    transition: transform 0.1s, color 0.2s;
+
+    &:hover { 
+        transform: scale(1.15);
+        color: $primary-color; 
+    }
+    &.btn-success:hover { color: #2e7d32; }
+    &.text-primary:hover { color: #0056b3; }
+    &.text-danger:hover { color: #a71d2a; }
+}
+
+/* Timeline/Percurso */
 .timeline-wrapper {
     position: relative;
     flex: 1;
@@ -157,15 +261,23 @@ table {
         .marker-dot { background-color: #ef4444; }
         .timeline-label { color: #b91c1c; }
     }
+    
+    &.prazo-pago {
+        .timeline-track { background-color: #d4edda; border: 1px solid #c3e6cb; } 
+        .marker-dot { background-color: #28a745; box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
+        .timeline-label { color: #155724; font-weight: bold; }
+    }
 }
 
 .timeline-track { width: 100%; height: 4px; border-radius: 10px; flex: 1; }
 .timeline-marker {
     position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 2;
+    transition: left 0.3s ease;
     .timeline-label { font-size: 11px; font-weight: 800; position: absolute; top: -18px; white-space: nowrap; }
     .marker-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 }
 
+/* Badges de Status */
 [class^="status-"] {
     padding: 4px 8px;
     border-radius: 12px;
@@ -188,4 +300,58 @@ table {
     background-color: rgba(0, 0, 0, 0.5);
     display: flex; justify-content: center; align-items: center; z-index: 1000;
 }
-.form-card { background: white; padding: 20px; border-radius: 8px; width: 95%; max-width: 600px; }
+
+.form-card { 
+    background: white; 
+    padding: 20px; 
+    border-radius: 8px; 
+    width: 95%; 
+    max-width: 600px; 
+}
+
+.detalhes-card {
+    max-width: 500px;
+    
+    h3 {
+        color: $primary-color;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+}
+
+.detalhes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+
+    .detalhe-item {
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #eee;
+
+        strong {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        span {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        &.text-success-bold {
+            span { color: #28a745; font-weight: 600; }
+        }
+    }
+
+    .descricao-full {
+        grid-column: 1 / -1;
+    }
+}
