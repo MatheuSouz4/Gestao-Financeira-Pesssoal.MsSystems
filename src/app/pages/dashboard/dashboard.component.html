@@ -1,138 +1,69 @@
-<div class="dashboard-wrapper">
-  <header class="dashboard-header">
-    <div>
-      <h1>Painel de Controle</h1>
-      <p>Resumo financeiro dos últimos 30 dias</p>
+<div class="dashboard-container">
+  <div class="header">
+    <div class="titulos">
+      <h2>MsSystems - Visão Geral Financeira</h2>
+      <p>Acompanhamento de fluxo de caixa e projeção anual</p>
     </div>
-    <div class="current-date">
-      <i class="material-icons"></i>
-      <span>{{ hoje | date:'longDate' }}</span>
-    </div>
-  </header>
-
-  <section class="saldo-consolidado-container">
-    <div class="saldo-display">
-      <span class="label-saldo">Saldo Consolidado</span>
-      <h2 [ngClass]="{'positivo': saldoConsolidado >= 0, 'negativo': saldoConsolidado < 0}">
-        {{ saldoConsolidado | currency:'BRL' }}
-      </h2>
-    </div>
-
-    <div class="saldo-filtros">
-      <select [(ngModel)]="filtroContaId" (change)="aplicarFiltrosSaldo()" class="filtro-select">
-        <option value="">Todas as Contas</option>
-        <option *ngFor="let conta of contasDisponiveis" [value]="conta.id">{{ conta.nome }}</option>
-      </select>
-      
-      <div class="date-group">
-        <input type="date" [(ngModel)]="filtroInicio" (change)="aplicarFiltrosSaldo()" class="filtro-input" title="Data Inicial">
-        <span class="separator">até</span>
-        <input type="date" [(ngModel)]="filtroFim" (change)="aplicarFiltrosSaldo()" class="filtro-input" title="Data Final">
-      </div>
-    </div>
-  </section>
-
-  <section class="stats-grid">
     
-    <div class="stat-card receita">
-      <div class="icon-box">
-        <i class="material-icons"></i>
+    <div class="card-destaque" [ngClass]="{'positivo': metricas.saldoGeral >= 0, 'negativo': metricas.saldoGeral < 0}">
+      <span>Saldo Atual (Realizado)</span>
+      <h3>{{ metricas.saldoGeral | currency:'BRL' }}</h3>
+    </div>
+  </div>
+
+  <div class="grid-metricas">
+    
+    <div class="card-group receitas">
+      <h4>Receitas</h4>
+      <div class="card-item">
+        <span>Recebidas</span>
+        <strong class="text-success">{{ metricas.receitasRecebidas | currency:'BRL' }}</strong>
       </div>
-      <div class="stat-info">
-        <span class="label">Receitas Recebidas</span>
-        <h2 class="value">{{ resumo.receitasPagas | currency:'BRL' }}</h2>
+      <div class="card-item">
+        <span>Pendentes</span>
+        <strong class="text-warning">{{ metricas.receitasPendentes | currency:'BRL' }}</strong>
       </div>
-      <div class="stat-footer success">
-        <span>Entradas liquidadas</span>
+      <div class="card-item">
+        <span>Vencidas</span>
+        <strong class="text-danger">{{ metricas.receitasVencidas | currency:'BRL' }}</strong>
+      </div>
+      <div class="card-item totalizador">
+        <span>Previsão Total</span>
+        <strong>{{ metricas.saldoReceitas | currency:'BRL' }}</strong>
       </div>
     </div>
 
-    <div class="stat-card despesa">
-      <div class="icon-box">
-        <i class="material-icons"></i>
+    <div class="card-group despesas">
+      <h4>Despesas</h4>
+      <div class="card-item">
+        <span>Pagas</span>
+        <strong class="text-success">{{ metricas.despesasPagas | currency:'BRL' }}</strong>
       </div>
-      <div class="stat-info">
-        <span class="label">Despesas Pagas</span>
-        <h2 class="value">{{ resumo.despesasPagas | currency:'BRL' }}</h2>
+      <div class="card-item">
+        <span>Pendentes</span>
+        <strong class="text-warning">{{ metricas.despesasPendentes | currency:'BRL' }}</strong>
       </div>
-      <div class="stat-footer danger">
-        <span>Saídas liquidadas</span>
+      <div class="card-item">
+        <span>Vencidas</span>
+        <strong class="text-danger">{{ metricas.despesasVencidas | currency:'BRL' }}</strong>
       </div>
-    </div>
-
-    <div class="stat-card pendente-receita">
-      <div class="icon-box">
-        <i class="material-icons"></i>
-      </div>
-      <div class="stat-info">
-        <span class="label">A Receber</span>
-        <h2 class="value">{{ resumo.receitasPendentes | currency:'BRL' }}</h2>
-      </div>
-      <div class="stat-footer warning">
-        <span>Previsão de entradas</span>
+      <div class="card-item totalizador">
+        <span>Previsão Total</span>
+        <strong>{{ metricas.saldoDespesas | currency:'BRL' }}</strong>
       </div>
     </div>
+    
+  </div>
 
-    <div class="stat-card pendente-despesa">
-      <div class="icon-box">
-        <i class="material-icons"></i>
-      </div>
-      <div class="stat-info">
-        <span class="label">A Pagar</span>
-        <h2 class="value">{{ resumo.despesasPendentes | currency:'BRL' }}</h2>
-      </div>
-      <div class="stat-footer info">
-        <span>{{ resumo.qtdPendentes }} contas em aberto</span>
-      </div>
+  <div class="graficos-wrapper">
+    
+    <div class="grafico-container">
+      <canvas #graficoBarras></canvas>
     </div>
 
-    <div class="stat-card balanco">
-      <div class="icon-box">
-        <i class="material-icons"></i>
-      </div>
-      <div class="stat-info">
-        <span class="label">Balanço Atual</span>
-        <h2 class="value" [ngClass]="{'positivo': resumo.totalPago >= 0, 'negativo': resumo.totalPago < 0}">
-          {{ resumo.totalPago | currency:'BRL' }}
-        </h2>
-      </div>
-      <div class="stat-footer neutral">
-        <span>Resultado do mês atual</span>
-      </div>
+    <div class="grafico-container">
+      <canvas #graficoLinhas></canvas>
     </div>
-
-    <div class="stat-card balanco-projetado">
-      <div class="icon-box">
-        <i class="material-icons"></i>
-      </div>
-      <div class="stat-info">
-        <span class="label">Balanço Projetado</span>
-        <h2 class="value">
-          {{ (resumo.totalPago + resumo.totalPendente) | currency:'BRL' }}
-        </h2>
-      </div>
-      <div class="stat-footer primary">
-        <span>Previsão final de fechamento</span>
-      </div>
-    </div>
-
-  </section>
-
-  <section class="chart-main-container">
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Fluxo de Caixa Mensal</h3>
-        <div class="chart-actions">
-          <button class="btn-icon" (click)="carregarDadosGrafico()"><i class="material-icons">refresh</i></button>
-        </div>
-      </div>
-      <div class="canvas-wrapper">
-        <canvas baseChart
-          [data]="lineChartData"
-          [options]="lineChartOptions"
-          [type]="'line'">
-        </canvas>
-      </div>
-    </div>
-  </section>
+    
+  </div>
 </div>

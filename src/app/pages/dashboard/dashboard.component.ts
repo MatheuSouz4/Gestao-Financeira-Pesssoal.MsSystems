@@ -1,127 +1,110 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { Conta, ContasService } from '../../services/contas.service';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import { Subscription, forkJoin } from 'rxjs'; // <-- Importe forkJoin
+import { DashboardService, MetricasDashboard, ProjecaoMensal } from '../../services/dashboard.service';
+import { FinanceiroService } from '../../services/financeiro.service';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseChartDirective],
-  providers: [provideCharts(withDefaultRegisterables())],
+  imports: [CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  @ViewChild('graficoBarras', { static: true }) elementoGraficoBarras!: ElementRef;
+  @ViewChild('graficoLinhas', { static: true }) elementoGraficoLinhas!: ElementRef;
   
-  hoje: Date = new Date();
+  private chartBarras!: Chart;
+  private chartLinhas!: Chart;
+  private subscricao!: Subscription;
 
-  saldoConsolidado: number = 0;
-  contasDisponiveis: Conta[] = [];
-
-  filtroInicio: string = '';
-  filtroFim: string = '';
-  filtroContaId: string = '';
-
-  // Estrutura expandida para cobrir todos os saldos analíticos
-  resumo = {
-    receitasPagas: 0,
-    receitasPendentes: 0,
-    despesasPagas: 0,
-    despesasPendentes: 0,
-    totalPago: 0,       // Balanço atual (Receitas Pagas - Despesas Pagas)
-    totalPendente: 0,   // Balanço pendente (Receitas Pendentes - Despesas Pendentes)
-    qtdPendentes: 0
+  metricas: MetricasDashboard = {
+    receitasRecebidas: 0, receitasPendentes: 0, receitasVencidas: 0, saldoReceitas: 0,
+    despesasPagas: 0, despesasPendentes: 0, despesasVencidas: 0, saldoDespesas: 0, saldoGeral: 0
   };
-
-  public lineChartData: ChartConfiguration['data'] = {
-    datasets: [
-      {
-        data: [],
-        label: 'Pagamentos (R$)',
-        backgroundColor: 'rgba(67, 97, 238, 0.2)',
-        borderColor: '#4361ee',
-        pointBackgroundColor: '#2b3674',
-        fill: 'origin',
-      }
-    ],
-    labels: []
-  };
-
-  public lineChartOptions: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true, position: 'top' }
-    }
-  };
-
-  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   constructor(
-    private http: HttpClient,
-    private contasService: ContasService
+    private dashboardService: DashboardService,
+    private financeiroService: FinanceiroService
   ) {}
 
   ngOnInit(): void {
-    this.carregarContas();
-    this.carregarSaldoConsolidado();
-    this.carregarResumo();
-    this.carregarDadosGrafico();
-  }
-
-  carregarContas(): void {
-    this.contasService.listar().subscribe({
-      next: (contas) => this.contasDisponiveis = contas,
-      error: (err) => console.error('Erro ao listar contas no dashboard:', err)
+    this.inicializarGraficos();
+    
+    this.subscricao = this.financeiroService.financeiros$.subscribe(() => {
+      this.carregarDadosDoBanco();
     });
   }
 
-  carregarSaldoConsolidado(): void {
-    this.contasService.obterSaldoConsolidado(
-      this.filtroInicio,
-      this.filtroFim,
-      this.filtroContaId
-    ).subscribe({
-      next: (total) => this.saldoConsolidado = total,
-      error: (err) => console.error('Erro ao buscar saldo consolidado:', err)
+  ngOnDestroy(): void {
+    if (this.subscricao) this.subscricao.unsubscribe();
+    if (this.chartBarras) this.chartBarras.destroy();
+    if (this.chartLinhas) this.chartLinhas.destroy();
+  }
+
+  private carregarDadosDoBanco(): void {
+    // Busca métricas gerais e projeção ao mesmo tempo
+    forkJoin({
+      metricas: this.dashboardService.obterMetricas(),
+      projecao: this.dashboardService.obterProjecao()
+    }).subscribe({
+      next: (res) => {
+        this.metricas = res.metricas;
+        this.atualizarGraficoBarras();
+        this.atualizarGraficoLinhas(res.projecao);
+      },
+      error: (err: any) => console.error('Erro ao carregar dados do dashboard:', err)
     });
   }
 
-  aplicarFiltrosSaldo(): void {
-    this.carregarSaldoConsolidado();
+  private inicializarGraficos(): void {
+    // Gráfico de Barras (Status)
+    const configBarras: ChartConfiguration = {
+      type: 'bar',
+      data: {
+        labels: ['Recebidas / Pagas', 'Pendentes', 'Vencidas'],
+        datasets: [
+          { label: 'Receitas', data: [0, 0, 0], backgroundColor: '#10b981', borderRadius: 4 },
+          { label: 'Despesas', data: [0, 0, 0], backgroundColor: '#ef4444', borderRadius: 4 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Posição Atual' } } }
+    };
+    this.chartBarras = new Chart(this.elementoGraficoBarras.nativeElement, configBarras);
+
+    // Gráfico de Linhas (Projeção Anual)
+    const configLinhas: ChartConfiguration = {
+      type: 'line',
+      data: {
+        labels: [], // Será preenchido com os meses
+        datasets: [
+          { label: 'Receitas', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true },
+          { label: 'Despesas', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4, fill: true }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Projeção Anual (' + new Date().getFullYear() + ')' } } }
+    };
+    this.chartLinhas = new Chart(this.elementoGraficoLinhas.nativeElement, configLinhas);
   }
 
-  carregarResumo() {
-    this.http.get<any>('http://localhost:8080/financeiro/resumo')
-      .subscribe({
-        next: (dados) => {
-          // Mapeia os dados do backend garantindo que valores nulos não quebrem o layout
-          this.resumo = {
-            receitasPagas: dados.ReceitasRecebidas || 0,
-            receitasPendentes: dados.ReceitasPendentes || 0,
-            despesasPagas: dados.DespesasPagas || 0,
-            despesasPendentes: dados.DespesasPendentes || 0,
-            totalPago: dados.SaldoPago || 0,
-            totalPendente: dados.SaldoPendente || 0,
-            qtdPendentes: dados.QtdPendentes || 0
-          };
-        },
-        error: (err) => console.error('Erro ao buscar resumo:', err)
-      });
+  private atualizarGraficoBarras(): void {
+    if (this.chartBarras) {
+      this.chartBarras.data.datasets[0].data = [this.metricas.receitasRecebidas, this.metricas.receitasPendentes, this.metricas.receitasVencidas];
+      this.chartBarras.data.datasets[1].data = [this.metricas.despesasPagas, this.metricas.despesasPendentes, this.metricas.despesasVencidas];
+      this.chartBarras.update();
+    }
   }
 
-  carregarDadosGrafico() {
-    this.http.get<any[]>('http://localhost:8080/financeiro/grafico')
-      .subscribe({
-        next: (res) => {
-          this.lineChartData.labels = res.map(item => new Date(item.data).toLocaleDateString('pt-BR'));
-          this.lineChartData.datasets[0].data = res.map(item => item.total);
-          this.chart?.update();
-        },
-        error: (err) => console.error('Erro ao buscar dados do gráfico:', err)
-      });
+  private atualizarGraficoLinhas(projecao: ProjecaoMensal[]): void {
+    if (this.chartLinhas && projecao.length > 0) {
+      this.chartLinhas.data.labels = projecao.map(p => p.mes);
+      this.chartLinhas.data.datasets[0].data = projecao.map(p => p.receitas);
+      this.chartLinhas.data.datasets[1].data = projecao.map(p => p.despesas);
+      this.chartLinhas.update();
+    }
   }
 }

@@ -12,6 +12,8 @@ import { QuitacaoFormComponent } from './quitacao-form/quitacao-form.component';
 interface FinanceiroVM extends Financeiro {
   nomeConta: string;
   statusReal: string;
+  dataVencimentoDate?: Date;
+  dataPagamentoDate?: Date;
 }
 
 @Component({
@@ -54,11 +56,29 @@ export class FinanceiroComponent implements OnInit {
     this.carregarFinanceiro();
     
     this.financeiroService.financeiros$.subscribe(dados => {
-      this.financeiros = dados.map(f => ({
-        ...f,
-        nomeConta: f.conta ? f.conta.nome : 'Conta desconhecida',
-        statusReal: this.financeiroService.calcularStatus(f)
-      }));
+      this.financeiros = dados.map(f => {
+        // CORREÇÃO SÊNIOR: Extração de datas blindada contra timezone (GMT)
+        let dataVencReal = new Date();
+        if (f.dataVencimento) {
+          const [ano, mes, dia] = f.dataVencimento.split('-');
+          dataVencReal = new Date(Number(ano), Number(mes) - 1, Number(dia));
+        }
+
+        let dataPagReal: Date | undefined = undefined;
+        if (f.dataPagamento) {
+          const [ano, mes, dia] = f.dataPagamento.split('-');
+          dataPagReal = new Date(Number(ano), Number(mes) - 1, Number(dia));
+        }
+
+        return {
+          ...f,
+          nomeConta: f.conta ? f.conta.nome : 'Conta desconhecida',
+          // Backend é a única fonte da verdade para o status agora
+          statusReal: f.status || 'PENDENTE',
+          dataVencimentoDate: dataVencReal,
+          dataPagamentoDate: dataPagReal
+        };
+      });
 
       this.financeiros.sort((a, b) => (b.id || 0) - (a.id || 0));
       this.aplicarFiltroLocal();
@@ -108,6 +128,7 @@ export class FinanceiroComponent implements OnInit {
     );
   }
 
+  // --- MODAIS DE CADASTRO E OPERAÇÕES ---
   abrirFormularioCadastro(): void {
     this.financeiroEmEdicao = null;
     this.isFormularioAberto = true;
@@ -150,7 +171,7 @@ export class FinanceiroComponent implements OnInit {
           this.toast.success('Baixa registrada com sucesso!');
           this.isModalQuitacaoAberto = false;
           this.lancamentoParaQuitar = null;
-          this.carregarFinanceiro(); // REQUISITO: Atualizar de imediato
+          this.carregarFinanceiro(); 
         },
         error: () => this.toast.error('Erro ao registrar quitação.')
       });
@@ -166,7 +187,7 @@ export class FinanceiroComponent implements OnInit {
     this.lancamentoSelecionadoDetalhes = null;
   }
 
-abrirModalEstorno(f: FinanceiroVM): void {
+  abrirModalEstorno(f: FinanceiroVM): void {
     this.lancamentoParaEstornar = f;
     this.isModalEstornoAberto = true;
   }
@@ -174,7 +195,6 @@ abrirModalEstorno(f: FinanceiroVM): void {
   processarEstorno(dados: { id: number, justificativa: string, retornarPendente: boolean }): void {
     this.financeiroService.estornar(dados.id, dados.justificativa, dados.retornarPendente).subscribe({
       next: () => {
-        // Mensagem dinâmica dependendo da ação
         const msg = dados.retornarPendente ? 'Pagamento desfeito com sucesso!' : 'Pagamento estornado com sucesso!';
         this.toast.success(msg);
         this.isModalEstornoAberto = false;
@@ -185,14 +205,16 @@ abrirModalEstorno(f: FinanceiroVM): void {
     });
   }
 
-  // --- AUXILIARES DE UI ---
+  // --- AUXILIARES DE UI CORRIGIDOS ---
   formatarStatus(status: string): string {
     return status ? status.replace('_', ' ') : '';
   }
 
-  getProgressoVencimento(dataVencimento: string) {
+  getProgressoVencimento(vencimento: Date | undefined): number {
+    if (!vencimento) return 0;
     const hoje = new Date();
-    const vencimento = new Date(dataVencimento);
+    hoje.setHours(0, 0, 0, 0); // Zera horas para precisão diária
+    
     const diffDays = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays > 30) return 0;
@@ -200,11 +222,13 @@ abrirModalEstorno(f: FinanceiroVM): void {
     return ((30 - diffDays) / 30) * 100;
   }
 
-  getCorTimeline(dataVencimento: string, status: string) {
+  getCorTimeline(vencimento: Date | undefined, status: string): string {
     if (status === 'PAGA') return 'prazo-pago';
+    if (!vencimento) return 'prazo-neutro';
     
     const hoje = new Date();
-    const vencimento = new Date(dataVencimento);
+    hoje.setHours(0, 0, 0, 0); // Zera horas para precisão diária
+    
     const diffDays = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return 'prazo-vencido';

@@ -65,14 +65,14 @@
                     
                     <td>
                         <div class="timeline-wrapper" 
-                            [ngClass]="getCorTimeline(f.dataVencimento, f.statusReal)"
-                            [title]="f.statusReal === 'PAGA' ? 'Data do Pagamento: ' + (f.dataPagamento | date:'dd/MM/yyyy') : 'Vencimento: ' + (f.dataVencimento | date:'dd/MM/yyyy')">
+                            [ngClass]="getCorTimeline(f.dataVencimentoDate, f.statusReal)"
+                            [title]="f.statusReal === 'PAGA' && f.dataPagamentoDate ? 'Data do Pagamento: ' + (f.dataPagamentoDate | date:'dd/MM/yyyy') : 'Vencimento: ' + (f.dataVencimentoDate | date:'dd/MM/yyyy')">
                             
                             <div class="timeline-track"></div>
                             
-                            <div class="timeline-marker" [style.left.%]="f.statusReal === 'PAGA' ? 100 : getProgressoVencimento(f.dataVencimento)">
+                            <div class="timeline-marker" [style.left.%]="f.statusReal === 'PAGA' ? 100 : getProgressoVencimento(f.dataVencimentoDate)">
                                 <span class="timeline-label">
-                                    {{ f.statusReal === 'PAGA' && f.dataPagamento ? (f.dataPagamento | date:'dd/MM/yy') : (f.dataVencimento | date:'dd/MM/yy') }}
+                                    {{ f.statusReal === 'PAGA' && f.dataPagamentoDate ? (f.dataPagamentoDate | date:'dd/MM/yy') : (f.dataVencimentoDate | date:'dd/MM/yy') }}
                                 </span>
                                 <div class="marker-dot"></div>
                             </div>
@@ -159,11 +159,11 @@
                 </div>
                 <div class="detalhe-item">
                     <strong>Data de Vencimento:</strong> 
-                    <span>{{ lancamentoSelecionadoDetalhes.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                    <span>{{ lancamentoSelecionadoDetalhes.dataVencimentoDate | date:'dd/MM/yyyy' }}</span>
                 </div>
                 <div class="detalhe-item text-success-bold">
                     <strong>Data de Pagamento:</strong> 
-                    <span>{{ lancamentoSelecionadoDetalhes.dataPagamento | date:'dd/MM/yyyy' }}</span>
+                    <span>{{ lancamentoSelecionadoDetalhes.dataPagamentoDate ? (lancamentoSelecionadoDetalhes.dataPagamentoDate | date:'dd/MM/yyyy') : 'Não Pago' }}</span>
                 </div>
                 <div class="detalhe-item">
                     <strong>Valor Original:</strong> 

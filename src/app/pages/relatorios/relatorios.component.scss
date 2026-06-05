@@ -1,0 +1,87 @@
+.relatorios-container {
+  padding: 1.5rem;
+  max-width: 900px; // Mantém a tela contida e elegante
+  
+  .header {
+    margin-bottom: 2rem;
+    h2 { margin: 0; color: #0f172a; font-size: 1.75rem; }
+    p { margin: 0.25rem 0 0 0; color: #64748b; }
+  }
+
+  .card-filtro {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+
+      .campo-largo {
+        grid-column: span 2; // O combo de tipo ocupa a linha inteira
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+
+        label {
+          margin-bottom: 0.5rem;
+          color: #475569;
+          font-weight: 600;
+        }
+
+        .form-control {
+          padding: 0.75rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          font-size: 1rem;
+          color: #334155;
+          outline: none;
+
+          &:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+          }
+        }
+      }
+    }
+
+    .acoes-container {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 1.5rem;
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: opacity 0.2s;
+
+        &:disabled { opacity: 0.6; cursor: not-allowed; }
+        &:hover:not(:disabled) { opacity: 0.9; }
+
+        &.btn-csv {
+          background-color: #0ea5e9; // Azul corporativo
+          color: white;
+        }
+
+        &.btn-pdf {
+          background-color: #ef4444; // Vermelho Adobe
+          color: white;
+        }
+      }
+    }
+  }
+}

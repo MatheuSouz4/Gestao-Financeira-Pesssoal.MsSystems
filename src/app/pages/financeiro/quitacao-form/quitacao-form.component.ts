@@ -25,7 +25,7 @@ export class QuitacaoFormComponent implements OnInit {
     this.quitacaoForm = this.fb.group({
       dataPagamento: [hoje, Validators.required],
       valorPago: [this.lancamento?.valor || 0, [Validators.required, Validators.min(0.01)]],
-      novaDataVencimento: [''] // Campo inicializado vazio
+      novaDataVencimento: [''] 
     });
 
     // Monitora o valor digitado para aplicar validação dinâmica na nova data de vencimento
@@ -40,7 +40,6 @@ export class QuitacaoFormComponent implements OnInit {
     });
   }
 
-  // Getter auxiliar para identificar se é pagamento parcial na View
   get isPagamentoParcial(): boolean {
     const valorPago = this.quitacaoForm.get('valorPago')?.value || 0;
     return this.lancamento && valorPago < this.lancamento.valor;
@@ -60,9 +59,12 @@ export class QuitacaoFormComponent implements OnInit {
       const novaDataVencimento = this.quitacaoForm.get('novaDataVencimento')?.value;
 
       formData.append('dataPagamento', dataPagamento); 
-      formData.append('valorPago', valorPago.toString());
       
-      // Se for parcial, anexa a nova data ao FormData para o backend processar
+      // CORREÇÃO SÊNIOR: Força o padrão americano com "." decimal (ex: 1000.50)
+      // Evita falha de parse no BigDecimal do Spring Boot.
+      const valorFormatado = Number(valorPago).toFixed(2);
+      formData.append('valorPago', valorFormatado);
+      
       if (this.isPagamentoParcial && novaDataVencimento) {
         formData.append('novaDataVencimento', novaDataVencimento);
       }
