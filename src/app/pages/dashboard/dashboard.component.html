@@ -1,20 +1,34 @@
 <div class="dashboard-container">
+  
   <div class="header">
     <div class="titulos">
       <h2>MsSystems - Visão Geral Financeira</h2>
-      <p>Acompanhamento de fluxo de caixa e projeção anual</p>
+      <p>Acompanhamento de fluxo de caixa, evolução e maiores faturamentos</p>
     </div>
     
     <div class="card-destaque" [ngClass]="{'positivo': metricas.saldoGeral >= 0, 'negativo': metricas.saldoGeral < 0}">
-      <span>Saldo Atual (Realizado)</span>
+      <span>Saldo do Período (Realizado)</span>
       <h3>{{ metricas.saldoGeral | currency:'BRL' }}</h3>
     </div>
   </div>
 
+  <div class="filters-grid form-modal-style">
+    <div class="filter-group">
+      <label>Data Inicial:</label>
+      <input type="date" [(ngModel)]="dataInicio" (change)="aplicarFiltro()" class="form-select">
+    </div>
+    <div class="filter-group">
+      <label>Data Final:</label>
+      <input type="date" [(ngModel)]="dataFim" (change)="aplicarFiltro()" class="form-select">
+    </div>
+    <button class="btn btn-primary btn-filtrar" (click)="aplicarFiltro()">
+      <i class="material-icons">Filtrar</i>
+    </button>
+  </div>
+
   <div class="grid-metricas">
-    
     <div class="card-group receitas">
-      <h4>Receitas</h4>
+      <h4>Receitas no Período</h4>
       <div class="card-item">
         <span>Recebidas</span>
         <strong class="text-success">{{ metricas.receitasRecebidas | currency:'BRL' }}</strong>
@@ -34,7 +48,7 @@
     </div>
 
     <div class="card-group despesas">
-      <h4>Despesas</h4>
+      <h4>Despesas no Período</h4>
       <div class="card-item">
         <span>Pagas</span>
         <strong class="text-success">{{ metricas.despesasPagas | currency:'BRL' }}</strong>
@@ -52,18 +66,21 @@
         <strong>{{ metricas.saldoDespesas | currency:'BRL' }}</strong>
       </div>
     </div>
-    
   </div>
 
   <div class="graficos-wrapper">
-    
     <div class="grafico-container">
       <canvas #graficoBarras></canvas>
     </div>
-
     <div class="grafico-container">
       <canvas #graficoLinhas></canvas>
     </div>
-    
+    <div class="grafico-container">
+      <canvas #graficoTopReceitas></canvas>
+    </div>
+    <div class="grafico-container">
+      <canvas #graficoTopDespesas></canvas>
+    </div>
   </div>
+
 </div>

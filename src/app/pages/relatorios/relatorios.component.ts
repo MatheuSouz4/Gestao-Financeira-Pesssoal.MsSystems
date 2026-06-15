@@ -13,14 +13,17 @@ import { RelatoriosService } from '../../services/relatorios.service';
 })
 export class RelatoriosComponent {
   
-  // Opções espelhadas do Back-end
   tiposRelatorio = [
     { valor: 'EXTRATO_GERAL', label: 'Extrato Geral (Todos os Lançamentos)' },
-    { valor: 'RECEITAS_RECEBIDAS', label: 'Receitas Recebidas' },
-    { valor: 'RECEITAS_PENDENTES', label: 'Receitas Pendentes' },
-    { valor: 'DESPESAS_PAGAS', label: 'Despesas Pagas' },
-    { valor: 'DESPESAS_PENDENTES', label: 'Despesas Pendentes' },
-    { valor: 'LANCAMENTOS_VENCIDOS', label: 'Inadimplência (Lançamentos Vencidos)' }
+    { valor: 'TODAS_RECEITAS', label: 'Todas as Receitas' },
+    { valor: 'RECEITAS_RECEBIDAS', label: 'Apenas Receitas Recebidas' },
+    { valor: 'RECEITAS_PENDENTES', label: 'Apenas Receitas Pendentes' },
+    { valor: 'RECEITAS_VENCIDAS', label: 'Apenas Receitas Vencidas' },
+    { valor: 'TODAS_DESPESAS', label: 'Todas as Despesas' },
+    { valor: 'DESPESAS_PAGAS', label: 'Apenas Despesas Pagas' },
+    { valor: 'DESPESAS_PENDENTES', label: 'Apenas Despesas Pendentes' },
+    { valor: 'DESPESAS_VENCIDAS', label: 'Apenas Despesas Vencidas' },
+    { valor: 'LANCAMENTOS_VENCIDOS', label: 'Inadimplência Geral (Tudo Vencido)' }
   ];
 
   filtro = {
@@ -38,7 +41,7 @@ export class RelatoriosComponent {
 
   gerarRelatorio(formato: 'csv' | 'pdf'): void {
     if (!this.filtro.dataInicio || !this.filtro.dataFim) {
-      this.toast.warning('Por favor, informe a data de início e fim.');
+      this.toast.warning('Por favor, informe a data de início e fim.', 'Atenção');
       return;
     }
 
@@ -59,19 +62,15 @@ export class RelatoriosComponent {
         },
         error: (err: any) => {
           this.isProcessando = false;
-          
-          // NOVA VALIDAÇÃO: Captura o 404 do Back-end e exibe a mensagem amigável
           if (err.status === 404) {
             this.toast.info('Não há lançamentos para o tipo e período selecionados.', 'Relatório Vazio');
           } else {
-            // Mantém o erro genérico para falhas de servidor (500) ou conexão
             this.toast.error('Erro ao gerar relatório. Verifique os dados e tente novamente.');
           }
         }
       });
   }
 
-  // --- Auxiliares para inicializar as datas no mês atual ---
   private getPrimeiroDiaMes(): string {
     const data = new Date();
     return new Date(data.getFullYear(), data.getMonth(), 1).toISOString().split('T')[0];

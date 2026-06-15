@@ -1,9 +1,13 @@
+@import "../../../styles/variables.scss";
+
 .dashboard-container {
-  padding: 1.5rem;
+  padding: 20px; // Padronizado com as outras páginas (.clientes-page, .financeiro-page)
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  color: #334155;
+  gap: 30px; // Espaçamento maior entre as seções verticais
+  background-color: white; // Fundo da página padronizado
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
   /* --- CABEÇALHO --- */
   .header {
@@ -11,49 +15,115 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1.5rem;
+    gap: 20px;
     
     .titulos {
       h2 {
+        color: $primary-color; // Padronizado com h2 de outras telas
         margin: 0;
-        color: #0f172a;
         font-size: 1.75rem;
       }
       p {
         margin: 0.25rem 0 0 0;
-        color: #64748b;
+        color: #6c757d; // Padronizado com subtítulos/muted text
         font-size: 0.95rem;
       }
     }
 
     .card-destaque {
       padding: 1.2rem 2.5rem;
-      border-radius: 10px;
+      border-radius: 8px; // Padronizado de 10px para 8px
       color: white;
       text-align: right;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // Padronizado com shadows da tabela
       transition: transform 0.2s ease;
       
       &:hover {
-        transform: translateY(-2px);
+        transform: translateY(-2px); // Padronizado com hover do card de financeiro
       }
       
       span { 
-        font-size: 0.95rem; 
+        font-size: 0.95rem;
         opacity: 0.9; 
         display: block;
         margin-bottom: 0.5rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        font-weight: 600;
       }
       h3 { 
         margin: 0; 
-        font-size: 2.2rem; 
+        font-size: 2.2rem;
         font-weight: 700;
       }
       
-      &.positivo { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+      &.positivo { background: linear-gradient(135deg, $success-color 0%, darken($success-color, 10%) 100%); }
       &.negativo { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+    }
+  }
+
+  /* --- BARRA DE FILTROS --- */
+  .filters-grid {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 15px;
+    background-color: #f8f9fa; // Fundo cinza claro, igual ao financeiro.component.scss
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 150px;
+
+      label {
+        font-size: 0.85rem;
+        color: #333; // Padrão de cor de label
+        font-weight: 600;
+      }
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 10px 15px; // Altura compatível com inputs da search-bar
+      border: 1px solid #ccc;
+      border-radius: 4px; // Padrão global de input
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+      background-color: white;
+
+      &:focus {
+        border-color: $primary-color;
+      }
+    }
+
+    .btn-filtrar {
+      height: 41px; // Altura exata do input padronizado
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: $primary-color; // Alterado para a cor primária do sistema
+      color: white;
+      border: none;
+      border-radius: 4px; // Padrão de botão
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: background-color 0.3s;
+
+      i {
+        margin-right: 0; // Se o botão tiver apenas ícone
+      }
+
+      &:hover { 
+        background-color: $secondary-color; 
+      }
     }
   }
 
@@ -61,49 +131,57 @@
   .grid-metricas {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
+    gap: 20px; // Espaçamento padrão
 
     .card-group {
       background: #ffffff;
-      padding: 1.5rem;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 20px;
+      border-radius: 8px; // Padrão
+      border: 1px solid #eef2f5; // Borda sutil como no financeiro.scss
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); // Shadow padrão
+
+      &.receitas { border-top: 4px solid $success-color; }
+      &.despesas { border-top: 4px solid #ef4444; }
 
       h4 { 
-        margin-top: 0; 
+        margin-top: 0;
         margin-bottom: 1.2rem; 
-        color: #1e293b; 
+        color: #333; 
         font-size: 1.2rem;
-        border-bottom: 2px solid #f1f5f9; 
-        padding-bottom: 0.8rem; 
+        border-bottom: 1px solid #eee; // Linha padrão
+        padding-bottom: 10px;
       }
 
       .card-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.9rem 0;
-        border-bottom: 1px dashed #cbd5e1;
-        font-size: 1.05rem;
+        padding: 10px 0;
+        border-bottom: 1px dashed #eee;
+        font-size: 1rem;
         
         span {
-          color: #475569;
+          color: #555;
+          font-weight: 500;
         }
 
         &:last-child { border-bottom: none; }
         
         &.totalizador { 
-          margin-top: 0.5rem; 
-          font-size: 1.15rem; 
-          border-top: 2px solid #e2e8f0; 
+          margin-top: 10px;
+          border-top: 1px solid #eee; 
           border-bottom: none;
-          padding-top: 1.2rem; 
-          
-          strong {
-            color: #0f172a;
-            font-size: 1.25rem;
-          }
+          padding-top: 15px;
+          background-color: #f8f8f8; // Destaque visual sutil
+          margin-left: -20px;
+          margin-right: -20px;
+          margin-bottom: -20px;
+          padding-left: 20px;
+          padding-right: 20px;
+          border-radius: 0 0 8px 8px;
+
+          span { font-weight: 600; color: #333; }
+          strong { color: $primary-color; font-size: 1.15rem; }
         }
       }
     }
@@ -113,27 +191,25 @@
   .graficos-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 20px;
 
     @media (max-width: 1024px) {
-      grid-template-columns: 1fr; // Quebra para 1 coluna em tablets/smartphones
+      grid-template-columns: 1fr; // Responsividade
     }
 
     .grafico-container {
       background: #ffffff;
-      padding: 1.5rem;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      height: 400px;
+      padding: 20px;
+      border-radius: 8px; // Padrão
+      border: 1px solid #eef2f5;
+      height: 350px;
       position: relative;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      
-      /* O Canvas se ajusta automaticamente ao container com as opções responsivas do Chart.js */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); // Shadow padrão
     }
   }
 
   /* --- CORES SEMÂNTICAS GLOBAIS --- */
-  .text-success { color: #10b981; font-weight: 600; }
-  .text-warning { color: #f59e0b; font-weight: 600; }
-  .text-danger  { color: #ef4444; font-weight: 600; }
+  .text-success { color: #2e7d32; font-weight: 600; } // Cor de ativo
+  .text-warning { color: #f57c00; font-weight: 600; } // Cor de inativo/pendente
+  .text-danger  { color: #c62828; font-weight: 600; } // Cor de vencida
 }

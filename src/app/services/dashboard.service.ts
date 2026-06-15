@@ -1,8 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-// O Angular SÓ acha a interface se tiver a palavra "export" aqui
 export interface MetricasDashboard {
   receitasRecebidas: number;
   receitasPendentes: number;
@@ -21,6 +20,11 @@ export interface ProjecaoMensal {
   despesas: number;
 }
 
+export interface TopCategoria {
+  nome: string;
+  total: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,13 +33,26 @@ export class DashboardService {
 
   constructor(private http: HttpClient) {}
 
-  // O Angular SÓ acha o método se ele estiver escrito exatamente assim
-  obterMetricas(): Observable<MetricasDashboard> {
-    return this.http.get<MetricasDashboard>(`${this.API_URL}/metricas`);
+  private getParams(inicio?: string, fim?: string): HttpParams {
+    let params = new HttpParams();
+    if (inicio) params = params.set('inicio', inicio);
+    if (fim) params = params.set('fim', fim);
+    return params;
   }
 
-  obterProjecao(): Observable<ProjecaoMensal[]> {
-  return this.http.get<ProjecaoMensal[]>(`${this.API_URL}/projecao`);
+  obterMetricas(inicio?: string, fim?: string): Observable<MetricasDashboard> {
+    return this.http.get<MetricasDashboard>(`${this.API_URL}/metricas`, { params: this.getParams(inicio, fim) });
   }
-  
+
+  obterProjecao(inicio?: string, fim?: string): Observable<ProjecaoMensal[]> {
+    return this.http.get<ProjecaoMensal[]>(`${this.API_URL}/projecao`, { params: this.getParams(inicio, fim) });
+  }
+
+  obterTopReceitas(inicio?: string, fim?: string): Observable<TopCategoria[]> {
+    return this.http.get<TopCategoria[]>(`${this.API_URL}/top-receitas`, { params: this.getParams(inicio, fim) });
+  }
+
+  obterTopDespesas(inicio?: string, fim?: string): Observable<TopCategoria[]> {
+    return this.http.get<TopCategoria[]>(`${this.API_URL}/top-despesas`, { params: this.getParams(inicio, fim) });
+  }
 }
