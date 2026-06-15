@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { ContasService } from '../../../services/contas.service';
 
 @Component({
@@ -22,12 +23,13 @@ export class FinanceiroFormComponent implements OnInit {
   contasFiltradas: any[] = [];
   tipoSelecionado: string = ''; 
 
-  constructor(
-    private fb: FormBuilder,
-    private contasService: ContasService
-  ) {}
+  // Injeções Modernas
+  private fb = inject(FormBuilder);
+  private contasService = inject(ContasService);
+  private toastService = inject(ToastrService);
 
   ngOnInit(): void {
+    this.isEditMode = !!this.financeiroEdicao;
     this.iniciarFormulario();
     this.carregarContas();
   }
@@ -60,13 +62,14 @@ export class FinanceiroFormComponent implements OnInit {
     this.contasService.listar().subscribe({
       next: (dados) => {
         this.todasContas = dados;
-        
-        // Se estivermos editando, precisamos preencher o form ANTES de filtrar as contas por tipo
         if (this.financeiroEdicao) {
           this.preencherFormulario();
         }
       },
-      error: (err) => console.error('Erro ao carregar contas', err)
+      error: (err) => {
+        console.error('Erro ao carregar contas', err);
+        this.toastService.error('Erro ao carregar a lista de contas disponíveis.', 'Erro de Conexão');
+      }
     });
   }
 
@@ -96,9 +99,8 @@ export class FinanceiroFormComponent implements OnInit {
 
   selecionarTipo(tipo: string): void {
     this.tipoSelecionado = tipo;
-
-    // AQUI A MUDANÇA: Filtramos por tipo E status.
-    // Se for edição, mantemos a conta atual na lista mesmo se ela estiver INATIVA.
+    
+    // Filtro nativo para ocultar inativas de novas seleções
     this.contasFiltradas = this.todasContas.filter(c => {
       const pertenceAoTipo = c.tipo === tipo;
       const estaAtiva = c.status === 'ATIVO';
@@ -106,7 +108,7 @@ export class FinanceiroFormComponent implements OnInit {
 
       return pertenceAoTipo && (estaAtiva || ehAContaJaSelecionada);
     });
-    
+
     const contaAtualId = this.financeiroForm.get('contaId')?.value;
     if (contaAtualId) {
        const contaAtualObj = this.todasContas.find(c => c.id === contaAtualId);
@@ -119,9 +121,18 @@ export class FinanceiroFormComponent implements OnInit {
   onSubmit(): void {
     if (this.financeiroForm.valid) {
       const payload = this.financeiroForm.getRawValue();
+
+      // INTERCEPTAÇÃO E VALIDAÇÃO DE STATUS (UX Frontend)
+      const contaSelecionada = this.todasContas.find(c => c.id === payload.contaId);
+      if (contaSelecionada && contaSelecionada.status === 'INATIVO' && !this.isEditMode) {
+        this.toastService.error(`A conta "${contaSelecionada.nome}" está inativa. Escolha uma conta ativa.`, 'Ação Bloqueada');
+        return;
+      }
+
       this.salvar.emit(payload);
     } else {
       this.financeiroForm.markAllAsTouched();
+      this.toastService.warning('Preencha todos os campos obrigatórios corretamente.', 'Atenção');
     }
   }
 }

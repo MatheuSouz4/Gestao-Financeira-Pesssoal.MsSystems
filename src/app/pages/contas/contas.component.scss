@@ -131,28 +131,19 @@
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: white;
     border-radius: 8px;
     overflow: hidden;
 
-    th, td {
-        padding: 12px 15px;
-        text-align: left;
-        border-bottom: 1px solid #eee;
-    }
-
-    th {
-        background-color: #f8f8f8;
-        color: #333;
-        font-weight: 600;
-    }
+    th { background-color: #f8f8f8; padding: 15px; text-align: left; }
+    td { padding: 15px; border-bottom: 1px solid #eee; }
 
     tr {
         transition: transform 0.2s, background-color 0.2s;
         &:hover {
             background-color: #fcfcfc;
             transform: scale(1.001);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
     }
 }

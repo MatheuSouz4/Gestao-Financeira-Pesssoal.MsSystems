@@ -33,9 +33,9 @@
     </div>
 
     <div class="contas-list">
-        <p *ngIf="itens.length === 0 && !termoPesquisa">Nenhuma conta cadastrada!</p>
+        <p *ngIf="itens.length === 0 && !termoPesquisa">Nenhuma conta cadastrada.</p>
         
-        <table *ngIf="contasFiltrados.length > 0">
+        <table *ngIf="contasFiltradas.length > 0">
             <thead>
                 <tr>
                     <th>Nome</th>
@@ -46,7 +46,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let conta of contasFiltrados">
+                <tr *ngFor="let conta of contasFiltradas">
                     <td>{{ conta.nome }}</td>
                     <td>
                         <span [ngClass]="conta.tipo === 'RECEITA' ? 'text-receita' : 'text-despesa'">
@@ -76,7 +76,7 @@
             </tbody>
         </table>
         
-        <p *ngIf="termoPesquisa && contasFiltrados.length === 0" class="no-results">
+        <p *ngIf="termoPesquisa && contasFiltradas.length === 0" class="no-results">
             Nenhuma conta encontrada com o termo "{{ termoPesquisa }}".
         </p>
     </div>

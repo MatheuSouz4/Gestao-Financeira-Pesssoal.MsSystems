@@ -1,7 +1,7 @@
 <div class="form-container">
-  <h3>{{ isEditMode ? 'Editar Laçamento' : 'Novo Lançamento' }}</h3>
+<h3>{{ isEditMode ? 'Editar Laçamento' : 'Novo Lançamento' }}</h3>
 
-  <form [formGroup]="financeiroForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="financeiroForm" (ngSubmit)="onSubmit()">
     
     <div class="alert-info" *ngIf="financeiroEdicao">
       <i class="fas fa-lock"></i> Conta e Descrição não podem ser alterados em lançamentos já existentes.

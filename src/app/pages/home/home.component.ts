@@ -19,7 +19,6 @@ export class HomeComponent implements OnInit{
     { nome: 'Fornecedores', rota: './fornecedores'},
     { nome: 'Contas', rota: './contas'},
     { nome: 'Financeiro', rota: './financeiro'},
-    { nome: 'Projeções', rota: './projecoes'},
     { nome: 'Relatórios', rota: './relatorios'},
   ];
 

@@ -1,5 +1,5 @@
 <div class="financeiro-page"> 
-    <h2>Gestão Financeira</h2>
+    <h2>Gerenciamento Financeiro</h2>
 
     <div class="top-actions">
         <div class="search-bar">
@@ -12,7 +12,7 @@
         </div>
 
         <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
-            <i class="material-icons"></i> Novo Lançamento
+            <i class="material-icons"></i>Adicionar Novo Lançamento
         </button>
     </div>
 
@@ -65,21 +65,23 @@
                     
                     <td>
                         <div class="timeline-wrapper" 
-                            [ngClass]="getCorTimeline(f.dataVencimentoDate, f.statusReal)"
-                            [title]="f.statusReal === 'PAGA' && f.dataPagamentoDate ? 'Data do Pagamento: ' + (f.dataPagamentoDate | date:'dd/MM/yyyy') : 'Vencimento: ' + (f.dataVencimentoDate | date:'dd/MM/yyyy')">
+                            [ngClass]="f.statusReal === 'PAGAMENTO_PARCIAL' ? 'prazo-neutro' : getCorTimeline(f.dataVencimentoDate, f.statusReal)"
+                            [title]="(f.statusReal === 'PAGA' || f.statusReal === 'PAGAMENTO_PARCIAL') && f.dataPagamentoDate ? 'Data do Pagamento: ' + (f.dataPagamentoDate | date:'dd/MM/yyyy') : 'Vencimento: ' + (f.dataVencimentoDate | date:'dd/MM/yyyy')">
                             
                             <div class="timeline-track"></div>
                             
-                            <div class="timeline-marker" [style.left.%]="f.statusReal === 'PAGA' ? 100 : getProgressoVencimento(f.dataVencimentoDate)">
+                            <div class="timeline-marker" [style.left.%]="(f.statusReal === 'PAGA' || f.statusReal === 'PAGAMENTO_PARCIAL') ? 100 : getProgressoVencimento(f.dataVencimentoDate)">
                                 <span class="timeline-label">
-                                    {{ f.statusReal === 'PAGA' && f.dataPagamentoDate ? (f.dataPagamentoDate | date:'dd/MM/yy') : (f.dataVencimentoDate | date:'dd/MM/yy') }}
+                                    {{ (f.statusReal === 'PAGA' || f.statusReal === 'PAGAMENTO_PARCIAL') && f.dataPagamentoDate ? (f.dataPagamentoDate | date:'dd/MM/yy') : (f.dataVencimentoDate | date:'dd/MM/yy') }}
                                 </span>
                                 <div class="marker-dot"></div>
                             </div>
                         </div>
                     </td>
 
-                    <td class="valor-celula">{{ f.valor | currency:'BRL' }}</td>
+                    <td class="valor-celula">
+                        {{ (f.statusReal === 'PAGAMENTO_PARCIAL' && f.valorPago ? f.valorPago : f.valor) | currency:'BRL' }}
+                    </td>
                     
                     <td>
                         <span [ngClass]="'status-' + f.statusReal">{{ formatarStatus(f.statusReal) }}</span>

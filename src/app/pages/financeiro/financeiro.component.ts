@@ -102,7 +102,6 @@ export class FinanceiroComponent implements OnInit {
     this.filtroContaId = contaId;
     this.filtroDataInicio = inicio;
     this.filtroDataFim = fim;
-
     this.financeiroService.listar(
       this.filtroStatus, 
       this.filtroTipo, 
@@ -120,12 +119,24 @@ export class FinanceiroComponent implements OnInit {
       return;
     }
     
-    const termo = this.termoPesquisa.toLowerCase();
-    this.financeirosFiltrados = this.financeiros.filter(f =>
-      f.nomeConta.toLowerCase().includes(termo) ||
-      f.statusReal.toLowerCase().includes(termo) ||
-      (f.descricao && f.descricao.toLowerCase().includes(termo))
-    );
+    // Padroniza o termo de pesquisa
+    const termo = this.termoPesquisa.toLowerCase().trim();
+    
+    // Remove o caractere '#' caso o usuário tente pesquisar o ID exatamente como vê na tela
+    const termoId = termo.replace('#', ''); 
+
+    this.financeirosFiltrados = this.financeiros.filter(f => {
+      // 1. Busca por ID (converte o ID numérico para string para usar o includes)
+      const matchId = f.id ? f.id.toString().includes(termoId) : false;
+      
+      // 2. Busca nos campos de texto padrão
+      const matchConta = f.nomeConta.toLowerCase().includes(termo);
+      const matchStatus = f.statusReal.toLowerCase().includes(termo);
+      const matchDescricao = f.descricao ? f.descricao.toLowerCase().includes(termo) : false;
+
+      // Retorna verdadeiro se bater com qualquer uma das condições
+      return matchId || matchConta || matchStatus || matchDescricao;
+    });
   }
 
   // --- MODAIS DE CADASTRO E OPERAÇÕES ---
@@ -146,11 +157,15 @@ export class FinanceiroComponent implements OnInit {
 
     operacao$.subscribe({
       next: () => {
-        this.toast.success('Operação realizada com sucesso!');
+        this.toast.success(dados.id ? 'Lançamento atualizado com sucesso!' : 'Lançamento cadastrado com sucesso!', 'Sucesso');
         this.fecharFormulario();
         this.carregarFinanceiro();
       },
-      error: () => this.toast.error('Erro ao processar a solicitação.')
+      error: (erro) => {
+        // Captura a mensagem mapeada no ResourceExceptionHandler do backend (Ex: Conta Inativa)
+        const msg = erro.error?.message || 'Erro ao processar a solicitação no servidor.';
+        this.toast.error(msg, 'Erro');
+      }
     });
   }
 
@@ -168,12 +183,15 @@ export class FinanceiroComponent implements OnInit {
     if (this.lancamentoParaQuitar?.id) {
       this.financeiroService.quitar(this.lancamentoParaQuitar.id, formData).subscribe({
         next: () => {
-          this.toast.success('Baixa registrada com sucesso!');
+          this.toast.success('Baixa de pagamento registrada com sucesso!', 'Quitação');
           this.isModalQuitacaoAberto = false;
           this.lancamentoParaQuitar = null;
           this.carregarFinanceiro(); 
         },
-        error: () => this.toast.error('Erro ao registrar quitação.')
+        error: (erro) => {
+          const msg = erro.error?.message || 'Erro ao registrar quitação do lançamento.';
+          this.toast.error(msg, 'Erro');
+        }
       });
     }
   }
@@ -195,13 +213,16 @@ export class FinanceiroComponent implements OnInit {
   processarEstorno(dados: { id: number, justificativa: string, retornarPendente: boolean }): void {
     this.financeiroService.estornar(dados.id, dados.justificativa, dados.retornarPendente).subscribe({
       next: () => {
-        const msg = dados.retornarPendente ? 'Pagamento desfeito com sucesso!' : 'Pagamento estornado com sucesso!';
-        this.toast.success(msg);
+        const msg = dados.retornarPendente ? 'Pagamento desfeito e retornado para Pendente!' : 'Pagamento estornado com sucesso!';
+        this.toast.success(msg, 'Estorno');
         this.isModalEstornoAberto = false;
         this.lancamentoParaEstornar = null;
         this.carregarFinanceiro();
       },
-      error: () => this.toast.error('Erro ao processar a solicitação.')
+      error: (erro) => {
+        const msg = erro.error?.message || 'Erro ao estornar o lançamento.';
+        this.toast.error(msg, 'Erro');
+      }
     });
   }
 
@@ -214,9 +235,7 @@ export class FinanceiroComponent implements OnInit {
     if (!vencimento) return 0;
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0); // Zera horas para precisão diária
-    
     const diffDays = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
-
     if (diffDays > 30) return 0;
     if (diffDays <= 0) return 100;
     return ((30 - diffDays) / 30) * 100;
@@ -225,12 +244,9 @@ export class FinanceiroComponent implements OnInit {
   getCorTimeline(vencimento: Date | undefined, status: string): string {
     if (status === 'PAGA') return 'prazo-pago';
     if (!vencimento) return 'prazo-neutro';
-    
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0); // Zera horas para precisão diária
-    
     const diffDays = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
-
     if (diffDays < 0) return 'prazo-vencido';
     if (diffDays <= 7) return 'prazo-alerta';
     return 'prazo-neutro';

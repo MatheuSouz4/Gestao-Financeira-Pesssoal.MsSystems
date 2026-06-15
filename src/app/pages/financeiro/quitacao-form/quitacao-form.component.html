@@ -5,6 +5,7 @@
     <p><strong>Conta:</strong> {{ lancamento?.conta?.nome }}</p>
     <p><strong>Descrição:</strong> {{ lancamento?.descricao }}</p>
     <p><strong>Valor Total Original:</strong> R$ {{ lancamento?.valor | number:'1.2-2' }}</p>
+    <p><strong>Data de Vencimento:</strong> {{ lancamento?.dataVencimento | date:'dd/MM/yyyy' }}</p>
    </div>
 
     <form [formGroup]="quitacaoForm" (ngSubmit)="onSubmit()">

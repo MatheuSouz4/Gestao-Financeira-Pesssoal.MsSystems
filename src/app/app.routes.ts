@@ -6,7 +6,6 @@ import { FinanceiroComponent } from './pages/financeiro/financeiro.component';
 import { FornecedoresComponent } from './pages/fornecedores/fornecedores.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
-import { ProjecoesComponent } from './pages/projecoes/projecoes.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { SignUpComponent } from './pages/signup/signup.component';
 import { AuthGuard } from './services/auth-guard.service';
@@ -33,7 +32,6 @@ export const routes: Routes = [
       { path: 'fornecedores', component: FornecedoresComponent },
       { path: 'contas', component: ContasComponent },
       { path: 'financeiro', component: FinanceiroComponent },
-      { path: 'projecoes', component: ProjecoesComponent },
       { path: 'relatorios', component: RelatoriosComponent },
     ],
   },
