@@ -110,6 +110,12 @@
         
         &:focus { border-color: $primary-color; }
     }
+
+     label {
+        font-size: 0.85rem;
+        color: #333; // Padrão de cor de label
+        font-weight: 600;
+      }
 }
 
 .search-bar {

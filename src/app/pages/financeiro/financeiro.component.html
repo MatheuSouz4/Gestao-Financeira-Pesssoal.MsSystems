@@ -36,8 +36,9 @@
             <option value="">Todas as Contas</option>
             <option *ngFor="let c of contasDisponiveis" [value]="c.id">{{ c.nome }}</option>
         </select>
-
+        <label>Data Inicial</label>
         <input type="date" #fIni (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select" title="Data Inicial">
+        <label>Data Final</label>
         <input type="date" #fFim (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select" title="Data Final">
     </div>
 
