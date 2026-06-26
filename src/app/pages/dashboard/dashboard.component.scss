@@ -1,127 +1,215 @@
-$bg-color: #f4f7fe;
-$primary: #4361ee;
-$success: #2ec4b6;
-$warning: #ff9f1c;
-$text-main: #2b3674;
-$text-sec: #a3aed0;
+@import "../../../styles/variables.scss";
 
-.dashboard-wrapper {
-  padding: 2.5rem;
-  background-color: $bg-color;
-  min-height: 100vh;
-  font-family: 'DM Sans', sans-serif;
+.dashboard-container {
+  padding: 20px; // Padronizado com as outras páginas (.clientes-page, .financeiro-page)
+  display: flex;
+  flex-direction: column;
+  gap: 30px; // Espaçamento maior entre as seções verticais
+  background-color: white; // Fundo da página padronizado
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
-  .dashboard-header {
+  /* --- CABEÇALHO --- */
+  .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-
-    h1 {
-      color: $text-main;
-      font-size: 2.1rem;
-      font-weight: 700;
-      margin: 0;
-    }
-    p { color: $text-sec; margin-top: 5px; }
-
-    .current-date {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: white;
-      padding: 10px 20px;
-      border-radius: 12px;
-      color: $text-main;
-      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05);
-      i { color: $primary; }
-    }
-  }
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-
-  .stat-card {
-    background: white;
-    border-radius: 20px;
-    padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
-
-    &:hover { transform: translateY(-5px); }
-
-    .icon-box {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
-      background: #f4f7fe;
-      
-      i { font-size: 28px; }
-    }
-
-    &.pago i { color: $success; }
-    &.pendente i { color: $warning; }
-    &.balanco i { color: $primary; }
-
-    .stat-info {
-      .label { color: $text-sec; font-size: 0.9rem; font-weight: 500; }
-      .value { color: $text-main; font-size: 1.7rem; font-weight: 700; margin: 5px 0; }
-    }
-
-    .stat-footer {
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.8rem;
-      font-weight: 600;
-
-      &.success { color: $success; }
-      &.warning { color: $warning; }
-      &.info { color: $primary; }
-    }
-  }
-}
-
-.chart-main-container {
-  .chart-card {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
-
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      h3 { color: $text-main; font-weight: 700; font-size: 1.3rem; }
-      
-      .btn-icon {
-        background: #f4f7fe;
-        border: none;
-        padding: 8px;
-        border-radius: 10px;
-        cursor: pointer;
-        color: $primary;
-        transition: 0.3s;
-        &:hover { background: $primary; color: white; }
+    flex-wrap: wrap;
+    gap: 20px;
+    
+    .titulos {
+      h2 {
+        color: $primary-color; // Padronizado com h2 de outras telas
+        margin: 0;
+        font-size: 1.75rem;
+      }
+      p {
+        margin: 0.25rem 0 0 0;
+        color: #6c757d; // Padronizado com subtítulos/muted text
+        font-size: 0.95rem;
       }
     }
 
-    .canvas-wrapper {
-      height: 350px;
-      width: 100%;
+    .card-destaque {
+      padding: 1.2rem 2.5rem;
+      border-radius: 8px; // Padronizado de 10px para 8px
+      color: white;
+      text-align: right;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // Padronizado com shadows da tabela
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: translateY(-2px); // Padronizado com hover do card de financeiro
+      }
+      
+      span { 
+        font-size: 0.95rem;
+        opacity: 0.9; 
+        display: block;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+      h3 { 
+        margin: 0; 
+        font-size: 2.2rem;
+        font-weight: 700;
+      }
+      
+      &.positivo { background: linear-gradient(135deg, $success-color 0%, darken($success-color, 10%) 100%); }
+      &.negativo { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
     }
   }
+
+  /* --- BARRA DE FILTROS --- */
+  .filters-grid {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 15px;
+    background-color: #f8f9fa; // Fundo cinza claro, igual ao financeiro.component.scss
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 150px;
+
+      label {
+        font-size: 0.85rem;
+        color: #333; // Padrão de cor de label
+        font-weight: 600;
+      }
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 10px 15px; // Altura compatível com inputs da search-bar
+      border: 1px solid #ccc;
+      border-radius: 4px; // Padrão global de input
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+      background-color: white;
+
+      &:focus {
+        border-color: $primary-color;
+      }
+    }
+
+    .btn-filtrar {
+      height: 41px; // Altura exata do input padronizado
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: $primary-color; // Alterado para a cor primária do sistema
+      color: white;
+      border: none;
+      border-radius: 4px; // Padrão de botão
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: background-color 0.3s;
+
+      i {
+        margin-right: 0; // Se o botão tiver apenas ícone
+      }
+
+      &:hover { 
+        background-color: $secondary-color; 
+      }
+    }
+  }
+
+  /* --- CARDS DE MÉTRICAS --- */
+  .grid-metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px; // Espaçamento padrão
+
+    .card-group {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px; // Padrão
+      border: 1px solid #eef2f5; // Borda sutil como no financeiro.scss
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); // Shadow padrão
+
+      &.receitas { border-top: 4px solid $success-color; }
+      &.despesas { border-top: 4px solid #ef4444; }
+
+      h4 { 
+        margin-top: 0;
+        margin-bottom: 1.2rem; 
+        color: #333; 
+        font-size: 1.2rem;
+        border-bottom: 1px solid #eee; // Linha padrão
+        padding-bottom: 10px;
+      }
+
+      .card-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px dashed #eee;
+        font-size: 1rem;
+        
+        span {
+          color: #555;
+          font-weight: 500;
+        }
+
+        &:last-child { border-bottom: none; }
+        
+        &.totalizador { 
+          margin-top: 10px;
+          border-top: 1px solid #eee; 
+          border-bottom: none;
+          padding-top: 15px;
+          background-color: #f8f8f8; // Destaque visual sutil
+          margin-left: -20px;
+          margin-right: -20px;
+          margin-bottom: -20px;
+          padding-left: 20px;
+          padding-right: 20px;
+          border-radius: 0 0 8px 8px;
+
+          span { font-weight: 600; color: #333; }
+          strong { color: $primary-color; font-size: 1.15rem; }
+        }
+      }
+    }
+  }
+
+  /* --- ÁREA DE GRÁFICOS --- */
+  .graficos-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr; // Responsividade
+    }
+
+    .grafico-container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px; // Padrão
+      border: 1px solid #eef2f5;
+      height: 350px;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); // Shadow padrão
+    }
+  }
+
+  /* --- CORES SEMÂNTICAS GLOBAIS --- */
+  .text-success { color: #2e7d32; font-weight: 600; } // Cor de ativo
+  .text-warning { color: #f57c00; font-weight: 600; } // Cor de inativo/pendente
+  .text-danger  { color: #c62828; font-weight: 600; } // Cor de vencida
 }

@@ -1,0 +1,198 @@
+<div class="financeiro-page"> 
+    <h2>Gerenciamento Financeiro</h2>
+
+    <div class="top-actions">
+        <div class="search-bar">
+            <input 
+                type="text" 
+                placeholder="Pesquisar"
+                [(ngModel)]="termoPesquisa" 
+                (ngModelChange)="aplicarFiltroLocal()">
+            <i class="material-icons search-icon"></i>
+        </div>
+
+        <button class="btn btn-primary" (click)="abrirFormularioCadastro()">
+            <i class="material-icons"></i>Adicionar Novo Lançamento
+        </button>
+    </div>
+
+    <div class="filters-grid">
+        <select #fTipo (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+            <option value="">Todos os Tipos</option> 
+            <option value="RECEITA">RECEITA</option>
+            <option value="DESPESA">DESPESA</option>
+        </select>
+
+        <select #fStatus (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+            <option value="">Todos os Status</option>
+            <option value="PENDENTE">PENDENTE</option>
+            <option value="VENCIDA">VENCIDA</option>
+            <option value="PAGA">PAGA</option>
+            <option value="PAGAMENTO_PARCIAL">PAGAMENTO PARCIAL</option>
+            <option value="ESTORNADA">ESTORNADA</option>
+        </select>
+
+        <select #fConta (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select">
+            <option value="">Todas as Contas</option>
+            <option *ngFor="let c of contasDisponiveis" [value]="c.id">{{ c.nome }}</option>
+        </select>
+        <label>Data Inicial</label>
+        <input type="date" #fIni (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select" title="Data Inicial">
+        <label>Data Final</label>
+        <input type="date" #fFim (change)="onFiltrar(fStatus.value, fTipo.value, fConta.value, fIni.value, fFim.value)" class="form-select" title="Data Final">
+    </div>
+
+    <div class="contas-list">
+        <table *ngIf="financeirosFiltrados.length > 0">
+            <thead>
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th class="col-conta">Conta</th>
+                    <th class="col-descricao">Descrição</th>
+                    <th class="col-vencimento">Vencimento / Pagamento</th>
+                    <th class="col-valor">Valor</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-acoes">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let f of financeirosFiltrados" [ngClass]="'linha-' + f.tipo?.toLowerCase()">
+                    <td class="col-id-valor">#{{ f.id }}</td>
+                    <td>{{ f.nomeConta }}</td>
+                    <td>
+                        {{ f.descricao || '--' }}
+                        <span *ngIf="f.idReferencia" class="badge-referencia" title="Lançamento residual">Ref: #{{ f.idReferencia }}</span>
+                    </td>
+                    
+                    <td>
+                        <div class="timeline-wrapper" 
+                            [ngClass]="f.statusReal === 'PAGAMENTO_PARCIAL' ? 'prazo-neutro' : getCorTimeline(f.dataVencimentoDate, f.statusReal)"
+                            [title]="(f.statusReal === 'PAGA' || f.statusReal === 'PAGAMENTO_PARCIAL') && f.dataPagamentoDate ? 'Data do Pagamento: ' + (f.dataPagamentoDate | date:'dd/MM/yyyy') : 'Vencimento: ' + (f.dataVencimentoDate | date:'dd/MM/yyyy')">
+                            
+                            <div class="timeline-track"></div>
+                            
+                            <div class="timeline-marker" [style.left.%]="(f.statusReal === 'PAGA' || f.statusReal === 'PAGAMENTO_PARCIAL') ? 100 : getProgressoVencimento(f.dataVencimentoDate)">
+                                <span class="timeline-label">
+                                    {{ (f.statusReal === 'PAGA' || f.statusReal === 'PAGAMENTO_PARCIAL') && f.dataPagamentoDate ? (f.dataPagamentoDate | date:'dd/MM/yy') : (f.dataVencimentoDate | date:'dd/MM/yy') }}
+                                </span>
+                                <div class="marker-dot"></div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="valor-celula">
+                        {{ (f.statusReal === 'PAGAMENTO_PARCIAL' && f.valorPago ? f.valorPago : f.valor) | currency:'BRL' }}
+                    </td>
+                    
+                    <td>
+                        <span [ngClass]="'status-' + f.statusReal">{{ formatarStatus(f.statusReal) }}</span>
+                    </td>
+
+                    <td class="acoes-celula">
+                        <ng-container *ngIf="f.statusReal !== 'PAGA' && f.statusReal !== 'ESTORNADA' && f.statusReal !== 'PAGAMENTO_PARCIAL'">
+                            <button class="btn-icon" title="Editar" (click)="editarFinanceiro(f)">
+                                <i class="material-icons">Editar</i>
+                            </button>
+                            <button class="btn-icon btn-success" title="Quitar" (click)="abrirModalQuitacao(f)">
+                                <i class="material-icons">Quitar</i>
+                            </button>
+                        </ng-container>
+
+                        <ng-container *ngIf="f.statusReal === 'PAGA' || f.statusReal === 'PAGAMENTO_PARCIAL'">
+                            <button class="btn-icon text-primary" title="Ver Detalhes" (click)="abrirModalDetalhes(f)">
+                                <i class="material-icons">Detalhes</i>
+                            </button>
+                            <button class="btn-icon text-danger" title="Estornar Pagamento" (click)="abrirModalEstorno(f)">
+                                <i class="material-icons">Estorno</i>
+                            </button>
+                        </ng-container>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p *ngIf="financeirosFiltrados.length === 0" class="no-results">Nenhum registro financeiro encontrado.</p>
+    </div>
+
+    <div *ngIf="isFormularioAberto" class="form-modal-overlay">
+        <div class="form-card">
+            <app-financeiro-form
+                [financeiroEdicao]="financeiroEmEdicao"
+                (salvar)="salvarFinanceiro($event)"
+                (fechar)="fecharFormulario()">
+            </app-financeiro-form>
+        </div>
+    </div>
+
+    <div *ngIf="isModalQuitacaoAberto" class="form-modal-overlay">
+        <div class="form-card">
+            <app-quitacao-form
+                [lancamento]="lancamentoParaQuitar"
+                (confirmar)="processarQuitacao($event)"
+                (fechar)="isModalQuitacaoAberto = false">
+            </app-quitacao-form>
+        </div>
+    </div>
+
+    <div *ngIf="isModalEstornoAberto" class="form-modal-overlay">
+        <div class="form-card">
+            <app-estorno-form
+                [lancamento]="lancamentoParaEstornar"
+                (confirmar)="processarEstorno($event)"
+                (fechar)="isModalEstornoAberto = false">
+            </app-estorno-form>
+        </div>
+    </div>
+
+    <div *ngIf="lancamentoSelecionadoDetalhes" class="form-modal-overlay">
+        <div class="form-card detalhes-card">
+            <h3>Detalhes do Lançamento</h3>
+            <div class="detalhes-grid">
+                <div class="detalhe-item">
+                    <strong>Tipo de Lançamento:</strong> 
+                    <span>{{ lancamentoSelecionadoDetalhes.tipo || 'N/A' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <strong>Conta:</strong> 
+                    <span>{{ lancamentoSelecionadoDetalhes.nomeConta }}</span>
+                </div>
+                <div class="detalhe-item descricao-full">
+                    <strong>Descrição:</strong> 
+                    <span>{{ lancamentoSelecionadoDetalhes.descricao || '--' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <strong>Data de Vencimento:</strong> 
+                    <span>{{ lancamentoSelecionadoDetalhes.dataVencimentoDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="detalhe-item text-success-bold">
+                    <strong>Data de Pagamento:</strong> 
+                    <span>{{ lancamentoSelecionadoDetalhes.dataPagamentoDate ? (lancamentoSelecionadoDetalhes.dataPagamentoDate | date:'dd/MM/yyyy') : 'Não Pago' }}</span>
+                </div>
+                <div class="detalhe-item">
+                    <strong>Valor Original:</strong> 
+                    <span>{{ lancamentoSelecionadoDetalhes.valor | currency:'BRL' }}</span>
+                </div>
+                <div class="detalhe-item text-success-bold">
+                    <strong>Valor Pago:</strong> 
+                    <span>{{ (lancamentoSelecionadoDetalhes.valorPago || 0) | currency:'BRL' }}</span>
+                </div>
+            </div>
+
+            <div class="detalhes-grid">
+                <div *ngIf="lancamentoSelecionadoDetalhes.statusReal === 'ESTORNADA'" class="detalhe-item descricao-full text-danger">
+                    <strong>Justificativa do Estorno:</strong>
+                    <span>{{ lancamentoSelecionadoDetalhes.justificativaEstorno || 'Não informada' }}</span>
+                </div>
+
+                <div *ngIf="lancamentoSelecionadoDetalhes.motivoAlteracao" class="detalhe-item descricao-full text-warning">
+                    <strong>Motivo da Última Alteração (Edição):</strong>
+                    <span>{{ lancamentoSelecionadoDetalhes.motivoAlteracao }}</span>
+                </div>
+            </div>
+            
+            <div class="form-actions" style="margin-top: 20px; text-align: right;">
+                <button class="btn btn-secondary" (click)="fecharModalDetalhes()">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -34,10 +34,10 @@ export class QuitacoesService {
     return of(novo);
   }
 
-  registrarPagamento(id: string, dados: Partial<Lancamento>): Observable<Lancamento> {
+  registrarPagamento(id: any, dados: Partial<Lancamento>): Observable<Lancamento> {
     const listaAtual = this._lancamentos.value.map(l => {
       if (l.id === id) {
-        return { ...l, ...dados, status: 'Paga' as const };
+        return { ...l, ...dados, status: 'PAGA' as const };
       }
       return l;
     });
@@ -47,13 +47,13 @@ export class QuitacoesService {
   }
 
   // Lógica de cálculo de status baseada na data atual
-  calcularStatus(lancamento: Lancamento): 'Pendente' | 'Vencida' | 'Paga' {
-    if (lancamento.status === 'Paga') return 'Paga';
+  calcularStatus(lancamento: Lancamento): 'PENDENTE' | 'VENCIDA' | 'PAGA' {
+    if (lancamento.status === 'PAGA') return 'PAGA';
     
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
     const vencimento = new Date(lancamento.dataVencimento + 'T00:00:00');
 
-    return vencimento < hoje ? 'Vencida' : 'Pendente';
+    return vencimento < hoje ? 'VENCIDA' : 'PENDENTE';
   }
 }

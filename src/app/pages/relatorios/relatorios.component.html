@@ -1,1 +1,41 @@
-<p>relatorio works!</p>
+<div class="relatorios-page">
+  <div class="header-section">
+    <h2>Central de Relatórios</h2>
+    <p class="subtitle">Exporte seus dados financeiros consolidados para análise externa e contabilidade.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-grid">
+      
+      <div class="form-group campo-largo">
+        <label>Escopo do Relatório</label>
+        <select [(ngModel)]="filtro.tipo" class="form-select">
+          <option *ngFor="let tipo of tiposRelatorio" [value]="tipo.valor">
+            {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Data Inicial</label>
+        <input type="date" [(ngModel)]="filtro.dataInicio" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Data Final</label>
+        <input type="date" [(ngModel)]="filtro.dataFim" class="form-control">
+      </div>
+
+    </div>
+
+    <div class="acoes-container">
+      <button class="btn btn-excel" (click)="gerarRelatorio('csv')" [disabled]="isProcessando">
+        <i class="material-icons"></i> Gerar Planilha (CSV)
+      </button>
+      
+      <button class="btn btn-primary" (click)="gerarRelatorio('pdf')" [disabled]="isProcessando">
+        <i class="material-icons"></i> Gerar Documento (PDF)
+      </button>
+    </div>
+  </div>
+</div>

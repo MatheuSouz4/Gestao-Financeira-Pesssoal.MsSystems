@@ -1,0 +1,97 @@
+<div class="form-container">
+<h3>{{ isEditMode ? 'Editar Laçamento' : 'Novo Lançamento' }}</h3>
+
+<form [formGroup]="financeiroForm" (ngSubmit)="onSubmit()">
+    
+    <div class="alert-info" *ngIf="financeiroEdicao">
+      <i class="fas fa-lock"></i> Conta e Descrição não podem ser alterados em lançamentos já existentes.
+    </div>
+
+    <div class="alert-warning" *ngIf="financeiroEdicao && financeiroEdicao.conta?.status === 'INATIVO'">
+      <i class="fas fa-exclamation-triangle"></i> Esta conta está <strong>INATIVA</strong>. Alterações permitidas apenas em valor e vencimento.
+    </div>
+
+    <div class="form-group" [style.pointer-events]="financeiroEdicao ? 'none' : 'auto'" [style.opacity]="financeiroEdicao ? '0.7' : '1'">
+      <label>Tipo de Lançamento</label>
+      <div class="flag-container">
+        <button type="button" class="flag-btn receita" 
+                [class.active]="tipoSelecionado === 'RECEITA'"
+                (click)="selecionarTipo('RECEITA')">
+          <i class="fas fa-plus-circle"></i> RECEITA
+        </button>
+        <button type="button" class="flag-btn despesa" 
+                [class.active]="tipoSelecionado === 'DESPESA'"
+                (click)="selecionarTipo('DESPESA')">
+          <i class="fas fa-minus-circle"></i> DESPESA
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="contaId">Conta</label>
+      <select id="contaId" formControlName="contaId" 
+              [ngClass]="{'is-invalid': financeiroForm.get('contaId')?.invalid && financeiroForm.get('contaId')?.touched}">
+        <option [ngValue]="null" disabled>
+          {{ tipoSelecionado ? 'Selecione uma conta...' : 'Selecione o tipo acima primeiro' }}
+        </option>
+        <option *ngFor="let conta of contasFiltradas" [ngValue]="conta.id">
+          {{ conta.nome }} {{ conta.status === 'INATIVO' ? '(INATIVA)' : '' }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="descricao">Descrição</label>
+      <input type="text" id="descricao" formControlName="descricao" placeholder="Ex: Mensalidade Software"
+             [ngClass]="{'is-invalid': financeiroForm.get('descricao')?.invalid && financeiroForm.get('descricao')?.touched}">
+    </div>
+
+    <div class="grid-form">
+      <div class="form-group">
+        <label for="valor">Valor</label>
+        <input type="number" id="valor" formControlName="valor" step="0.01"
+               [ngClass]="{'is-invalid': financeiroForm.get('valor')?.invalid && financeiroForm.get('valor')?.touched}">
+      </div>
+
+      <div class="form-group">
+        <label for="vencimento">Data de Vencimento</label>
+        <input type="date" id="vencimento" formControlName="vencimento"
+               [ngClass]="{'is-invalid': financeiroForm.get('vencimento')?.invalid && financeiroForm.get('vencimento')?.touched}">
+      </div>
+    </div>
+
+    <div class="grid-form" *ngIf="!financeiroEdicao">
+      <div class="form-group">
+        <label for="tipoRecorrencia">Recorrência</label>
+        <select id="tipoRecorrencia" formControlName="tipoRecorrencia">
+          <option value="NENHUMA">Nenhuma (Única)</option>
+          <option value="MENSAL">Mensal</option>
+          <option value="SEMESTRAL">Semestral</option>
+          <option value="ANUAL">Anual</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="financeiroForm.get('tipoRecorrencia')?.value !== 'NENHUMA'">
+        <label for="quantidadeParcelas">Qtd. de Parcelas</label>
+        <input type="number" id="quantidadeParcelas" formControlName="quantidadeParcelas" min="2"
+               [ngClass]="{'is-invalid': financeiroForm.get('quantidadeParcelas')?.invalid && financeiroForm.get('quantidadeParcelas')?.touched}">
+      </div>
+    </div>
+
+    <div class="form-group" *ngIf="financeiroEdicao">
+      <label for="motivoAlteracao">Motivo da Alteração <span class="text-danger">*</span></label>
+      <textarea id="motivoAlteracao" formControlName="motivoAlteracao" placeholder="Justifique a alteração de valor ou data..."
+                [ngClass]="{'is-invalid': financeiroForm.get('motivoAlteracao')?.invalid && financeiroForm.get('motivoAlteracao')?.touched}"></textarea>
+      <small class="error-text" *ngIf="financeiroForm.get('motivoAlteracao')?.invalid && financeiroForm.get('motivoAlteracao')?.touched">
+        O motivo da alteração é obrigatório por regras de auditoria.
+      </small>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="fechar.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="financeiroForm.invalid">
+        {{ financeiroEdicao ? 'Confirmar Alterações' : 'Salvar Lançamento' }}
+      </button>
+    </div>
+  </form>
+</div>

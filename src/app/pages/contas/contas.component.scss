@@ -5,38 +5,91 @@
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
 
-h2 {
-    color:$primary-color;
-    margin-bottom: 25px;
+    h2 {
+        color: $primary-color;
+        margin-bottom: 25px;
+    }
 }
-
 
 .top-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.filters-container {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .select-filters {
+        display: flex;
+        gap: 10px;
+    }
 }
 
 .search-bar {
     position: relative;
-    width: 400px;
+    flex: 1;
+    max-width: 400px;
+
     input {
         width: 100%;
-        padding: 10px 10px 10px 10px;
+        padding: 10px 15px;
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 16px;
+        transition: border-color 0.3s;
+
+        &:focus {
+            border-color: $primary-color;
+            outline: none;
+        }
     }
-    .search-icon {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #888;
+}
+
+.form-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    min-width: 150px;
+    cursor: pointer;
+
+    &:focus {
+        border-color: $primary-color;
+        outline: none;
     }
+}
+
+/* Tipos de Conta */
+.text-receita { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #e8f5f4;
+    color: #2e687d;
+    font-weight: bold;
+}
+
+.text-despesa { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #f5e8e8;
+    color: #ff0000;
+    font-weight: bold;
 }
 
 /* Botões */
@@ -67,81 +120,72 @@ h2 {
     background: none;
     border: none;
     padding: 5px;
-    color:$text-color;
+    color: #444;
     margin-left: 5px;
-    font-size: 14px;
     &:hover {
-        color: $secondary-color;
+        color: #0d47a1;
     }
 }
 
-
+/* Tabela de Contas */
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: white;
     border-radius: 8px;
     overflow: hidden;
-}
 
-th, td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
+    th { background-color: #f8f8f8; padding: 15px; text-align: left; }
+    td { padding: 15px; border-bottom: 1px solid #eee; }
 
-th {
-    
-    background-color: #f8f8f8;
-    color: #333;
-    font-weight: 600;
-}
-
-tr:hover {
-    background-color:#f9f9f9;
-}
-
-.status-ativo, .status-inativo {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-// Efeito de elevação na tabela
-table {
-    border: none;
     tr {
-        transition: transform 0.2s;
+        transition: transform 0.2s, background-color 0.2s;
         &:hover {
             background-color: #fcfcfc;
-            transform: scale(1.002);
+            transform: scale(1.001);
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
     }
 }
 
+/* Tipos de Conta */
+.text-receita { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #e8f5f4;
+    color: #2e687d;
+    font-weight: bold;
+ }
+.text-despesa { 
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background-color: #f5e8e8;
+    color: #ff0000;
+    font-weight: bold;
+ }
+
+/* Status */
 .status-ativo {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     background-color: #e8f5e9;
     color: #2e7d32;
     font-weight: bold;
 }
 
 .status-inativo {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     background-color: #fff3e0;
     color: #f57c00;
     font-weight: bold;
 }
 
-.no-results {
-    text-align: center;
-    padding: 20px;
-    color: #888;
-}
-
-
+/* Modais */
 .form-modal-overlay {
     position: fixed;
     top: 0;
@@ -157,18 +201,9 @@ table {
 
 .form-card {
     background: white;
-    padding: 30px;
+    padding: 20px;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 500px;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    margin-top: 20px;
-    &:hover {
-        background-color: #5a6268;
-    }
+    width: 95%;
+    max-width: 600px;
 }
